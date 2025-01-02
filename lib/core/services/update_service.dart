@@ -1,3 +1,4 @@
+import 'dart:io' show Platform;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/program_info.dart';
 import '../../shared/utils/platform_utils.dart';
@@ -42,7 +43,7 @@ class UpdateService extends StateNotifier<Map<String, ProgramInfo>> {
     }
 
     final platform = PlatformUtils.getPlatformString();
-    final arch = 'X64';
+    final arch = Platform.version.contains('arm') ? 'ARM64' : 'X64';
     final extension = platform == 'windows' ? 'zip' : 'tar.gz';
     final urlProgramName = programName == 'go-cyberchain' ? 'ccx' : programName;
 
