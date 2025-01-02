@@ -377,13 +377,13 @@ class _XMinerViewState extends ConsumerState<XMinerView> {
                                   : () {
                                       final controller = ref.read(
                                           miningControllerProvider.notifier);
-                                      controller.stopMining('xMiner');
+                                      controller.stopMining();
                                     })
                               : () {
                                   final controller = ref
                                       .read(miningControllerProvider.notifier);
                                   controller.setSelectedServer(selectedPool);
-                                  controller.startPoolMining(selectedPool);
+                                  controller.startMining();
                                   setState(() {});
                                 },
                           style: ElevatedButton.styleFrom(
