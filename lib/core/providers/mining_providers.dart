@@ -117,3 +117,5 @@ final selectedPoolProvider =
   final prefsService = ref.watch(preferencesServiceProvider);
   return SelectedPoolNotifier(prefsService);
 });
+
+final solutionCountProvider = StateProvider<int>((ref) => 0);

@@ -3,16 +3,17 @@ import 'dart:convert';
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/output_providers.dart';
+import '../providers/mining_providers.dart';
 import '../../shared/utils/platform_utils.dart';
 
-class ProcessService extends StateNotifier<void> {
+class ProcessService extends StateNotifier<Map<String, Process>> {
   final Map<String, Process> _processes = {};
-  final Ref _ref;
-  final Map<String, String> _outputs = {};
-  final Map<String, bool> _stoppingProcesses = {};
   final Map<String, bool> _startingProcesses = {};
+  final Map<String, bool> _stoppingProcesses = {};
+  final Map<String, String> _outputs = {};
+  final Ref _ref;
 
-  ProcessService(this._ref) : super(null);
+  ProcessService(this._ref) : super({});
 
   bool isProcessStopping(String name) => _stoppingProcesses[name] ?? false;
   bool isProcessStarting(String name) => _startingProcesses[name] ?? false;
@@ -26,6 +27,11 @@ class ProcessService extends StateNotifier<void> {
       _ref.read(goCyberchainOutputProvider.notifier).appendOutput(output);
     } else if (name == 'xMiner') {
       _ref.read(xMinerOutputProvider.notifier).appendOutput(output);
+
+      // Parse solution count for xMiner
+      if (output.contains('Solutions accepted:')) {
+        _ref.read(solutionCountProvider.notifier).state += 1;
+      }
     }
   }
 

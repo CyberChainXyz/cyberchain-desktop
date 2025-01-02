@@ -432,6 +432,17 @@ class _XMinerViewState extends ConsumerState<XMinerView> {
                             foregroundColor: Colors.white,
                           ),
                         ),
+                        const Spacer(),
+                        Consumer(
+                          builder: (context, ref, child) {
+                            final solutionCount =
+                                ref.watch(solutionCountProvider);
+                            return Text(
+                              'Solutions: $solutionCount',
+                              style: Theme.of(context).textTheme.titleMedium,
+                            );
+                          },
+                        ),
                       ],
                     ),
                   ],
