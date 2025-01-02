@@ -159,8 +159,9 @@ class ProcessService extends StateNotifier<Map<String, ProgramInfo>> {
 
       // Start countdown in a separate future
       Future(() async {
-        for (int i = 10; i >= 1; i--) {
+        for (int i = 5; i >= 1; i--) {
           _countdowns[name] = i;
+          state = Map<String, ProgramInfo>.from(state); // Force update
           await Future.delayed(const Duration(seconds: 1));
         }
         _countdowns.remove(name);
@@ -170,6 +171,7 @@ class ProcessService extends StateNotifier<Map<String, ProgramInfo>> {
         _stoppingProcesses[name] = false;
         _startRequested[name] = false;
         _updateProgramState(name, isRunning: false);
+        state = Map<String, ProgramInfo>.from(state); // Force update
       });
 
       // Send stop signal immediately
