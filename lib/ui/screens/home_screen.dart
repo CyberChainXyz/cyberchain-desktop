@@ -9,6 +9,8 @@ import '../../features/mining/mining_controller.dart';
 import '../../core/models/mining_pool.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'cyberchain_info_screen.dart';
+import '../../core/providers/opencl_devices_provider.dart';
+import '../../core/models/mining_device.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -375,44 +377,53 @@ class _XMinerViewState extends ConsumerState<XMinerView> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // CCX Address Input
-                  TextField(
-                    decoration: const InputDecoration(
-                      labelText: 'CCX Address',
-                      border: OutlineInputBorder(),
-                    ),
-                    onChanged: (value) {
-                      ref.read(ccxAddressProvider.notifier).state = value;
-                    },
-                    controller: TextEditingController(text: ccxAddress),
-                  ),
-                  const SizedBox(height: 16),
-                  // Mining Pool Selection
-                  DropdownButtonFormField<String>(
-                    decoration: const InputDecoration(
-                      labelText: 'Mining Pool',
-                      border: OutlineInputBorder(),
-                    ),
-                    value: selectedPool?.url,
-                    items: const [
-                      DropdownMenuItem(
-                        value: 'pool1.ccx.org',
-                        child: Text('Pool 1'),
+                  // CCX Address and Pool Selection in one row
+                  Row(
+                    children: [
+                      Expanded(
+                        flex: 3,
+                        child: TextField(
+                          decoration: const InputDecoration(
+                            labelText: 'CCX Address',
+                            border: OutlineInputBorder(),
+                          ),
+                          onChanged: (value) {
+                            ref.read(ccxAddressProvider.notifier).state = value;
+                          },
+                          controller: TextEditingController(text: ccxAddress),
+                        ),
                       ),
-                      DropdownMenuItem(
-                        value: 'pool2.ccx.org',
-                        child: Text('Pool 2'),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        flex: 2,
+                        child: DropdownButtonFormField<String>(
+                          decoration: const InputDecoration(
+                            labelText: 'Mining Pool',
+                            border: OutlineInputBorder(),
+                          ),
+                          value: selectedPool?.url,
+                          items: const [
+                            DropdownMenuItem(
+                              value: 'pool1.ccx.org',
+                              child: Text('Pool 1'),
+                            ),
+                            DropdownMenuItem(
+                              value: 'pool2.ccx.org',
+                              child: Text('Pool 2'),
+                            ),
+                          ],
+                          onChanged: (String? value) {
+                            if (value != null) {
+                              ref.read(selectedPoolProvider.notifier).state =
+                                  MiningPool(
+                                name: value,
+                                url: value,
+                              );
+                            }
+                          },
+                        ),
                       ),
                     ],
-                    onChanged: (String? value) {
-                      if (value != null) {
-                        ref.read(selectedPoolProvider.notifier).state =
-                            MiningPool(
-                          name: value,
-                          url: value,
-                        );
-                      }
-                    },
                   ),
                   const SizedBox(height: 16),
                   // Device Selection
@@ -424,27 +435,113 @@ class _XMinerViewState extends ConsumerState<XMinerView> {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: devices.map((device) {
-                      final isSelected = selectedDevices.contains(device.id);
-                      return FilterChip(
-                        label: Text(device.name),
-                        selected: isSelected,
-                        onSelected: (bool selected) {
-                          final newSelection =
-                              Set<String>.from(selectedDevices);
-                          if (selected) {
-                            newSelection.add(device.id);
-                          } else {
-                            newSelection.remove(device.id);
+                  Consumer(
+                    builder: (context, ref, child) {
+                      final openclDevicesAsync =
+                          ref.watch(openclDevicesProvider);
+
+                      return openclDevicesAsync.when(
+                        data: (devices) {
+                          if (devices.isEmpty) {
+                            return const Text(
+                              'No OpenCL devices found',
+                              style: TextStyle(
+                                color: Colors.red,
+                                fontStyle: FontStyle.italic,
+                              ),
+                            );
                           }
-                          ref.read(selectedDevicesProvider.notifier).state =
-                              newSelection;
+
+                          return GridView.builder(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            gridDelegate:
+                                const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 3,
+                              childAspectRatio: 8,
+                              crossAxisSpacing: 8,
+                              mainAxisSpacing: 8,
+                            ),
+                            itemCount: devices.length,
+                            itemBuilder: (context, index) {
+                              final device = devices[index];
+                              final isSelected = selectedDevices
+                                  .contains(device.id.toString());
+                              return Card(
+                                child: InkWell(
+                                  onTap: () {
+                                    setState(() {
+                                      if (isSelected) {
+                                        selectedDevices
+                                            .remove(device.id.toString());
+                                      } else {
+                                        selectedDevices
+                                            .add(device.id.toString());
+                                      }
+                                    });
+                                  },
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 8),
+                                    decoration: BoxDecoration(
+                                      border: Border.all(
+                                        color: isSelected
+                                            ? Theme.of(context)
+                                                .colorScheme
+                                                .primary
+                                            : Colors.transparent,
+                                        width: 2,
+                                      ),
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Checkbox(
+                                          value: isSelected,
+                                          onChanged: (bool? value) {
+                                            setState(() {
+                                              if (value ?? false) {
+                                                selectedDevices
+                                                    .add(device.id.toString());
+                                              } else {
+                                                selectedDevices.remove(
+                                                    device.id.toString());
+                                              }
+                                            });
+                                          },
+                                        ),
+                                        Text(
+                                          '[${device.id}]',
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Expanded(
+                                          child: Text(
+                                            device.name,
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
+                          );
                         },
+                        loading: () => const CircularProgressIndicator(),
+                        error: (error, stack) => Text(
+                          'Error loading devices: $error',
+                          style: const TextStyle(
+                            color: Colors.red,
+                            fontStyle: FontStyle.italic,
+                          ),
+                        ),
                       );
-                    }).toList(),
+                    },
                   ),
                   const SizedBox(height: 16),
                   // Control Buttons
