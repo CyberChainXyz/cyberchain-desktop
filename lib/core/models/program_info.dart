@@ -16,6 +16,7 @@ class ProgramInfo {
   });
 
   ProgramInfo copyWith({
+    String? name,
     String? version,
     String? downloadUrl,
     String? localPath,
@@ -23,12 +24,35 @@ class ProgramInfo {
     String? output,
   }) {
     return ProgramInfo(
-      name: name,
+      name: name ?? this.name,
       version: version ?? this.version,
       downloadUrl: downloadUrl ?? this.downloadUrl,
       localPath: localPath ?? this.localPath,
       isRunning: isRunning ?? this.isRunning,
       output: output ?? this.output,
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'name': name,
+      'version': version,
+      'downloadUrl': downloadUrl,
+      'localPath': localPath,
+    };
+  }
+
+  factory ProgramInfo.fromJson(Map<String, dynamic> json) {
+    return ProgramInfo(
+      name: json['name'] as String,
+      version: json['version'] as String,
+      downloadUrl: json['downloadUrl'] as String,
+      localPath: json['localPath'] as String,
+    );
+  }
+
+  @override
+  String toString() {
+    return 'ProgramInfo(name: $name, version: $version, localPath: $localPath)';
   }
 }

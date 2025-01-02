@@ -1,60 +1,73 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'core/services/init_service.dart';
-import 'core/providers/app_state_provider.dart';
-import 'core/services/update_checker.dart';
-import 'core/theme/app_theme.dart';
-import 'core/theme/theme_controller.dart';
-import 'core/providers/error_provider.dart';
-import 'shared/widgets/loading_screen.dart';
-import 'features/mining/mining_page.dart';
+import 'core/providers/service_providers.dart';
+import 'ui/screens/home_screen.dart';
+import 'ui/screens/download_screen.dart';
 
 void main() async {
-  runApp(const ProviderScope(child: CCXDesktopApp()));
+  WidgetsFlutterBinding.ensureInitialized();
+  runApp(
+    const ProviderScope(
+      child: CCXDesktopApp(),
+    ),
+  );
 }
 
-class CCXDesktopApp extends ConsumerStatefulWidget {
+final programExistsProvider = FutureProvider<bool>((ref) async {
+  final initService = ref.read(initServiceProvider.notifier);
+  return initService.checkProgramsExist();
+});
+
+class CCXDesktopApp extends StatelessWidget {
   const CCXDesktopApp({super.key});
 
   @override
-  ConsumerState<CCXDesktopApp> createState() => _CCXDesktopAppState();
-}
-
-class _CCXDesktopAppState extends ConsumerState<CCXDesktopApp> {
-  @override
-  void initState() {
-    super.initState();
-    _initialize();
-  }
-
-  Future<void> _initialize() async {
-    try {
-      final initService = ref.read(initServiceProvider);
-      await initService.initialize();
-
-      ref.read(updateCheckerProvider.notifier).startChecking();
-      ref.read(appStateProvider.notifier).setInitialized();
-    } catch (e) {
-      ref.read(errorHandlerProvider.notifier).handleError(
-            'initialization',
-            'Failed to initialize: $e',
-          );
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final appState = ref.watch(appStateProvider);
-    final themeMode = ref.watch(themeProvider);
-
     return MaterialApp(
       title: 'CCX Desktop',
-      theme: AppTheme.light,
-      darkTheme: AppTheme.dark,
-      themeMode: themeMode,
-      home: appState.isInitialized
-          ? const MiningPage()
-          : const LoadingScreen(message: 'Initializing CCX Desktop...'),
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        useMaterial3: true,
+      ),
+      home: const CCXDesktopHome(),
+    );
+  }
+}
+
+class CCXDesktopHome extends ConsumerWidget {
+  const CCXDesktopHome({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final programExists = ref.watch(programExistsProvider);
+
+    return programExists.when(
+      data: (exists) => exists ? const HomeScreen() : const DownloadScreen(),
+      error: (error, _) => Scaffold(
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.error_outline, color: Colors.red, size: 48),
+              const SizedBox(height: 16),
+              Text(
+                'Error',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              const SizedBox(height: 8),
+              Text(error.toString()),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: () {
+                  ref.invalidate(programExistsProvider);
+                },
+                child: const Text('Retry'),
+              ),
+            ],
+          ),
+        ),
+      ),
+      loading: () => const SizedBox.shrink(),
     );
   }
 }

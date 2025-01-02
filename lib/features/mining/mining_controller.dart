@@ -11,7 +11,7 @@ import '../settings/settings_controller.dart';
 final miningControllerProvider =
     StateNotifierProvider<MiningController, Map<String, ProgramInfo>>((ref) {
   final controller = MiningController(
-    ref.watch(processServiceProvider),
+    ref.watch(processServiceProvider.notifier),
     ref.watch(updateServiceProvider.notifier),
     ref.watch(settingsProvider),
     ref.read(errorHandlerProvider.notifier),
@@ -90,11 +90,7 @@ class MiningController extends StateNotifier<Map<String, ProgramInfo>> {
   Future<void> startSoloMining() async {
     await _processService.startProgram(
       'go-cyberchain',
-      [
-        '--mine',
-        '--miner.threads',
-        _settings.minerThreads.toString(),
-      ],
+      [],
     );
   }
 

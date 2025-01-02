@@ -9,10 +9,16 @@ class PlatformUtils {
   }
 
   static String getProgramFileName(String programName) {
-    if (Platform.isWindows) {
-      return '$programName.exe';
+    String baseName = programName;
+    switch (programName) {
+      case 'go-cyberchain':
+        baseName = 'ccx';
+        break;
+      case 'xMiner':
+        baseName = 'xMiner';
+        break;
     }
-    return programName;
+    return Platform.isWindows ? '$baseName.exe' : baseName;
   }
 
   static Future<String> getProgramPath(String programName) async {

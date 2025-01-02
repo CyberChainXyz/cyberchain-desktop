@@ -4,6 +4,7 @@ import '../../core/models/program_info.dart';
 import '../../core/models/mining_pool.dart';
 import '../../shared/widgets/console_output.dart';
 import '../../shared/widgets/program_status.dart';
+import '../../core/providers/mining_providers.dart';
 import 'mining_controller.dart';
 import 'mining_pools_provider.dart';
 import '../../core/services/update_checker.dart';
@@ -189,8 +190,8 @@ class _MiningPageState extends ConsumerState<MiningPage> {
                   Expanded(
                     child: ConsoleOutput(
                       output: isSoloMining
-                          ? programs['go-cyberchain']?.output ?? ''
-                          : programs['xMiner']?.output ?? '',
+                          ? ref.watch(goCyberchainOutputProvider)
+                          : ref.watch(xMinerOutputProvider),
                       isRunning: isSoloMining
                           ? programs['go-cyberchain']?.isRunning ?? false
                           : programs['xMiner']?.isRunning ?? false,
