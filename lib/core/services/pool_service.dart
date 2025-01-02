@@ -47,7 +47,6 @@ class PoolService {
       final List<dynamic> json = jsonDecode(contents);
       return _parsePoolsJson(json);
     } catch (e) {
-      print('Error loading local pools: $e');
       return _parsePoolsJson(defaultPools);
     }
   }
@@ -58,7 +57,7 @@ class PoolService {
       final json = pools.map((pool) => pool.toJson()).toList();
       await file.writeAsString(jsonEncode(json));
     } catch (e) {
-      print('Error saving local pools: $e');
+      // Silently handle error
     }
   }
 
@@ -69,7 +68,6 @@ class PoolService {
         final response = await client
             .get(Uri.parse(poolsUrl))
             .timeout(fetchTimeout, onTimeout: () {
-          print('Fetch pools timeout after ${fetchTimeout.inSeconds} seconds');
           throw TimeoutException('Fetch pools timeout');
         });
 
@@ -79,12 +77,11 @@ class PoolService {
           await saveLocalPools(pools);
           return pools;
         }
-        print('Failed to fetch pools. Status code: ${response.statusCode}');
       } finally {
         client.close();
       }
     } catch (e) {
-      print('Error fetching pools: $e');
+      // Silently handle error
     }
     return loadLocalPools();
   }

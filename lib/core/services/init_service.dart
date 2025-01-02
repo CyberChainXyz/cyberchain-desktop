@@ -1,7 +1,4 @@
-import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../models/program_info.dart';
-import '../../shared/utils/platform_utils.dart';
 import 'update_service.dart';
 import 'program_info_service.dart';
 import '../providers/app_state_provider.dart';
@@ -27,7 +24,7 @@ class InitService extends StateNotifier<bool> {
         }
       }
       return true;
-    } catch (e, stackTrace) {
+    } catch (e) {
       return false;
     }
   }
@@ -53,7 +50,7 @@ class InitService extends StateNotifier<bool> {
         }
       }
       state = true;
-    } catch (e, stackTrace) {
+    } catch (e) {
       rethrow;
     }
   }

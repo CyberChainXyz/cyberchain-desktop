@@ -8,7 +8,7 @@ import '../providers/output_providers.dart';
 
 class ProcessService extends StateNotifier<Map<String, ProgramInfo>> {
   final Map<String, Process> _processes = {};
-  final StateNotifierProviderRef _ref;
+  final Ref _ref;
   String _currentOutput = '';
   final Map<String, bool> _stoppingProcesses = {};
   final Map<String, bool> _startingProcesses = {};

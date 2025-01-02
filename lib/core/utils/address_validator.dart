@@ -1,6 +1,3 @@
-import 'dart:typed_data';
-import 'package:web3dart/crypto.dart';
-
 class AddressValidator {
   static final RegExp _evmAddressRegex = RegExp(r'^0x[a-fA-F0-9]{40}$');
   static final RegExp _evmAddressWithSuffixRegex =

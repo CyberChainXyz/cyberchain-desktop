@@ -23,7 +23,6 @@ class ProgramInfoService {
 
     try {
       if (!appDir.existsSync()) {
-        print('Application directory does not exist');
         return {};
       }
 
@@ -38,10 +37,8 @@ class ProgramInfoService {
         }
       }
 
-      print('Loaded program info: $programInfo');
       return programInfo;
     } catch (e) {
-      print('Error loading program info: $e');
       return {};
     }
   }
@@ -51,9 +48,8 @@ class ProgramInfoService {
       for (final entry in programInfo.entries) {
         await updateProgramInfo(entry.key, entry.value);
       }
-      print('Saved all program info');
     } catch (e) {
-      print('Error saving program info: $e');
+      // Silently handle error
     }
   }
 
@@ -72,9 +68,8 @@ class ProgramInfoService {
       final file = File(infoPath);
       final jsonString = jsonEncode(info.toJson());
       await file.writeAsString(jsonString);
-      print('Saved info for program $name: $info');
     } catch (e) {
-      print('Error saving info for program $name: $e');
+      // Silently handle error
     }
   }
 
@@ -84,23 +79,18 @@ class ProgramInfoService {
       final file = File(infoPath);
 
       if (!file.existsSync()) {
-        print('Info file does not exist for program: $name');
         return null;
       }
 
       final jsonString = await file.readAsString();
       final jsonMap = jsonDecode(jsonString) as Map<String, dynamic>;
-      final info = ProgramInfo.fromJson(jsonMap);
-      print('Loaded info for program $name: $info');
-      return info;
+      return ProgramInfo.fromJson(jsonMap);
     } catch (e) {
-      print('Error loading info for program $name: $e');
       return null;
     }
   }
 
   Future<bool> programExists(String name) async {
-    final programDir = await _getProgramDir(name);
     final infoPath = await _getProgramInfoPath(name);
     return File(infoPath).existsSync();
   }

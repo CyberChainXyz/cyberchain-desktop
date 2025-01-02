@@ -56,8 +56,9 @@ class LoadingScreen extends ConsumerWidget {
                           Expanded(
                             child: LinearProgressIndicator(
                               value: progress,
-                              backgroundColor:
-                                  Theme.of(context).colorScheme.surfaceVariant,
+                              backgroundColor: Theme.of(context)
+                                  .colorScheme
+                                  .surfaceContainerHighest,
                               valueColor: AlwaysStoppedAnimation<Color>(
                                 Theme.of(context).colorScheme.primary,
                               ),
@@ -73,7 +74,7 @@ class LoadingScreen extends ConsumerWidget {
                       const SizedBox(height: 24),
                     ],
                   );
-                }).toList(),
+                }),
               ],
             ],
           ),
