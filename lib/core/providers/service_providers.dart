@@ -9,7 +9,7 @@ import '../models/program_info.dart';
 import 'app_state_provider.dart';
 
 final processServiceProvider =
-    StateNotifierProvider<ProcessService, Map<String, ProgramInfo>>((ref) {
+    StateNotifierProvider<ProcessService, void>((ref) {
   return ProcessService(ref);
 });
 

@@ -49,9 +49,9 @@ class _XMinerViewState extends ConsumerState<XMinerView> {
   @override
   Widget build(BuildContext context) {
     final processService = ref.watch(processServiceProvider.notifier);
-    final programs = ref.watch(processServiceProvider);
-    final isRunning = programs['xMiner']?.isRunning ?? false;
+    final isRunning = processService.isProcessRunning('xMiner');
     final isStopping = processService.isProcessStopping('xMiner');
+    final isStarting = processService.isProcessStarting('xMiner');
     final selectedDevices = ref.watch(selectedDevicesProvider);
     final ccxAddress = ref.watch(ccxAddressProvider);
     final selectedPool = ref.watch(selectedPoolProvider);
@@ -64,9 +64,7 @@ class _XMinerViewState extends ConsumerState<XMinerView> {
       _controller.text = ccxAddress;
     }
 
-    final isOperating = isStopping ||
-        processService.isProcessStarting('xMiner') ||
-        processService.getCountdown('xMiner') > 0;
+    final isOperating = isStopping || isStarting;
 
     WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
 
@@ -392,12 +390,8 @@ class _XMinerViewState extends ConsumerState<XMinerView> {
                         ElevatedButton.icon(
                           icon: Icon(isRunning ? Icons.stop : Icons.play_arrow),
                           label: Text(isRunning
-                              ? (isStopping
-                                  ? 'Stopping (${processService.getCountdown('xMiner')})'
-                                  : 'Stop')
-                              : (processService.isProcessStarting('xMiner')
-                                  ? 'Starting (${processService.getCountdown('xMiner')})'
-                                  : 'Start')),
+                              ? (isStopping ? 'Stopping...' : 'Stop')
+                              : (isStarting ? 'Starting...' : 'Start')),
                           onPressed: isOperating ||
                                   isRunning ||
                                   !AddressValidator.isValidCCXAddress(

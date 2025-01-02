@@ -32,10 +32,12 @@ class _GoCyberchainViewState extends ConsumerState<GoCyberchainView> {
   @override
   Widget build(BuildContext context) {
     final processService = ref.watch(processServiceProvider.notifier);
-    final programs = ref.watch(processServiceProvider);
-    final isRunning = programs['go-cyberchain']?.isRunning ?? false;
+    final isRunning = processService.isProcessRunning('go-cyberchain');
     final isStopping = processService.isProcessStopping('go-cyberchain');
+    final isStarting = processService.isProcessStarting('go-cyberchain');
     final output = ref.watch(goCyberchainOutputProvider);
+
+    final isOperating = isStopping || isStarting;
 
     WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
 
@@ -52,15 +54,9 @@ class _GoCyberchainViewState extends ConsumerState<GoCyberchainView> {
                   ElevatedButton.icon(
                     icon: Icon(isRunning ? Icons.stop : Icons.play_arrow),
                     label: Text(isRunning
-                        ? (isStopping
-                            ? 'Stopping (${processService.getCountdown('go-cyberchain')})'
-                            : 'Stop')
-                        : (processService.isProcessStarting('go-cyberchain')
-                            ? 'Starting (${processService.getCountdown('go-cyberchain')})'
-                            : 'Start')),
-                    onPressed: isStopping ||
-                            processService.isProcessStarting('go-cyberchain') ||
-                            processService.getCountdown('go-cyberchain') > 0
+                        ? (isStopping ? 'Stopping...' : 'Stop')
+                        : (isStarting ? 'Starting...' : 'Start')),
+                    onPressed: isOperating
                         ? null
                         : () {
                             if (isRunning) {
@@ -71,14 +67,8 @@ class _GoCyberchainViewState extends ConsumerState<GoCyberchainView> {
                           },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: isRunning
-                          ? (isStopping ||
-                                  processService.getCountdown('go-cyberchain') >
-                                      0
-                              ? Colors.grey
-                              : Colors.red)
-                          : (processService.isProcessStarting('go-cyberchain')
-                              ? Colors.grey
-                              : Colors.green),
+                          ? (isStopping ? Colors.grey : Colors.red)
+                          : (isStarting ? Colors.grey : Colors.green),
                       foregroundColor: Colors.white,
                     ),
                   ),
