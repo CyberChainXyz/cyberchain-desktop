@@ -6,7 +6,7 @@ import 'package:path_provider/path_provider.dart';
 import '../models/mining_pool.dart';
 
 class PoolService {
-  static const String poolsUrl = 'https://cyberchain.xyz/pools.json';
+  static const String poolsUrl = 'https://file.cyberchain.xyz/pools.json';
   static const String localFileName = 'pools.json';
   static const Duration fetchTimeout = Duration(seconds: 3);
   static const List<List<dynamic>> defaultPools = [

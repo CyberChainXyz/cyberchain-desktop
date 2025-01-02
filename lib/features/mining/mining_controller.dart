@@ -1,7 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/material.dart';
 import 'package:collection/collection.dart';
-import '../../core/models/program_info.dart';
 import '../../core/models/mining_pool.dart';
 import '../../core/services/process_service.dart';
 import '../../core/services/error_handler.dart';
