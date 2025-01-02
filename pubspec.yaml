@@ -43,6 +43,7 @@ dependencies:
   archive: ^3.4.10
   package_info_plus: ^8.1.2
   url_launcher: ^6.2.5
+  web3dart: ^2.7.3
 
 dev_dependencies:
   flutter_test:

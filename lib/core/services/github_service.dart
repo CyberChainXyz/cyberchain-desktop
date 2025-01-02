@@ -4,6 +4,23 @@ import '../models/mining_pool.dart';
 
 class GithubService {
   static const String _baseUrl = 'https://api.github.com/repos/cyberchainxyz';
+  static const List<List<dynamic>> defaultPools = [
+    [
+      "Solo",
+      [
+        ["Local", "ws://127.0.0.1:8546"]
+      ]
+    ],
+    [
+      "CoolPool",
+      [
+        ["Main", "ws://ccx.coolpool.top:14003"],
+        ["EU", "ws://eu.coolpool.top:14003"],
+        ["US", "ws://us.coolpool.top:14003"],
+        ["ASIA", "ws://asia.coolpool.top:14003"]
+      ]
+    ]
+  ];
 
   Future<String?> getLatestVersion(String program) async {
     final url = '$_baseUrl/$program/releases/latest';
@@ -26,22 +43,15 @@ class GithubService {
         final version = data['tag_name'] as String;
         print('Latest version for $program: $version');
         return version;
-      } else if (response.statusCode == 404) {
-        // If the latest release endpoint fails, try to get all releases
-        return await _getLatestVersionFromAllReleases(program);
       }
       print('Failed to get version. Status code: ${response.statusCode}');
     } catch (e) {
       print('Error getting latest version for $program: $e');
     }
-    return null;
-  }
-
-  Future<String?> _getLatestVersionFromAllReleases(String program) async {
-    final url = '$_baseUrl/$program/releases';
-    print('Fetching all releases from: $url');
 
     try {
+      final url = '$_baseUrl/$program/releases';
+      print('Trying to get version from all releases: $url');
       final response = await http.get(
         Uri.parse(url),
         headers: {
@@ -86,14 +96,14 @@ class GithubService {
         final content = utf8.decode(base64.decode(data['content']));
         final List<dynamic> pools = jsonDecode(content);
         return pools
-            .map((pool) => MiningPool.fromJson(pool as Map<String, dynamic>))
+            .map((pool) => MiningPool.fromJson(pool as List<dynamic>))
             .toList();
       }
       print('Failed to get mining pools. Status code: ${response.statusCode}');
     } catch (e) {
       print('Error getting mining pools: $e');
     }
-    return [];
+    return defaultPools.map((pool) => MiningPool.fromJson(pool)).toList();
   }
 
   Future<bool> checkForUpdates(String program) async {

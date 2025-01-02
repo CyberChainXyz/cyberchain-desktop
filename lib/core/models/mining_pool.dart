@@ -1,30 +1,53 @@
 class MiningPool {
   final String name;
-  final String url;
+  final List<MiningPoolServer> servers;
 
   const MiningPool({
+    required this.name,
+    required this.servers,
+  });
+
+  factory MiningPool.fromJson(List<dynamic> json) {
+    return MiningPool(
+      name: json[0] as String,
+      servers: (json[1] as List<dynamic>)
+          .map((server) => MiningPoolServer.fromJson(server as List<dynamic>))
+          .toList(),
+    );
+  }
+
+  List<dynamic> toJson() {
+    return [
+      name,
+      servers.map((server) => server.toJson()).toList(),
+    ];
+  }
+}
+
+class MiningPoolServer {
+  final String name;
+  final String url;
+
+  const MiningPoolServer({
     required this.name,
     required this.url,
   });
 
-  factory MiningPool.fromJson(Map<String, dynamic> json) {
-    return MiningPool(
-      name: json['name'] as String,
-      url: json['url'] as String,
+  factory MiningPoolServer.fromJson(List<dynamic> json) {
+    return MiningPoolServer(
+      name: json[0] as String,
+      url: json[1] as String,
     );
   }
 
-  Map<String, dynamic> toJson() {
-    return {
-      'name': name,
-      'url': url,
-    };
+  List<dynamic> toJson() {
+    return [name, url];
   }
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is MiningPool &&
+      other is MiningPoolServer &&
           runtimeType == other.runtimeType &&
           url == other.url;
 

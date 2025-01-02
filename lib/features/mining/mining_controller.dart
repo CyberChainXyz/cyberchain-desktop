@@ -6,22 +6,14 @@ import '../../core/services/update_service.dart';
 import '../../core/services/error_handler.dart';
 import '../../core/providers/service_providers.dart';
 import '../../core/providers/error_provider.dart';
-import '../settings/settings_controller.dart';
 
 final miningControllerProvider =
     StateNotifierProvider<MiningController, Map<String, ProgramInfo>>((ref) {
   final controller = MiningController(
     ref.watch(processServiceProvider.notifier),
     ref.watch(updateServiceProvider.notifier),
-    ref.watch(settingsProvider),
     ref.read(errorHandlerProvider.notifier),
   );
-
-  ref.listen(settingsProvider, (previous, next) {
-    if (next.autoStartMining && previous?.autoStartMining == false) {
-      controller.startMining();
-    }
-  });
 
   return controller;
 });
@@ -29,15 +21,14 @@ final miningControllerProvider =
 class MiningController extends StateNotifier<Map<String, ProgramInfo>> {
   final ProcessService _processService;
   final UpdateService _updateService;
-  final Settings _settings;
   final ErrorHandler _errorHandler;
   bool _isSoloMining = true;
-  MiningPool? _selectedPool;
+  MiningPoolServer? _selectedServer;
+  static const int defaultMinerThreads = 2;
 
   MiningController(
     this._processService,
     this._updateService,
-    this._settings,
     this._errorHandler,
   ) : super({
           'go-cyberchain': const ProgramInfo(
@@ -52,30 +43,22 @@ class MiningController extends StateNotifier<Map<String, ProgramInfo>> {
             downloadUrl: '',
             localPath: '',
           ),
-        }) {
-    _initialize();
-  }
-
-  Future<void> _initialize() async {
-    if (_settings.autoStartMining) {
-      await startMining();
-    }
-  }
+        });
 
   void setMiningMode(bool isSoloMining) {
     _isSoloMining = isSoloMining;
   }
 
-  void setSelectedPool(MiningPool? pool) {
-    _selectedPool = pool;
+  void setSelectedServer(MiningPoolServer? server) {
+    _selectedServer = server;
   }
 
   Future<void> startMining() async {
     try {
       if (_isSoloMining) {
         await startSoloMining();
-      } else if (_selectedPool != null) {
-        await startPoolMining(_selectedPool!);
+      } else if (_selectedServer != null) {
+        await startPoolMining(_selectedServer!);
       } else {
         _errorHandler.handleError(
           'mining',
@@ -94,14 +77,14 @@ class MiningController extends StateNotifier<Map<String, ProgramInfo>> {
     );
   }
 
-  Future<void> startPoolMining(MiningPool pool) async {
+  Future<void> startPoolMining(MiningPoolServer server) async {
     await _processService.startProgram(
       'xMiner',
       [
         '--pool',
-        pool.url,
+        server.url,
         '--threads',
-        _settings.minerThreads.toString(),
+        defaultMinerThreads.toString(),
       ],
     );
   }
