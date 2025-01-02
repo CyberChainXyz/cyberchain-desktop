@@ -72,6 +72,29 @@ final ccxAddressProvider =
   return CCXAddressNotifier(prefsService);
 });
 
+class GoCyberchainArgsNotifier extends StateNotifier<List<String>> {
+  final PreferencesService _preferencesService;
+
+  GoCyberchainArgsNotifier(this._preferencesService) : super([]) {
+    _loadSavedArgs();
+  }
+
+  Future<void> _loadSavedArgs() async {
+    state = await _preferencesService.loadGoCyberchainArgs();
+  }
+
+  Future<void> setArgs(List<String> args) async {
+    state = args;
+    await _preferencesService.saveGoCyberchainArgs(args);
+  }
+}
+
+final goCyberchainArgsProvider =
+    StateNotifierProvider<GoCyberchainArgsNotifier, List<String>>((ref) {
+  final prefsService = ref.watch(preferencesServiceProvider);
+  return GoCyberchainArgsNotifier(prefsService);
+});
+
 class SelectedPoolNotifier extends StateNotifier<MiningPoolServer?> {
   final PreferencesService _preferencesService;
 

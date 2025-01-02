@@ -26,6 +26,10 @@ class _XMinerViewState extends ConsumerState<XMinerView> {
   @override
   void initState() {
     super.initState();
+    // Set context for mining controller after build
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(miningControllerProvider.notifier).setContext(context);
+    });
   }
 
   @override

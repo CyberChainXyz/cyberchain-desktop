@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/providers/service_providers.dart';
 import '../../core/providers/output_providers.dart';
+import '../../core/providers/mining_providers.dart';
 
 class GoCyberchainView extends ConsumerStatefulWidget {
   const GoCyberchainView({super.key});
@@ -36,6 +37,7 @@ class _GoCyberchainViewState extends ConsumerState<GoCyberchainView> {
     final isStopping = processService.isProcessStopping('go-cyberchain');
     final isStarting = processService.isProcessStarting('go-cyberchain');
     final output = ref.watch(goCyberchainOutputProvider);
+    final savedArgs = ref.watch(goCyberchainArgsProvider);
 
     final isOperating = isStopping || isStarting;
 
@@ -62,7 +64,8 @@ class _GoCyberchainViewState extends ConsumerState<GoCyberchainView> {
                             if (isRunning) {
                               processService.stopProgram('go-cyberchain');
                             } else {
-                              processService.startProgram('go-cyberchain', []);
+                              processService.startProgram(
+                                  'go-cyberchain', savedArgs);
                             }
                           },
                     style: ElevatedButton.styleFrom(
@@ -72,6 +75,16 @@ class _GoCyberchainViewState extends ConsumerState<GoCyberchainView> {
                       foregroundColor: Colors.white,
                     ),
                   ),
+                  if (savedArgs.isNotEmpty) ...[
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Text(
+                        'Arguments: ${savedArgs.join(" ")}',
+                        style: Theme.of(context).textTheme.bodySmall,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),
