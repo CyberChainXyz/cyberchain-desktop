@@ -25,13 +25,6 @@ class _XMinerViewState extends ConsumerState<XMinerView> {
   @override
   void initState() {
     super.initState();
-    // Set initial value from provider
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final address = ref.read(ccxAddressProvider);
-      if (address.isNotEmpty) {
-        _controller.text = address;
-      }
-    });
   }
 
   @override
@@ -62,6 +55,11 @@ class _XMinerViewState extends ConsumerState<XMinerView> {
     final ccxAddress = ref.watch(ccxAddressProvider);
     final selectedPool = ref.watch(selectedPoolProvider);
     final output = ref.watch(xMinerOutputProvider);
+
+    // Update controller text when ccxAddress changes
+    if (_controller.text != ccxAddress) {
+      _controller.text = ccxAddress;
+    }
 
     final isOperating = isStopping ||
         processService.isProcessStarting('xMiner') ||
@@ -115,12 +113,10 @@ class _XMinerViewState extends ConsumerState<XMinerView> {
                                   setState(() {
                                     _addressError = error;
                                   });
-                                  // Save address if valid
-                                  if (error == null) {
-                                    ref
-                                        .read(ccxAddressProvider.notifier)
-                                        .setAddress(value);
-                                  }
+                                  // Save address regardless of validation
+                                  ref
+                                      .read(ccxAddressProvider.notifier)
+                                      .setAddress(value);
                                 }
                               }),
                             controller: _controller,
