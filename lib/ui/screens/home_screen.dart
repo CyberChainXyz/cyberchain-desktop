@@ -3,8 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/providers/service_providers.dart';
 import '../../core/providers/app_state_provider.dart';
 import '../../core/providers/mining_providers.dart';
+import '../../core/providers/version_provider.dart';
+import '../../core/services/version_service.dart';
 import '../../features/mining/mining_controller.dart';
 import '../../core/models/mining_pool.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -16,12 +19,46 @@ class HomeScreen extends ConsumerStatefulWidget {
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   int _selectedIndex = 0;
 
+  void _launchGitHub() async {
+    final uri = Uri.parse(VersionService.githubUrl);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri);
+    }
+  }
+
+  void _launchReleasePage() async {
+    try {
+      final versionService = ref.read(versionServiceProvider);
+      final releaseUrl = versionService.getLatestReleaseUrl();
+      print('Attempting to launch release page: $releaseUrl');
+
+      if (releaseUrl == null) {
+        print('Release URL is null');
+        return;
+      }
+
+      final uri = Uri.parse(releaseUrl);
+      print('Parsed URI: $uri');
+
+      if (await canLaunchUrl(uri)) {
+        print('Launching URL...');
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      } else {
+        print('Cannot launch URL: $uri');
+      }
+    } catch (e) {
+      print('Error launching release page: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final currentVersion = ref.watch(currentVersionProvider);
+    final hasUpdate = ref.watch(hasUpdateProvider);
+
     return Scaffold(
       body: Row(
         children: [
-          // Left Navigation Panel
           NavigationRail(
             selectedIndex: _selectedIndex,
             onDestinationSelected: (int index) {
@@ -44,9 +81,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ),
                 const Padding(
                   padding: EdgeInsets.symmetric(horizontal: 16),
-                  child: Divider(
-                    thickness: 1,
-                  ),
+                  child: Divider(thickness: 1),
                 ),
                 const SizedBox(height: 8),
               ],
@@ -67,10 +102,64 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
               ),
             ],
+            trailing: Expanded(
+              child: Align(
+                alignment: Alignment.bottomCenter,
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (hasUpdate.value == true)
+                        InkWell(
+                          onTap: _launchReleasePage,
+                          child: Container(
+                            margin: const EdgeInsets.only(bottom: 8),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 6,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).colorScheme.primary,
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            child: const Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.system_update,
+                                  size: 16,
+                                  color: Colors.white,
+                                ),
+                                SizedBox(width: 4),
+                                Text(
+                                  'Update Available',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      InkWell(
+                        onTap: _launchGitHub,
+                        child: Text(
+                          'v${currentVersion.value ?? ""}',
+                          style: TextStyle(
+                            color: Theme.of(context).textTheme.bodySmall?.color,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
           ),
-          // Vertical Divider
           const VerticalDivider(thickness: 1, width: 1),
-          // Content Area
           Expanded(
             child: _selectedIndex == 0
                 ? const GoCyberchainView()
