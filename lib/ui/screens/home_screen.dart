@@ -8,6 +8,7 @@ import '../../core/services/version_service.dart';
 import '../../features/mining/mining_controller.dart';
 import '../../core/models/mining_pool.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'cyberchain_info_screen.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -101,6 +102,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     style:
                         TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
               ),
+              NavigationRailDestination(
+                padding: EdgeInsets.symmetric(vertical: 12),
+                icon: Icon(Icons.info_outline, size: 28),
+                label: Text('About',
+                    style:
+                        TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
+              ),
             ],
             trailing: Expanded(
               child: Align(
@@ -163,7 +171,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           Expanded(
             child: _selectedIndex == 0
                 ? const GoCyberchainView()
-                : const XMinerView(),
+                : _selectedIndex == 1
+                    ? const XMinerView()
+                    : const CyberchainInfoScreen(),
           ),
         ],
       ),
