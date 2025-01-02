@@ -1,0 +1,78 @@
+name: Release
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          - os: windows-2022
+            build-path: build/windows/x64/runner/Release
+            archive-type: zip
+            ext: zip
+          - os: ubuntu-20.04
+            build-path: build/linux/x64/release/bundle
+            archive-type: tar
+            ext: tar.gz
+          - os: macos-13
+            build-path: build/macos/Build/Products/Release
+            archive-type: tar
+            ext: tar.gz
+          - os: macos-14
+            build-path: build/macos/Build/Products/Release
+            archive-type: tar
+            ext: tar.gz
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: 3.27.1
+      - run: flutter --version
+
+      - name: Install Linux dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev
+      - run: flutter config --enable-${{ runner.os == 'macOS' && 'macos' || runner.os == 'Windows' && 'windows' || 'linux' }}-desktop
+      - run: flutter pub get
+      - run: flutter build ${{ runner.os == 'macOS' && 'macos' || runner.os == 'Windows' && 'windows' || 'linux' }} --release
+      
+      - name: Create release directory and copy files
+        run: |
+          mkdir ccx-desktop-${{ github.ref_name }} && cd ccx-desktop-${{ github.ref_name }}
+          cp -r ../${{ matrix.build-path }}/* ./
+
+      - name: Archive Release
+        uses: thedoctor0/zip-release@0.7.6
+        with:
+          type: ${{ matrix.archive-type }}
+          filename: ccx-desktop-${{ runner.os }}-${{ runner.arch }}-${{ github.ref_name }}.${{ matrix.ext }}
+          path: ccx-desktop-${{ github.ref_name }}
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.os }}-artifact
+          path: ccx-desktop-${{ runner.os }}-${{ runner.arch }}-${{ github.ref_name }}.${{ matrix.ext }}
+
+  create-release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download All Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: artifacts/**/* 
