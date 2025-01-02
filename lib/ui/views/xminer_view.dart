@@ -7,6 +7,7 @@ import '../../features/mining/mining_controller.dart';
 import '../../core/models/mining_pool.dart';
 import '../../core/utils/address_validator.dart';
 import '../../core/providers/output_providers.dart';
+import '../../core/providers/error_provider.dart';
 
 class XMinerView extends ConsumerStatefulWidget {
   const XMinerView({super.key});
@@ -55,6 +56,8 @@ class _XMinerViewState extends ConsumerState<XMinerView> {
     final ccxAddress = ref.watch(ccxAddressProvider);
     final selectedPool = ref.watch(selectedPoolProvider);
     final output = ref.watch(xMinerOutputProvider);
+    final errors = ref.watch(errorHandlerProvider);
+    final miningError = errors['mining'];
 
     // Update controller text when ccxAddress changes
     if (_controller.text != ccxAddress) {
@@ -72,6 +75,35 @@ class _XMinerViewState extends ConsumerState<XMinerView> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          if (miningError != null)
+            Card(
+              color: Colors.red.shade50,
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Row(
+                  children: [
+                    Icon(Icons.error_outline, color: Colors.red.shade700),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Text(
+                        miningError.message,
+                        style: TextStyle(color: Colors.red.shade700),
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.close),
+                      onPressed: () {
+                        ref
+                            .read(errorHandlerProvider.notifier)
+                            .clearError('mining');
+                      },
+                      color: Colors.red.shade700,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          const SizedBox(height: 16),
           Card(
             child: Padding(
               padding: const EdgeInsets.all(16.0),
@@ -382,6 +414,9 @@ class _XMinerViewState extends ConsumerState<XMinerView> {
                               : () {
                                   final controller = ref
                                       .read(miningControllerProvider.notifier);
+                                  controller.setMinerAddress(ccxAddress);
+                                  controller.setSelectedDevices(
+                                      selectedDevices.toList());
                                   controller.setSelectedServer(selectedPool);
                                   controller.startMining();
                                   setState(() {});
