@@ -71,6 +71,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     height: 48,
                   ),
                 ),
+                Text(
+                  "2025 - CCX",
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: const Color.fromARGB(255, 196, 141, 32),
+                  ),
+                ),
+                const SizedBox(height: 8),
                 const Padding(
                   padding: EdgeInsets.symmetric(horizontal: 16),
                   child: Divider(thickness: 1),
