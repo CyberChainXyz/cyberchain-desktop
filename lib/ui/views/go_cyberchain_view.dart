@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/providers/service_providers.dart';
-import '../../core/providers/mining_providers.dart';
-import '../../features/mining/mining_controller.dart';
+import '../../core/providers/output_providers.dart';
 
 class GoCyberchainView extends ConsumerStatefulWidget {
   const GoCyberchainView({super.key});
@@ -64,12 +63,10 @@ class _GoCyberchainViewState extends ConsumerState<GoCyberchainView> {
                             processService.getCountdown('go-cyberchain') > 0
                         ? null
                         : () {
-                            final controller =
-                                ref.read(miningControllerProvider.notifier);
                             if (isRunning) {
-                              controller.stopMining('go-cyberchain');
+                              processService.stopProgram('go-cyberchain');
                             } else {
-                              controller.startSoloMining();
+                              processService.startProgram('go-cyberchain', []);
                             }
                           },
                     style: ElevatedButton.styleFrom(

@@ -4,7 +4,7 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/program_info.dart';
 import '../../shared/utils/platform_utils.dart';
-import '../providers/mining_providers.dart';
+import '../providers/output_providers.dart';
 
 class ProcessService extends StateNotifier<Map<String, ProgramInfo>> {
   final Map<String, Process> _processes = {};

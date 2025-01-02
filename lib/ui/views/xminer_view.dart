@@ -3,10 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/providers/service_providers.dart';
 import '../../core/providers/mining_providers.dart';
 import '../../core/providers/opencl_devices_provider.dart';
-import '../../core/providers/error_provider.dart';
 import '../../features/mining/mining_controller.dart';
 import '../../core/models/mining_pool.dart';
 import '../../core/utils/address_validator.dart';
+import '../../core/providers/output_providers.dart';
 
 class XMinerView extends ConsumerStatefulWidget {
   const XMinerView({super.key});
@@ -63,7 +63,6 @@ class _XMinerViewState extends ConsumerState<XMinerView> {
     final selectedPool = ref.watch(selectedPoolProvider);
     final output = ref.watch(xMinerOutputProvider);
 
-    // 检查是否正在进行操作
     final isOperating = isStopping ||
         processService.isProcessStarting('xMiner') ||
         processService.getCountdown('xMiner') > 0;
