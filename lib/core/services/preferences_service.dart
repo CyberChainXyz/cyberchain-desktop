@@ -39,7 +39,6 @@ class PreferencesService {
         url: data[1] as String,
       );
     } catch (e) {
-      print('Error loading selected pool: $e');
       return null;
     }
   }

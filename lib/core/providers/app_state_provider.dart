@@ -106,47 +106,33 @@ class AppStateNotifier extends StateNotifier<AppState> {
   AppStateNotifier() : super(const AppState());
 
   void updatePrograms(Map<String, ProgramInfo> programs) {
-    print('Updating programs: $programs');
     state = state.copyWith(programs: programs);
-    print('New state: $state');
   }
 
   void updatePools(List<MiningPool> pools) {
-    print('Updating pools: $pools');
     state = state.copyWith(pools: pools);
-    print('New state: $state');
   }
 
   void setMiningMode(bool isSoloMining) {
-    print('Setting mining mode: $isSoloMining');
     state = state.copyWith(isSoloMining: isSoloMining);
-    print('New state: $state');
   }
 
   void setSelectedPool(MiningPool? pool) {
-    print('Setting selected pool: $pool');
     state = state.copyWith(selectedPool: pool);
-    print('New state: $state');
   }
 
   void setInitialized() {
-    print('Setting initialized state');
     state = state.copyWith(isInitialized: true);
-    print('New state: $state');
   }
 
   void updateDownloadProgress(String program, double progress) {
-    print('Updating download progress for $program: $progress');
     final newProgress = Map<String, double>.from(state.downloadProgress);
     newProgress[program] = progress;
     state = state.copyWith(downloadProgress: newProgress);
-    print('New state: $state');
   }
 
   void setProgramsReady(bool ready) {
-    print('Setting programs ready state: $ready');
     state = state.copyWith(isProgramsReady: ready);
-    print('New state: $state');
   }
 }
 

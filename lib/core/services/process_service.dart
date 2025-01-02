@@ -22,14 +22,12 @@ class ProcessService extends StateNotifier<Map<String, ProgramInfo>> {
   int getCountdown(String name) => _countdowns[name] ?? 0;
 
   void updateProgramInfo(String name, ProgramInfo info) {
-    print('Updating program info for $name: $info');
     final newState = Map<String, ProgramInfo>.from(state);
     newState[name] = info;
     state = newState;
   }
 
   void _appendOutput(String name, String output) {
-    print('Appending output for $name: $output');
     _currentOutput += output;
 
     // Use the appropriate output provider based on the program name
@@ -52,25 +50,10 @@ class ProcessService extends StateNotifier<Map<String, ProgramInfo>> {
     if (newState.containsKey(name)) {
       newState[name] = newState[name]!.copyWith(isRunning: isRunning);
       state = newState;
-      print('Updated program state: $name, isRunning: $isRunning');
     }
   }
 
   Future<void> startProgram(String name, List<String> arguments) async {
-    print('Starting program: $name with arguments: $arguments');
-
-    // Don't start if the program is stopping
-    if (_stoppingProcesses[name] == true) {
-      print('Program $name is currently stopping, cannot start');
-      return;
-    }
-
-    // Don't start if the program is already running
-    if (state[name]?.isRunning ?? false) {
-      print('Program $name is already running');
-      return;
-    }
-
     _startRequested[name] = true;
     _startingProcesses[name] = true;
 
@@ -85,8 +68,6 @@ class ProcessService extends StateNotifier<Map<String, ProgramInfo>> {
     // Get the program path and directory
     final programPath = await PlatformUtils.getProgramPath(name);
     final programDir = Directory(programPath).parent.path;
-    print('Program path: $programPath');
-    print('Working directory: $programDir');
 
     // Create or update program info in state if it doesn't exist
     if (!state.containsKey(name)) {
@@ -100,12 +81,9 @@ class ProcessService extends StateNotifier<Map<String, ProgramInfo>> {
         output: '',
       );
       state = newState;
-      print('Created initial state for $name: ${state[name]}');
     }
 
     try {
-      print('Starting process for $name at $programPath');
-
       // Run the process and capture output
       final process = await Process.start(
         programPath,
@@ -116,7 +94,6 @@ class ProcessService extends StateNotifier<Map<String, ProgramInfo>> {
         includeParentEnvironment: true,
       );
 
-      print('Process started with PID: ${process.pid}');
       _processes[name] = process;
 
       // Start countdown in a separate future
@@ -130,7 +107,6 @@ class ProcessService extends StateNotifier<Map<String, ProgramInfo>> {
         _startingProcesses[name] = false;
         _updateProgramState(name, isRunning: true);
         state = Map<String, ProgramInfo>.from(state); // Force update
-        print('Starting delay elapsed, marking program as running');
       });
 
       // Handle stdout
@@ -139,11 +115,9 @@ class ProcessService extends StateNotifier<Map<String, ProgramInfo>> {
           .transform(const LineSplitter())
           .listen(
         (line) {
-          print('[$name] stdout: $line');
           _appendOutput(name, '$line\n');
         },
         onError: (error) {
-          print('[$name] stdout error: $error');
           _appendOutput(name, '\nError reading output: $error\n');
         },
       );
@@ -154,11 +128,9 @@ class ProcessService extends StateNotifier<Map<String, ProgramInfo>> {
           .transform(const LineSplitter())
           .listen(
         (line) {
-          print('[$name] stderr: $line');
           _appendOutput(name, '$line\n');
         },
         onError: (error) {
-          print('[$name] stderr error: $error');
           _appendOutput(name, '\nError reading error output: $error\n');
         },
       );
@@ -166,7 +138,6 @@ class ProcessService extends StateNotifier<Map<String, ProgramInfo>> {
       // Handle process exit
       process.exitCode.then((exitCode) => _handleProcessExit(name, exitCode));
     } catch (e) {
-      print('Error starting program $name: $e');
       _startingProcesses[name] = false;
       _startRequested[name] = false;
       _updateProgramState(name, isRunning: false);
@@ -176,10 +147,8 @@ class ProcessService extends StateNotifier<Map<String, ProgramInfo>> {
   }
 
   Future<void> stopProgram(String name) async {
-    print('Stopping program: $name');
     final process = _processes[name];
     if (process == null) {
-      print('No running process found for $name');
       return;
     }
 
@@ -192,11 +161,9 @@ class ProcessService extends StateNotifier<Map<String, ProgramInfo>> {
       Future(() async {
         for (int i = 10; i >= 1; i--) {
           _countdowns[name] = i;
-          state = Map<String, ProgramInfo>.from(state); // Force update
           await Future.delayed(const Duration(seconds: 1));
         }
         _countdowns.remove(name);
-        state = Map<String, ProgramInfo>.from(state); // Force update
 
         // Only update running state after countdown is complete
         _processes.remove(name);
@@ -207,18 +174,10 @@ class ProcessService extends StateNotifier<Map<String, ProgramInfo>> {
 
       // Send stop signal immediately
       if (Platform.isWindows) {
-        print(
-            'Sending Ctrl+C signal to Windows process with PID: ${process.pid}');
         await Process.run('taskkill', ['/F', '/T', '/PID', '${process.pid}']);
       } else {
-        print('Sending SIGTERM to process group with PID: ${process.pid}');
-
-        try {
-          await Process.run('pkill', ['-TERM', '-P', '${process.pid}']);
-          process.kill(ProcessSignal.sigterm);
-        } catch (e) {
-          print('Error sending SIGTERM: $e');
-        }
+        await Process.run('pkill', ['-TERM', '-P', '${process.pid}']);
+        process.kill(ProcessSignal.sigterm);
 
         // Wait for the process to exit gracefully
         bool exited = false;
@@ -234,40 +193,23 @@ class ProcessService extends StateNotifier<Map<String, ProgramInfo>> {
               break;
             }
           } catch (e) {
-            print('Error checking process status: $e');
+            // Ignore error
           }
         }
 
         if (!exited) {
-          print('Process did not exit gracefully, force killing...');
-          try {
-            await Process.run('pkill', ['-KILL', '-P', '${process.pid}']);
-            process.kill(ProcessSignal.sigkill);
-          } catch (e) {
-            print('Error force killing process: $e');
-          }
-
-          try {
-            await Process.run('pkill', ['-KILL', '-P', '${process.pid}']);
-          } catch (e) {
-            print('Error in final kill attempt: $e');
-          }
+          await Process.run('pkill', ['-KILL', '-P', '${process.pid}']);
+          process.kill(ProcessSignal.sigkill);
         }
       }
     } catch (e) {
-      print('Error stopping program $name: $e');
-
       // Start error countdown in a separate future
       Future(() async {
         for (int i = 10; i >= 1; i--) {
           _countdowns[name] = i;
-          state = Map<String, ProgramInfo>.from(state); // Force update
           await Future.delayed(const Duration(seconds: 1));
         }
         _countdowns.remove(name);
-        state = Map<String, ProgramInfo>.from(state); // Force update
-
-        // Only update running state after countdown is complete
         _processes.remove(name);
         _stoppingProcesses[name] = false;
         _startRequested[name] = false;
@@ -280,9 +222,6 @@ class ProcessService extends StateNotifier<Map<String, ProgramInfo>> {
 
   // Handle process exit
   void _handleProcessExit(String name, int exitCode) {
-    print('[$name] Process exited with code: $exitCode');
-
-    // Only update state if there's no active countdown
     if (!_countdowns.containsKey(name)) {
       _processes.remove(name);
       _stoppingProcesses[name] = false;
@@ -297,12 +236,11 @@ class ProcessService extends StateNotifier<Map<String, ProgramInfo>> {
 
   @override
   void dispose() {
-    print('Disposing ProcessService, killing all processes');
     for (final process in _processes.values) {
       try {
         process.kill();
       } catch (e) {
-        print('Error killing process during dispose: $e');
+        // Ignore error
       }
     }
     _processes.clear();

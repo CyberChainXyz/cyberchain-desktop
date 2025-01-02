@@ -28,24 +28,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     try {
       final versionService = ref.read(versionServiceProvider);
       final releaseUrl = versionService.getLatestReleaseUrl();
-      print('Attempting to launch release page: $releaseUrl');
 
       if (releaseUrl == null) {
-        print('Release URL is null');
         return;
       }
 
       final uri = Uri.parse(releaseUrl);
-      print('Parsed URI: $uri');
 
       if (await canLaunchUrl(uri)) {
-        print('Launching URL...');
         await launchUrl(uri, mode: LaunchMode.externalApplication);
-      } else {
-        print('Cannot launch URL: $uri');
       }
     } catch (e) {
-      print('Error launching release page: $e');
+      // print('Error launching release page: $e');
     }
   }
 

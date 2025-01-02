@@ -24,15 +24,12 @@ class UpdateService extends StateNotifier<Map<String, ProgramInfo>> {
   }
 
   Future<bool> checkForUpdates(String programName) async {
-    print('Checking for updates for $programName');
     final latestVersion = await _githubService.getLatestVersion(programName);
     if (latestVersion == null) {
-      print('No version found for $programName');
       return false;
     }
 
     final currentVersion = state[programName]?.version;
-    print('Current version: $currentVersion, Latest version: $latestVersion');
     return currentVersion != null && currentVersion != latestVersion;
   }
 
@@ -40,10 +37,8 @@ class UpdateService extends StateNotifier<Map<String, ProgramInfo>> {
     String programName, {
     void Function(double)? onProgress,
   }) async {
-    print('Updating program: $programName');
     final latestVersion = await _githubService.getLatestVersion(programName);
     if (latestVersion == null) {
-      print('No version found for $programName');
       return;
     }
 
@@ -55,7 +50,6 @@ class UpdateService extends StateNotifier<Map<String, ProgramInfo>> {
     final downloadUrl =
         'https://github.com/cyberchainxyz/$programName/releases/download/$latestVersion/$urlProgramName-${platform.capitalize()}-$arch-$latestVersion.$extension';
 
-    print('Download URL: $downloadUrl');
     final localPath = await PlatformUtils.getProgramPath(programName);
     final program = ProgramInfo(
       name: urlProgramName,

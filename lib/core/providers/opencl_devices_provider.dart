@@ -18,13 +18,11 @@ final openclDevicesProvider = FutureProvider<List<OpenCLDevice>>((ref) async {
     );
 
     if (result.exitCode != 0) {
-      print('Error getting OpenCL devices: ${result.stderr}');
       return [];
     }
 
     return OpenCLDevice.parseDevices(result.stdout as String);
   } catch (e) {
-    print('Error running xMiner info command: $e');
     return [];
   }
 });

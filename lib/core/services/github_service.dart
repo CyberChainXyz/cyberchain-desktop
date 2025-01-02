@@ -6,7 +6,6 @@ class GithubService {
 
   Future<String?> getLatestVersion(String program) async {
     final url = '$_baseUrl/$program/releases/latest';
-    print('Fetching latest version from: $url');
 
     try {
       final response = await http.get(
@@ -16,24 +15,18 @@ class GithubService {
           'User-Agent': 'CCX-Desktop-App',
         },
       );
-
-      print('Response status code: ${response.statusCode}');
-      print('Response body: ${response.body}');
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         final version = data['tag_name'] as String;
-        print('Latest version for $program: $version');
         return version;
       }
-      print('Failed to get version. Status code: ${response.statusCode}');
     } catch (e) {
-      print('Error getting latest version for $program: $e');
+      // No need to print error here, as it's handled in the catch block
     }
 
     try {
       final url = '$_baseUrl/$program/releases';
-      print('Trying to get version from all releases: $url');
       final response = await http.get(
         Uri.parse(url),
         headers: {
@@ -42,19 +35,15 @@ class GithubService {
         },
       );
 
-      print('Response status code: ${response.statusCode}');
       if (response.statusCode == 200) {
         final List<dynamic> releases = jsonDecode(response.body);
         if (releases.isNotEmpty) {
           final version = releases[0]['tag_name'] as String;
-          print('Latest version from all releases for $program: $version');
           return version;
         }
       }
-      print(
-          'Failed to get version from all releases. Status code: ${response.statusCode}');
     } catch (e) {
-      print('Error getting all releases for $program: $e');
+      // No need to print error here, as it's handled in the catch block
     }
     return null;
   }

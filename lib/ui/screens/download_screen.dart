@@ -22,17 +22,14 @@ class _DownloadScreenState extends ConsumerState<DownloadScreen> {
 
   Future<void> _startDownload() async {
     try {
-      print('Starting download process...');
       final initService = ref.read(initServiceProvider.notifier);
       await initService.downloadPrograms();
-      print('Download process completed successfully');
       if (mounted) {
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (context) => const HomeScreen()),
         );
       }
     } catch (e) {
-      print('Error during download: $e');
       if (mounted) {
         setState(() {
           _error = 'Failed to download required programs: $e';

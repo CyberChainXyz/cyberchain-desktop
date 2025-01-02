@@ -13,14 +13,11 @@ class DownloadService {
     void Function(double)? onProgress,
     String? originalProgramName,
   }) async {
-    print('Starting download for ${program.name} from ${program.downloadUrl}');
-
     final appDir = await getApplicationSupportDirectory();
     final programDir =
         Directory(path.join(appDir.path, originalProgramName ?? program.name));
 
     if (!programDir.existsSync()) {
-      print('Creating directory: ${programDir.path}');
       programDir.createSync(recursive: true);
     }
 
@@ -33,16 +30,11 @@ class DownloadService {
         onReceiveProgress: (received, total) {
           if (total != -1) {
             final progress = received / total;
-            print(
-                'Download progress for ${program.name}: ${(progress * 100).toStringAsFixed(1)}%');
             onProgress
                 ?.call(progress * 0.8); // Use 80% of progress for download
           }
         },
       );
-
-      print('Download completed for ${program.name}, extracting...');
-      print('Program directory: ${programDir.path}');
 
       // Extract the executable from the archive
       final executablePath = await ArchiveUtils.extractExecutable(
@@ -51,15 +43,11 @@ class DownloadService {
         originalProgramName: originalProgramName,
       );
 
-      print('Extraction completed for ${program.name}');
-      onProgress?.call(1.0); // Set progress to 100% after extraction
-
       // Clean up the temporary archive file
       await File(archivePath).delete();
 
       return executablePath;
     } catch (e) {
-      print('Error processing ${program.name}: $e');
       // Clean up the temporary archive file if it exists
       if (await File(archivePath).exists()) {
         await File(archivePath).delete();
