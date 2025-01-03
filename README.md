@@ -1,16 +1,33 @@
-# ccx_desktop
+# CCX Desktop
 
-A new Flutter project.
+CCX Desktop is the official desktop application for [CyberChain](https://cyberchain.xyz), a next-generation blockchain platform. Built with modern technology, it provides an intuitive interface for managing your CyberChain node and mining operations.
 
-## Getting Started
+## Features
 
-This project is a starting point for a Flutter application.
+- 🚀 Modern and intuitive user interface
+- 💻 Cross-platform support (Windows, Linux, macOS coming soon)
+- ⛏️ Automatic management of CyberChain nodes and xMiner mining program
+- 🔄 One-click mining with SOLO and Pool mining support
+- 🌟 100% open source and portable
+- 🛡️ Secure third-party GitHub builds
+- 🔒 Safe and reliable operation
 
-A few resources to get you started if this is your first Flutter project:
+## Download
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+Download the latest version for your platform from our [Releases Page](https://github.com/OpenCyberXyz/ccx-desktop/releases).
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Support
+
+[Join CyberChain Community Discussions](https://github.com/orgs/CyberChainXyz/discussions)
+
+## Screenshots
+
+![Download Screen](screenshots/download.png)
+![Mining Interface](screenshots/mining.png)
+![Node Management](screenshots/node.png)
+![About Screen](screenshots/about.png)
+
+## License
+
+This project is licensed under the terms specified in the [LICENSE](LICENSE) file.
+
