@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/providers/app_state_provider.dart';
 import '../../core/providers/service_providers.dart';
+import '../../core/constants/app_constants.dart';
 import 'home_screen.dart';
 
 class DownloadScreen extends ConsumerStatefulWidget {
@@ -13,35 +14,241 @@ class DownloadScreen extends ConsumerStatefulWidget {
 
 class _DownloadScreenState extends ConsumerState<DownloadScreen> {
   String? _error;
+  Set<String> _downloadingPrograms = {};
+  Map<String, String?> _localVersions = {};
+  Map<String, String?> _latestVersions = {};
+  bool _isChecking = true;
 
   @override
   void initState() {
     super.initState();
-    _startDownload();
+    _checkProgramStatus();
   }
 
-  Future<void> _startDownload() async {
+  Future<void> _checkProgramStatus() async {
+    setState(() {
+      _isChecking = true;
+    });
+
     try {
-      final initService = ref.read(initServiceProvider.notifier);
-      await initService.downloadPrograms();
-      if (mounted) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => const HomeScreen()),
-        );
+      final programInfoService = ref.read(programInfoServiceProvider);
+      final githubService = ref.read(githubServiceProvider);
+
+      final programs = [AppConstants.goCyberchainRepo, AppConstants.xMinerRepo];
+      for (final program in programs) {
+        final info = await programInfoService.getProgramInfo(program);
+        final latestVersion = await githubService.getLatestVersion(program);
+        setState(() {
+          _localVersions[program] = info?.version;
+          _latestVersions[program] = latestVersion;
+        });
       }
     } catch (e) {
       if (mounted) {
         setState(() {
-          _error = 'Failed to download required programs: $e';
+          _error = 'Failed to check program status: $e';
+        });
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isChecking = false;
         });
       }
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
+  Future<void> _downloadProgram(String program) async {
+    setState(() {
+      _downloadingPrograms.add(program);
+      _error = null;
+    });
+
+    try {
+      final updateService = ref.read(updateServiceProvider.notifier);
+      final downloadProgress = ref.read(downloadProgressProvider.notifier);
+
+      downloadProgress.startDownload(program);
+
+      try {
+        await updateService.updateProgram(
+          program,
+          onProgress: (progress) {
+            downloadProgress.updateProgress(program, progress);
+          },
+        );
+      } finally {
+        downloadProgress.finishDownload(program);
+      }
+
+      if (mounted) {
+        // Update local version to latest version since we just downloaded it
+        setState(() {
+          _localVersions[program] = _latestVersions[program];
+          _downloadingPrograms.remove(program);
+        });
+
+        // Only navigate to home screen if all programs are installed
+        final allProgramsInstalled = [
+          AppConstants.goCyberchainRepo,
+          AppConstants.xMinerRepo
+        ].every((p) => _localVersions[p] != null);
+
+        if (allProgramsInstalled) {
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (context) => const HomeScreen()),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _error = 'Failed to download program: $e';
+          _downloadingPrograms.remove(program);
+        });
+      }
+    }
+  }
+
+  Widget _buildVersionInfo(String program) {
+    final localVersion = _localVersions[program];
+    final latestVersion = _latestVersions[program];
+    final isUpToDate = localVersion != null && localVersion == latestVersion;
+    final needsDownload = localVersion == null || localVersion != latestVersion;
+    final isDownloading = _downloadingPrograms.contains(program);
     final downloadProgress = ref.watch(downloadProgressProvider);
 
+    return Card(
+      elevation: 2,
+      child: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              program == AppConstants.goCyberchainRepo
+                  ? 'go-cyberchain'
+                  : 'xMiner',
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Current Version',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: Colors.grey[600],
+                            ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        localVersion ?? 'Not installed',
+                        style: TextStyle(
+                          color: localVersion == null ? Colors.red : null,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  height: 40,
+                  width: 1,
+                  color: Colors.grey[300],
+                  margin: const EdgeInsets.symmetric(horizontal: 16),
+                ),
+                Expanded(
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Latest Version',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodySmall
+                                  ?.copyWith(
+                                    color: Colors.grey[600],
+                                  ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              latestVersion ?? 'Unknown',
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.w500),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      if (_isChecking)
+                        const SizedBox(
+                          height: 24,
+                          width: 24,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                          ),
+                        )
+                      else if (isUpToDate)
+                        const Icon(Icons.check_circle,
+                            color: Colors.green, size: 24)
+                      else if (!isDownloading)
+                        SizedBox(
+                          height: 36,
+                          child: ElevatedButton.icon(
+                            onPressed: needsDownload
+                                ? () => _downloadProgram(program)
+                                : null,
+                            icon: const Icon(Icons.download, size: 18),
+                            label: const Text('Download'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.blue[700],
+                              foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(18),
+                              ),
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 16),
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            if (isDownloading &&
+                downloadProgress.downloading.contains(program)) ...[
+              const SizedBox(height: 16),
+              LinearProgressIndicator(
+                value: downloadProgress.progress[program] ?? 0,
+                backgroundColor: Colors.blue[50],
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.blue[400]!),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                '${((downloadProgress.progress[program] ?? 0) * 100).toStringAsFixed(1)}%',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Colors.grey[600],
+                    ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
     if (_error != null) {
       return Scaffold(
         body: Center(
@@ -51,7 +258,7 @@ class _DownloadScreenState extends ConsumerState<DownloadScreen> {
               const Icon(Icons.error_outline, color: Colors.red, size: 48),
               const SizedBox(height: 16),
               Text(
-                'Download Error',
+                'Error',
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               const SizedBox(height: 8),
@@ -68,9 +275,9 @@ class _DownloadScreenState extends ConsumerState<DownloadScreen> {
                   setState(() {
                     _error = null;
                   });
-                  _startDownload();
+                  _checkProgramStatus();
                 },
-                child: const Text('Retry Download'),
+                child: const Text('Retry'),
               ),
             ],
           ),
@@ -79,49 +286,57 @@ class _DownloadScreenState extends ConsumerState<DownloadScreen> {
     }
 
     return Scaffold(
-      body: Center(
-        child: SizedBox(
-          width: 300,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text(
-                'Downloading Required Programs',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 20),
-              if (downloadProgress.downloading.isNotEmpty) ...[
-                for (final program in downloadProgress.downloading)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(program),
-                            Text(
-                              '${((downloadProgress.progress[program] ?? 0) * 100).toStringAsFixed(1)}%',
-                            ),
-                          ],
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Colors.blue[50]!,
+              Colors.white,
+            ],
+          ),
+        ),
+        child: Center(
+          child: SingleChildScrollView(
+            child: Container(
+              width: 600,
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Image.asset(
+                    'assets/images/logo.png',
+                    width: 120,
+                    height: 120,
+                  ),
+                  const SizedBox(height: 24),
+                  Text(
+                    'Welcome to CyberChain',
+                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.blue[900],
                         ),
-                        const SizedBox(height: 4),
-                        LinearProgressIndicator(
-                          value: downloadProgress.progress[program] ?? 0,
-                        ),
-                      ],
+                  ),
+                  const SizedBox(height: 16),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 32),
+                    child: Text(
+                      'A Layer 1 blockchain with GPU-friendly PoW, built for the next generation of decentralized applications.',
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            color: Colors.grey[700],
+                            height: 1.4,
+                          ),
                     ),
                   ),
-              ] else
-                const Column(
-                  children: [
-                    CircularProgressIndicator(),
-                    SizedBox(height: 16),
-                    Text('Preparing download...'),
-                  ],
-                ),
-            ],
+                  const SizedBox(height: 48),
+                  _buildVersionInfo(AppConstants.goCyberchainRepo),
+                  const SizedBox(height: 16),
+                  _buildVersionInfo(AppConstants.xMinerRepo),
+                ],
+              ),
+            ),
           ),
         ),
       ),
