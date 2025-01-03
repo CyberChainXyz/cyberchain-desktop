@@ -4,9 +4,9 @@ import 'package:package_info_plus/package_info_plus.dart';
 
 class VersionService {
   static const String githubUrl =
-      'https://github.com/CyberChainXyz/ccx-desktop/';
+      'https://github.com/OpenCyberXyz/ccx-desktop/';
   static const String apiUrl =
-      'https://api.github.com/repos/CyberChainXyz/ccx-desktop/releases/latest';
+      'https://api.github.com/repos/OpenCyberXyz/ccx-desktop/releases/latest';
 
   String? _latestReleaseUrl;
 
