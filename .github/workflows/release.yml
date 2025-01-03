@@ -20,14 +20,6 @@ jobs:
             build-path: build/linux/x64/release/bundle
             archive-type: tar
             ext: tar.gz
-          - os: macos-13
-            build-path: build/macos/Build/Products/Release
-            archive-type: tar
-            ext: tar.gz
-          - os: macos-14
-            build-path: build/macos/Build/Products/Release
-            archive-type: tar
-            ext: tar.gz
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
