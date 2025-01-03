@@ -72,11 +72,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ),
                 ),
                 Text(
-                  "2025 - CCX",
+                  "2025-CCX",
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w700,
-                    color: const Color.fromARGB(255, 196, 141, 32),
+                    color: Colors.blue[900],
                   ),
                 ),
                 const SizedBox(height: 8),
