@@ -6,6 +6,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'cyberchain_info_screen.dart';
 import '../views/go_cyberchain_view.dart';
 import '../views/xminer_view.dart';
+import '../../features/chat/views/chat_view.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -104,6 +105,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ),
               NavigationRailDestination(
                 padding: EdgeInsets.symmetric(vertical: 12),
+                icon: Icon(Icons.chat_bubble_outline, size: 28),
+                label: Text('Chat',
+                    style:
+                        TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
+              ),
+              NavigationRailDestination(
+                padding: EdgeInsets.symmetric(vertical: 12),
                 icon: Icon(Icons.info_outline, size: 28),
                 label: Text('About',
                     style:
@@ -173,7 +181,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ? const GoCyberchainView()
                 : _selectedIndex == 1
                     ? const XMinerView()
-                    : const CyberchainInfoScreen(),
+                    : _selectedIndex == 2
+                        ? const ChatView()
+                        : const CyberchainInfoScreen(),
           ),
         ],
       ),
