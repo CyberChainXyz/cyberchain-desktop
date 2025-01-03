@@ -23,9 +23,32 @@ class ArchiveUtils {
     String? originalProgramName,
   }) async {
     final bytes = await File(archivePath).readAsBytes();
-    final Archive archive = archivePath.endsWith('.zip')
-        ? ZipDecoder().decodeBytes(bytes)
-        : TarDecoder().decodeBytes(GZipDecoder().decodeBytes(bytes));
+
+    // Try different decoders until one succeeds
+    Archive? archive;
+    List<String> errors = [];
+
+    // Try GZip/Tar decoder
+    try {
+      archive = TarDecoder().decodeBytes(GZipDecoder().decodeBytes(bytes));
+    } catch (e) {
+      errors.add('GZip/Tar decode failed: $e');
+    }
+
+    // If GZip/Tar failed, try ZIP decoder
+    if (archive == null) {
+      try {
+        archive = ZipDecoder().decodeBytes(bytes);
+      } catch (e) {
+        errors.add('ZIP decode failed: $e');
+      }
+    }
+
+    // If both decoders failed, throw an exception with all error messages
+    if (archive == null) {
+      throw Exception(
+          'Failed to decode archive. Errors:\n${errors.join('\n')}');
+    }
 
     // Get the correct executable name
     final executableName = _getExecutableName(programName);

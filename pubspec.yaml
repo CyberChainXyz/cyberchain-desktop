@@ -41,7 +41,7 @@ dependencies:
   path_provider: ^2.1.5
   shared_preferences: ^2.3.4
   dio: ^5.4.1
-  archive: ^3.4.10
+  archive: ^4.0.2
   package_info_plus: ^8.1.2
   url_launcher: ^6.2.5
   web3dart: ^2.7.3
