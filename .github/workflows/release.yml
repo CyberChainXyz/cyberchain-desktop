@@ -46,10 +46,16 @@ jobs:
       - run: flutter pub get
       - run: flutter build ${{ runner.os == 'macOS' && 'macos' || runner.os == 'Windows' && 'windows' || 'linux' }} --release
       
-      - name: Create release directory and copy files
-        run: |
-          mkdir ccx-desktop-${{ github.ref_name }} && cd ccx-desktop-${{ github.ref_name }}
-          cp -r ../${{ matrix.build-path }}/* ./
+      - name: Create release directory
+        run: mkdir ccx-desktop-${{ github.ref_name }}
+
+      - name: Copy files (Windows/Linux)
+        if: runner.os != 'macOS'
+        run: cp -r ${{ matrix.build-path }}/* ccx-desktop-${{ github.ref_name }}/
+
+      - name: Copy files (macOS)
+        if: runner.os == 'macOS'
+        run: cp -r ${{ matrix.build-path }}/ccx_desktop.app ccx-desktop-${{ github.ref_name }}/
 
       - name: Archive Release
         uses: thedoctor0/zip-release@0.7.6
