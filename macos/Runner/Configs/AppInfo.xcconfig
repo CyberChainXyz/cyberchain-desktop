@@ -8,7 +8,7 @@
 PRODUCT_NAME = ccx_desktop
 
 // The application's bundle identifier
-PRODUCT_BUNDLE_IDENTIFIER = xyz.cyberchain.ccx_desktop
+PRODUCT_BUNDLE_IDENTIFIER = xyz.opencyber.ccxDesktop
 
 // The copyright displayed in application information
-PRODUCT_COPYRIGHT = Copyright © 2025 xyz.cyberchain. All rights reserved.
+PRODUCT_COPYRIGHT = Copyright © 2025 opencyber.xyz. All rights reserved.
