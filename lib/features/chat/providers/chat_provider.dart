@@ -66,6 +66,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
       );
 
       _setupSubscriptions();
+      _monitorConnection();
     } catch (e) {
       if (!mounted) return;
       state = state.copyWith(
@@ -73,6 +74,20 @@ class ChatNotifier extends StateNotifier<ChatState> {
         error: e.toString(),
       );
     }
+  }
+
+  void _monitorConnection() {
+    Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!mounted) {
+        timer.cancel();
+        return;
+      }
+
+      final isConnected = _chatService.isConnected;
+      if (state.isConnected != isConnected) {
+        state = state.copyWith(isConnected: isConnected);
+      }
+    });
   }
 
   void _setupSubscriptions() {
@@ -101,6 +116,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
   void dispose() {
     _messageSubscription?.cancel();
     _initialMessagesSubscription?.cancel();
+    (_chatService as WebSocketChatService).dispose();
     super.dispose();
   }
 

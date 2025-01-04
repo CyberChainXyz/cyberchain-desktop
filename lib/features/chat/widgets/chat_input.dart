@@ -6,11 +6,13 @@ import 'dart:math' as math;
 class ChatInput extends StatefulWidget {
   final Future<void> Function(String) onSendMessage;
   final FocusNode? focusNode;
+  final bool enabled;
 
   const ChatInput({
     super.key,
     required this.onSendMessage,
     this.focusNode,
+    this.enabled = true,
   });
 
   @override
@@ -295,18 +297,22 @@ class _ChatInputState extends State<ChatInput> with WidgetsBindingObserver {
       child: Row(
         children: [
           MouseRegion(
-            onEnter: (_) => _showEmojiPicker(),
+            onEnter: widget.enabled ? (_) => _showEmojiPicker() : null,
             child: IconButton(
               key: _emojiButtonKey,
-              onPressed: () {}, // Empty onPressed as we're using hover
+              onPressed: widget.enabled
+                  ? () {}
+                  : null, // Empty onPressed as we're using hover
               icon: const Icon(Icons.emoji_emotions_outlined),
-              color: const Color(0xFF95A5A6),
+              color: widget.enabled
+                  ? const Color(0xFF95A5A6)
+                  : const Color(0xFFCCCCCC),
             ),
           ),
           Expanded(
             child: Container(
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: widget.enabled ? Colors.white : const Color(0xFFF5F5F5),
                 borderRadius: BorderRadius.circular(24),
                 border: Border.all(
                   color: const Color(0xFFE0E0E0),
@@ -316,27 +322,34 @@ class _ChatInputState extends State<ChatInput> with WidgetsBindingObserver {
               child: TextField(
                 controller: _textController,
                 focusNode: _focusNode,
+                enabled: widget.enabled,
                 onChanged: (text) {
                   setState(() {
                     _canSend = text.trim().isNotEmpty;
                   });
                 },
-                onSubmitted: _handleSubmitted,
-                decoration: const InputDecoration(
-                  hintText: 'Type a message',
+                onSubmitted: widget.enabled ? _handleSubmitted : null,
+                decoration: InputDecoration(
+                  hintText: widget.enabled
+                      ? 'Type a message'
+                      : 'Reconnecting to chat...',
                   hintStyle: TextStyle(
-                    color: Color(0xFF95A5A6),
+                    color: widget.enabled
+                        ? const Color(0xFF95A5A6)
+                        : const Color(0xFFAAAAAA),
                     fontSize: 16,
                   ),
-                  contentPadding: EdgeInsets.symmetric(
+                  contentPadding: const EdgeInsets.symmetric(
                     horizontal: 16,
                     vertical: 10,
                   ),
                   border: InputBorder.none,
                   isDense: true,
                 ),
-                style: const TextStyle(
-                  color: Color(0xFF2C3E50),
+                style: TextStyle(
+                  color: widget.enabled
+                      ? const Color(0xFF2C3E50)
+                      : const Color(0xFF999999),
                   fontSize: 14,
                   fontFamily: 'Inter',
                   fontFamilyFallback: ['Noto Color Emoji'],
@@ -347,12 +360,13 @@ class _ChatInputState extends State<ChatInput> with WidgetsBindingObserver {
             ),
           ),
           IconButton(
-            onPressed:
-                _canSend ? () => _handleSubmitted(_textController.text) : null,
+            onPressed: (widget.enabled && _canSend)
+                ? () => _handleSubmitted(_textController.text)
+                : null,
             icon: const Icon(Icons.send),
-            color: _canSend
+            color: (widget.enabled && _canSend)
                 ? Theme.of(context).colorScheme.primary
-                : const Color(0xFF95A5A6),
+                : const Color(0xFFCCCCCC),
           ),
         ],
       ),

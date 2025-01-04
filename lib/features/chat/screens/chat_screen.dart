@@ -402,6 +402,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
                   ),
                   child: ChatInput(
                     focusNode: _focusNode,
+                    enabled: chatState.isConnected,
                     onSendMessage: (message) async {
                       await ref
                           .read(chatProvider.notifier)

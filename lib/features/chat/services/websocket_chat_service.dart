@@ -12,6 +12,7 @@ class WebSocketChatService implements ChatService {
   static const String _baseUrl = 'http://localhost:8080';
   static const String _wsUrl = 'ws://localhost:8080/ws/chat';
   static const String _userKey = 'chat_user';
+  static const Duration _retryInterval = Duration(seconds: 3);
 
   WebSocketChannel? _channel;
   final _messageController = StreamController<ChatMessage>.broadcast();
@@ -19,7 +20,9 @@ class WebSocketChatService implements ChatService {
       StreamController<List<ChatMessage>>.broadcast();
   ChatUser? _currentUser;
   bool _isConnected = false;
+  Timer? _reconnectTimer;
   final Completer<void> _initCompleter = Completer<void>();
+  bool _isDisposed = false;
 
   WebSocketChatService() {
     _loadSavedUser();
@@ -101,6 +104,10 @@ class WebSocketChatService implements ChatService {
       throw Exception('User not created');
     }
 
+    if (_isConnected) {
+      return;
+    }
+
     developer.log('Connecting to WebSocket with userId: ${_currentUser!.id}');
     try {
       _channel = WebSocketChannel.connect(
@@ -123,28 +130,71 @@ class WebSocketChatService implements ChatService {
         },
         onDone: () {
           developer.log('WebSocket connection closed');
-          _isConnected = false;
+          _handleDisconnection();
         },
         onError: (error) {
           developer.log('WebSocket error: $error', error: error);
-          _isConnected = false;
+          _handleDisconnection();
         },
       );
 
       _isConnected = true;
+      _stopReconnectTimer();
       developer.log('WebSocket connection established');
     } catch (e) {
       developer.log('Error connecting to WebSocket: $e', error: e);
-      _isConnected = false;
+      _handleDisconnection();
       rethrow;
     }
+  }
+
+  void _handleDisconnection() {
+    if (_isDisposed) return;
+
+    _isConnected = false;
+    _channel?.sink.close();
+    _channel = null;
+
+    if (_reconnectTimer == null || !_reconnectTimer!.isActive) {
+      _startReconnectTimer();
+    }
+  }
+
+  void _startReconnectTimer() {
+    _reconnectTimer?.cancel();
+    _reconnectTimer = Timer.periodic(_retryInterval, (timer) async {
+      if (_isConnected || _isDisposed) {
+        _stopReconnectTimer();
+        return;
+      }
+
+      try {
+        await connect();
+      } catch (e) {
+        developer.log('Reconnection attempt failed: $e', error: e);
+      }
+    });
+  }
+
+  void _stopReconnectTimer() {
+    _reconnectTimer?.cancel();
+    _reconnectTimer = null;
   }
 
   @override
   Future<void> disconnect() async {
     developer.log('Disconnecting from WebSocket');
+    _stopReconnectTimer();
     await _channel?.sink.close();
     _isConnected = false;
+  }
+
+  void dispose() {
+    _isDisposed = true;
+    _stopReconnectTimer();
+    disconnect();
+    _messageController.close();
+    _initialMessagesController.close();
   }
 
   @override
