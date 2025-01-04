@@ -109,3 +109,8 @@ flutter:
 
   assets:
     - assets/images/
+
+  fonts:
+    - family: Noto Color Emoji
+      fonts:
+        - asset: assets/fonts/NotoColorEmoji.ttf

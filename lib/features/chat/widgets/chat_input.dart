@@ -265,6 +265,9 @@ class _ChatInputState extends State<ChatInput> {
               child: TextField(
                 controller: _textController,
                 textCapitalization: TextCapitalization.sentences,
+                style: const TextStyle(
+                  fontFamily: 'Noto Color Emoji',
+                ),
                 decoration: InputDecoration(
                   hintText: 'Type a message',
                   border: OutlineInputBorder(

@@ -57,6 +57,7 @@ class MessageBubble extends StatelessWidget {
                   Text(
                     message.content,
                     style: TextStyle(
+                      fontFamily: 'Noto Color Emoji',
                       color: isMe
                           ? Colors.white
                           : Theme.of(context).colorScheme.onSurfaceVariant,
