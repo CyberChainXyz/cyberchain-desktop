@@ -4,7 +4,7 @@ import '../screens/chat_screen.dart';
 import 'dart:math' as math;
 
 class ChatInput extends StatefulWidget {
-  final Function(String) onSendMessage;
+  final Future<void> Function(String) onSendMessage;
   final FocusNode? focusNode;
 
   const ChatInput({
@@ -54,15 +54,32 @@ class _ChatInputState extends State<ChatInput> with WidgetsBindingObserver {
     // Do nothing, let parent handle focus
   }
 
-  void _handleSubmitted(String text) {
+  Future<void> _handleSubmitted(String text) async {
     if (text.trim().isEmpty) return;
-    widget.onSendMessage(text.trim());
-    _textController.clear();
-    setState(() {
-      _canSend = false;
-    });
-    // Maintain focus after sending
-    _focusNode.requestFocus();
+
+    final message = text.trim();
+    try {
+      _textController.clear();
+      setState(() {
+        _canSend = false;
+      });
+      await widget.onSendMessage(message);
+      // Maintain focus after sending
+      _focusNode.requestFocus();
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to send message: ${e.toString()}'),
+          duration: const Duration(seconds: 3),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      // Restore the message in case of error
+      _textController.text = message;
+      setState(() {
+        _canSend = true;
+      });
+    }
   }
 
   void _switchCategory(Category category) {

@@ -159,6 +159,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
       await _chatService.sendMessage(content, type);
     } catch (e) {
       state = state.copyWith(error: e.toString());
+      rethrow;
     }
   }
 }
