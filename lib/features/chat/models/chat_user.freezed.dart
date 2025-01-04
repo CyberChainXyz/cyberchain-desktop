@@ -22,7 +22,6 @@ ChatUser _$ChatUserFromJson(Map<String, dynamic> json) {
 mixin _$ChatUser {
   String get id => throw _privateConstructorUsedError;
   String get name => throw _privateConstructorUsedError;
-  @JsonKey(name: 'avatarId')
   String get avatarId => throw _privateConstructorUsedError;
 
   /// Serializes this ChatUser to a JSON map.
@@ -40,8 +39,7 @@ abstract class $ChatUserCopyWith<$Res> {
   factory $ChatUserCopyWith(ChatUser value, $Res Function(ChatUser) then) =
       _$ChatUserCopyWithImpl<$Res, ChatUser>;
   @useResult
-  $Res call(
-      {String id, String name, @JsonKey(name: 'avatarId') String avatarId});
+  $Res call({String id, String name, String avatarId});
 }
 
 /// @nodoc
@@ -88,8 +86,7 @@ abstract class _$$ChatUserImplCopyWith<$Res>
       __$$ChatUserImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call(
-      {String id, String name, @JsonKey(name: 'avatarId') String avatarId});
+  $Res call({String id, String name, String avatarId});
 }
 
 /// @nodoc
@@ -130,9 +127,7 @@ class __$$ChatUserImplCopyWithImpl<$Res>
 @JsonSerializable()
 class _$ChatUserImpl implements _ChatUser {
   const _$ChatUserImpl(
-      {required this.id,
-      required this.name,
-      @JsonKey(name: 'avatarId') required this.avatarId});
+      {required this.id, required this.name, required this.avatarId});
 
   factory _$ChatUserImpl.fromJson(Map<String, dynamic> json) =>
       _$$ChatUserImplFromJson(json);
@@ -142,7 +137,6 @@ class _$ChatUserImpl implements _ChatUser {
   @override
   final String name;
   @override
-  @JsonKey(name: 'avatarId')
   final String avatarId;
 
   @override
@@ -183,10 +177,9 @@ class _$ChatUserImpl implements _ChatUser {
 
 abstract class _ChatUser implements ChatUser {
   const factory _ChatUser(
-          {required final String id,
-          required final String name,
-          @JsonKey(name: 'avatarId') required final String avatarId}) =
-      _$ChatUserImpl;
+      {required final String id,
+      required final String name,
+      required final String avatarId}) = _$ChatUserImpl;
 
   factory _ChatUser.fromJson(Map<String, dynamic> json) =
       _$ChatUserImpl.fromJson;
@@ -196,7 +189,6 @@ abstract class _ChatUser implements ChatUser {
   @override
   String get name;
   @override
-  @JsonKey(name: 'avatarId')
   String get avatarId;
 
   /// Create a copy of ChatUser

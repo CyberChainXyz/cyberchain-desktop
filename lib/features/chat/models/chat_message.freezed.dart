@@ -27,6 +27,7 @@ mixin _$ChatMessage {
   String get content => throw _privateConstructorUsedError;
   DateTime get timestamp => throw _privateConstructorUsedError;
   MessageType get type => throw _privateConstructorUsedError;
+  int get version => throw _privateConstructorUsedError;
 
   /// Serializes this ChatMessage to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -51,7 +52,8 @@ abstract class $ChatMessageCopyWith<$Res> {
       String senderAvatar,
       String content,
       DateTime timestamp,
-      MessageType type});
+      MessageType type,
+      int version});
 }
 
 /// @nodoc
@@ -76,6 +78,7 @@ class _$ChatMessageCopyWithImpl<$Res, $Val extends ChatMessage>
     Object? content = null,
     Object? timestamp = null,
     Object? type = null,
+    Object? version = null,
   }) {
     return _then(_value.copyWith(
       id: null == id
@@ -106,6 +109,10 @@ class _$ChatMessageCopyWithImpl<$Res, $Val extends ChatMessage>
           ? _value.type
           : type // ignore: cast_nullable_to_non_nullable
               as MessageType,
+      version: null == version
+          ? _value.version
+          : version // ignore: cast_nullable_to_non_nullable
+              as int,
     ) as $Val);
   }
 }
@@ -125,7 +132,8 @@ abstract class _$$ChatMessageImplCopyWith<$Res>
       String senderAvatar,
       String content,
       DateTime timestamp,
-      MessageType type});
+      MessageType type,
+      int version});
 }
 
 /// @nodoc
@@ -148,6 +156,7 @@ class __$$ChatMessageImplCopyWithImpl<$Res>
     Object? content = null,
     Object? timestamp = null,
     Object? type = null,
+    Object? version = null,
   }) {
     return _then(_$ChatMessageImpl(
       id: null == id
@@ -178,6 +187,10 @@ class __$$ChatMessageImplCopyWithImpl<$Res>
           ? _value.type
           : type // ignore: cast_nullable_to_non_nullable
               as MessageType,
+      version: null == version
+          ? _value.version
+          : version // ignore: cast_nullable_to_non_nullable
+              as int,
     ));
   }
 }
@@ -192,7 +205,8 @@ class _$ChatMessageImpl implements _ChatMessage {
       required this.senderAvatar,
       required this.content,
       required this.timestamp,
-      this.type = MessageType.text});
+      this.type = MessageType.text,
+      this.version = 1});
 
   factory _$ChatMessageImpl.fromJson(Map<String, dynamic> json) =>
       _$$ChatMessageImplFromJson(json);
@@ -212,10 +226,13 @@ class _$ChatMessageImpl implements _ChatMessage {
   @override
   @JsonKey()
   final MessageType type;
+  @override
+  @JsonKey()
+  final int version;
 
   @override
   String toString() {
-    return 'ChatMessage(id: $id, senderId: $senderId, senderName: $senderName, senderAvatar: $senderAvatar, content: $content, timestamp: $timestamp, type: $type)';
+    return 'ChatMessage(id: $id, senderId: $senderId, senderName: $senderName, senderAvatar: $senderAvatar, content: $content, timestamp: $timestamp, type: $type, version: $version)';
   }
 
   @override
@@ -233,13 +250,14 @@ class _$ChatMessageImpl implements _ChatMessage {
             (identical(other.content, content) || other.content == content) &&
             (identical(other.timestamp, timestamp) ||
                 other.timestamp == timestamp) &&
-            (identical(other.type, type) || other.type == type));
+            (identical(other.type, type) || other.type == type) &&
+            (identical(other.version, version) || other.version == version));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(runtimeType, id, senderId, senderName,
-      senderAvatar, content, timestamp, type);
+      senderAvatar, content, timestamp, type, version);
 
   /// Create a copy of ChatMessage
   /// with the given fields replaced by the non-null parameter values.
@@ -265,7 +283,8 @@ abstract class _ChatMessage implements ChatMessage {
       required final String senderAvatar,
       required final String content,
       required final DateTime timestamp,
-      final MessageType type}) = _$ChatMessageImpl;
+      final MessageType type,
+      final int version}) = _$ChatMessageImpl;
 
   factory _ChatMessage.fromJson(Map<String, dynamic> json) =
       _$ChatMessageImpl.fromJson;
@@ -284,6 +303,8 @@ abstract class _ChatMessage implements ChatMessage {
   DateTime get timestamp;
   @override
   MessageType get type;
+  @override
+  int get version;
 
   /// Create a copy of ChatMessage
   /// with the given fields replaced by the non-null parameter values.

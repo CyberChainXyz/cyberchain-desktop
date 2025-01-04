@@ -172,7 +172,7 @@ class __$$ChatStateImplCopyWithImpl<$Res>
 class _$ChatStateImpl implements _ChatState {
   const _$ChatStateImpl(
       {this.isConnected = false,
-      this.isLoading = false,
+      this.isLoading = true,
       final List<ChatMessage> messages = const [],
       this.currentUser,
       this.error})
