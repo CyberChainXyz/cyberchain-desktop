@@ -177,13 +177,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ),
           const VerticalDivider(thickness: 1, width: 1),
           Expanded(
-            child: _selectedIndex == 0
-                ? const GoCyberchainView()
-                : _selectedIndex == 1
-                    ? const XMinerView()
-                    : _selectedIndex == 2
-                        ? const ChatView()
-                        : const CyberchainInfoScreen(),
+            child: IndexedStack(
+              index: _selectedIndex,
+              children: const [
+                GoCyberchainView(),
+                XMinerView(),
+                ChatView(),
+                CyberchainInfoScreen(),
+              ],
+            ),
           ),
         ],
       ),

@@ -13,7 +13,6 @@ class ChatScreen extends ConsumerStatefulWidget {
 
 class _ChatScreenState extends ConsumerState<ChatScreen> {
   final _scrollController = ScrollController();
-  bool _showEmojiPicker = false;
 
   @override
   void initState() {
