@@ -15,18 +15,44 @@ class ChatInput extends StatefulWidget {
   State<ChatInput> createState() => _ChatInputState();
 }
 
-class _ChatInputState extends State<ChatInput> {
+class _ChatInputState extends State<ChatInput> with WidgetsBindingObserver {
   final _textController = TextEditingController();
+  final _focusNode = FocusNode();
   bool _canSend = false;
   OverlayEntry? _overlayEntry;
   final _emojiButtonKey = GlobalKey();
   Category _currentCategory = Category.SMILEYS;
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    // Request focus when mounted
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _focusNode.requestFocus();
+    });
+  }
+
+  @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _hideEmojiPicker();
     _textController.dispose();
+    _focusNode.dispose();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _focusNode.requestFocus();
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _focusNode.requestFocus();
   }
 
   void _handleSubmitted(String text) {
@@ -36,6 +62,8 @@ class _ChatInputState extends State<ChatInput> {
     setState(() {
       _canSend = false;
     });
+    // Maintain focus after sending
+    _focusNode.requestFocus();
   }
 
   void _switchCategory(Category category) {
@@ -259,62 +287,74 @@ class _ChatInputState extends State<ChatInput> {
         ],
       ),
       child: SafeArea(
-        child: Row(
-          children: [
-            Expanded(
-              child: TextField(
-                controller: _textController,
-                textCapitalization: TextCapitalization.sentences,
-                style: const TextStyle(
-                  fontFamily: 'Noto Color Emoji',
-                ),
-                decoration: InputDecoration(
-                  hintText: 'Type a message',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(24),
-                    borderSide: BorderSide.none,
+        child: Focus(
+          onFocusChange: (hasFocus) {
+            if (!hasFocus) {
+              Future.delayed(const Duration(milliseconds: 100), () {
+                if (mounted) {
+                  _focusNode.requestFocus();
+                }
+              });
+            }
+          },
+          child: Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: _textController,
+                  focusNode: _focusNode,
+                  textCapitalization: TextCapitalization.sentences,
+                  style: const TextStyle(
+                    fontFamily: 'Noto Color Emoji',
                   ),
-                  filled: true,
-                  fillColor: Theme.of(context).colorScheme.surfaceVariant,
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
-                  ),
-                  prefixIcon: MouseRegion(
-                    onEnter: (_) => _showEmojiPicker(),
-                    child: IconButton(
-                      key: _emojiButtonKey,
-                      icon: Icon(
-                        Icons.emoji_emotions_outlined,
-                        color: Theme.of(context).colorScheme.primary,
+                  decoration: InputDecoration(
+                    hintText: 'Type a message',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(24),
+                      borderSide: BorderSide.none,
+                    ),
+                    filled: true,
+                    fillColor: Theme.of(context).colorScheme.surfaceVariant,
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
+                    prefixIcon: MouseRegion(
+                      onEnter: (_) => _showEmojiPicker(),
+                      child: IconButton(
+                        key: _emojiButtonKey,
+                        icon: Icon(
+                          Icons.emoji_emotions_outlined,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                        onPressed: () {}, // We don't need onPressed anymore
                       ),
-                      onPressed: () {}, // We don't need onPressed anymore
+                    ),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        Icons.send,
+                        color: _canSend
+                            ? Theme.of(context).colorScheme.primary
+                            : Theme.of(context)
+                                .colorScheme
+                                .onSurface
+                                .withOpacity(0.38),
+                      ),
+                      onPressed: _canSend
+                          ? () => _handleSubmitted(_textController.text)
+                          : null,
                     ),
                   ),
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      Icons.send,
-                      color: _canSend
-                          ? Theme.of(context).colorScheme.primary
-                          : Theme.of(context)
-                              .colorScheme
-                              .onSurface
-                              .withOpacity(0.38),
-                    ),
-                    onPressed: _canSend
-                        ? () => _handleSubmitted(_textController.text)
-                        : null,
-                  ),
+                  onChanged: (text) {
+                    setState(() {
+                      _canSend = text.trim().isNotEmpty;
+                    });
+                  },
+                  onSubmitted: _handleSubmitted,
                 ),
-                onChanged: (text) {
-                  setState(() {
-                    _canSend = text.trim().isNotEmpty;
-                  });
-                },
-                onSubmitted: _handleSubmitted,
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
