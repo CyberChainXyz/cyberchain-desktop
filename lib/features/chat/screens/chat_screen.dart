@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import '../providers/chat_provider.dart';
-import '../models/chat_message.dart';
 import '../widgets/message_bubble.dart';
 import '../widgets/chat_input.dart';
 
@@ -81,27 +79,10 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                     },
                   ),
           ),
-          if (_showEmojiPicker)
-            SizedBox(
-              height: 250,
-              child: EmojiPicker(
-                onEmojiSelected: (category, emoji) {
-                  ref
-                      .read(chatProvider.notifier)
-                      .sendMessage(emoji.emoji, type: MessageType.emoji);
-                },
-              ),
-            ),
           ChatInput(
             onSendMessage: (message) {
               ref.read(chatProvider.notifier).sendMessage(message);
             },
-            onEmojiTap: () {
-              setState(() {
-                _showEmojiPicker = !_showEmojiPicker;
-              });
-            },
-            showEmojiPicker: _showEmojiPicker,
           ),
         ],
       ),
