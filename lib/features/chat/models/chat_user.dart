@@ -7,8 +7,9 @@ part 'chat_user.g.dart';
 class ChatUser with _$ChatUser {
   const factory ChatUser({
     required String id,
-    required String name,
-    required String avatarId,
+    required String username,
+    required String avatar,
+    @JsonKey(name: 'secret_key') required String secretKey,
   }) = _ChatUser;
 
   factory ChatUser.fromJson(Map<String, dynamic> json) =>

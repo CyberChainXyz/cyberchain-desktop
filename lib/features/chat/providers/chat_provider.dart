@@ -120,11 +120,11 @@ class ChatNotifier extends StateNotifier<ChatState> {
     super.dispose();
   }
 
-  Future<void> createUser(String name, String avatarId) async {
+  Future<void> createUser(String username, String avatar) async {
     if (!mounted) return;
     try {
       state = state.copyWith(isLoading: true, error: null);
-      final user = await _chatService.createUser(name, avatarId);
+      final user = await _chatService.createUser(username, avatar);
       if (!mounted) return;
       state = state.copyWith(
         currentUser: user,

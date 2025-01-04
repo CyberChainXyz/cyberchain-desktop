@@ -68,11 +68,11 @@ class WebSocketChatService implements ChatService {
     developer.log('Creating user: $name with avatarId: $avatarId');
     try {
       final response = await http.post(
-        Uri.parse('$_baseUrl/api/chat/users'),
+        Uri.parse('$_baseUrl/api/users'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
-          'name': name,
-          'avatarId': avatarId,
+          'username': name,
+          'avatar': avatarId,
         }),
       );
 

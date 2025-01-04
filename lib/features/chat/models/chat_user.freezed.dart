@@ -21,8 +21,10 @@ ChatUser _$ChatUserFromJson(Map<String, dynamic> json) {
 /// @nodoc
 mixin _$ChatUser {
   String get id => throw _privateConstructorUsedError;
-  String get name => throw _privateConstructorUsedError;
-  String get avatarId => throw _privateConstructorUsedError;
+  String get username => throw _privateConstructorUsedError;
+  String get avatar => throw _privateConstructorUsedError;
+  @JsonKey(name: 'secret_key')
+  String get secretKey => throw _privateConstructorUsedError;
 
   /// Serializes this ChatUser to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -39,7 +41,11 @@ abstract class $ChatUserCopyWith<$Res> {
   factory $ChatUserCopyWith(ChatUser value, $Res Function(ChatUser) then) =
       _$ChatUserCopyWithImpl<$Res, ChatUser>;
   @useResult
-  $Res call({String id, String name, String avatarId});
+  $Res call(
+      {String id,
+      String username,
+      String avatar,
+      @JsonKey(name: 'secret_key') String secretKey});
 }
 
 /// @nodoc
@@ -58,21 +64,26 @@ class _$ChatUserCopyWithImpl<$Res, $Val extends ChatUser>
   @override
   $Res call({
     Object? id = null,
-    Object? name = null,
-    Object? avatarId = null,
+    Object? username = null,
+    Object? avatar = null,
+    Object? secretKey = null,
   }) {
     return _then(_value.copyWith(
       id: null == id
           ? _value.id
           : id // ignore: cast_nullable_to_non_nullable
               as String,
-      name: null == name
-          ? _value.name
-          : name // ignore: cast_nullable_to_non_nullable
+      username: null == username
+          ? _value.username
+          : username // ignore: cast_nullable_to_non_nullable
               as String,
-      avatarId: null == avatarId
-          ? _value.avatarId
-          : avatarId // ignore: cast_nullable_to_non_nullable
+      avatar: null == avatar
+          ? _value.avatar
+          : avatar // ignore: cast_nullable_to_non_nullable
+              as String,
+      secretKey: null == secretKey
+          ? _value.secretKey
+          : secretKey // ignore: cast_nullable_to_non_nullable
               as String,
     ) as $Val);
   }
@@ -86,7 +97,11 @@ abstract class _$$ChatUserImplCopyWith<$Res>
       __$$ChatUserImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({String id, String name, String avatarId});
+  $Res call(
+      {String id,
+      String username,
+      String avatar,
+      @JsonKey(name: 'secret_key') String secretKey});
 }
 
 /// @nodoc
@@ -103,21 +118,26 @@ class __$$ChatUserImplCopyWithImpl<$Res>
   @override
   $Res call({
     Object? id = null,
-    Object? name = null,
-    Object? avatarId = null,
+    Object? username = null,
+    Object? avatar = null,
+    Object? secretKey = null,
   }) {
     return _then(_$ChatUserImpl(
       id: null == id
           ? _value.id
           : id // ignore: cast_nullable_to_non_nullable
               as String,
-      name: null == name
-          ? _value.name
-          : name // ignore: cast_nullable_to_non_nullable
+      username: null == username
+          ? _value.username
+          : username // ignore: cast_nullable_to_non_nullable
               as String,
-      avatarId: null == avatarId
-          ? _value.avatarId
-          : avatarId // ignore: cast_nullable_to_non_nullable
+      avatar: null == avatar
+          ? _value.avatar
+          : avatar // ignore: cast_nullable_to_non_nullable
+              as String,
+      secretKey: null == secretKey
+          ? _value.secretKey
+          : secretKey // ignore: cast_nullable_to_non_nullable
               as String,
     ));
   }
@@ -127,7 +147,10 @@ class __$$ChatUserImplCopyWithImpl<$Res>
 @JsonSerializable()
 class _$ChatUserImpl implements _ChatUser {
   const _$ChatUserImpl(
-      {required this.id, required this.name, required this.avatarId});
+      {required this.id,
+      required this.username,
+      required this.avatar,
+      @JsonKey(name: 'secret_key') required this.secretKey});
 
   factory _$ChatUserImpl.fromJson(Map<String, dynamic> json) =>
       _$$ChatUserImplFromJson(json);
@@ -135,13 +158,16 @@ class _$ChatUserImpl implements _ChatUser {
   @override
   final String id;
   @override
-  final String name;
+  final String username;
   @override
-  final String avatarId;
+  final String avatar;
+  @override
+  @JsonKey(name: 'secret_key')
+  final String secretKey;
 
   @override
   String toString() {
-    return 'ChatUser(id: $id, name: $name, avatarId: $avatarId)';
+    return 'ChatUser(id: $id, username: $username, avatar: $avatar, secretKey: $secretKey)';
   }
 
   @override
@@ -150,14 +176,16 @@ class _$ChatUserImpl implements _ChatUser {
         (other.runtimeType == runtimeType &&
             other is _$ChatUserImpl &&
             (identical(other.id, id) || other.id == id) &&
-            (identical(other.name, name) || other.name == name) &&
-            (identical(other.avatarId, avatarId) ||
-                other.avatarId == avatarId));
+            (identical(other.username, username) ||
+                other.username == username) &&
+            (identical(other.avatar, avatar) || other.avatar == avatar) &&
+            (identical(other.secretKey, secretKey) ||
+                other.secretKey == secretKey));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, id, name, avatarId);
+  int get hashCode => Object.hash(runtimeType, id, username, avatar, secretKey);
 
   /// Create a copy of ChatUser
   /// with the given fields replaced by the non-null parameter values.
@@ -177,9 +205,11 @@ class _$ChatUserImpl implements _ChatUser {
 
 abstract class _ChatUser implements ChatUser {
   const factory _ChatUser(
-      {required final String id,
-      required final String name,
-      required final String avatarId}) = _$ChatUserImpl;
+          {required final String id,
+          required final String username,
+          required final String avatar,
+          @JsonKey(name: 'secret_key') required final String secretKey}) =
+      _$ChatUserImpl;
 
   factory _ChatUser.fromJson(Map<String, dynamic> json) =
       _$ChatUserImpl.fromJson;
@@ -187,9 +217,12 @@ abstract class _ChatUser implements ChatUser {
   @override
   String get id;
   @override
-  String get name;
+  String get username;
   @override
-  String get avatarId;
+  String get avatar;
+  @override
+  @JsonKey(name: 'secret_key')
+  String get secretKey;
 
   /// Create a copy of ChatUser
   /// with the given fields replaced by the non-null parameter values.
