@@ -31,6 +31,7 @@ dependencies:
   flutter:
     sdk: flutter
   collection: ^1.19.0
+  intl: ^0.19.0
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -114,3 +115,4 @@ flutter:
     - family: Noto Color Emoji
       fonts:
         - asset: assets/fonts/NotoColorEmoji.ttf
+        - asset: assets/fonts/InterNormal.ttf

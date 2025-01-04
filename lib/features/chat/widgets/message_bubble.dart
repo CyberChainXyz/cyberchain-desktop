@@ -1,87 +1,133 @@
 import 'package:flutter/material.dart';
 import '../models/chat_message.dart';
 import '../utils/avatar_generator.dart';
+import 'dart:math' as math;
 
 class MessageBubble extends StatelessWidget {
   final ChatMessage message;
   final bool isMe;
+  final bool showAvatar;
+  final bool showName;
 
   const MessageBubble({
     super.key,
     required this.message,
     required this.isMe,
+    this.showAvatar = true,
+    this.showName = true,
   });
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
+      padding: const EdgeInsets.symmetric(
+        horizontal: 16.0,
+        vertical: 4.0,
+      ),
       child: Row(
         mainAxisAlignment:
             isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          if (!isMe)
-            AvatarGenerator.buildAvatar(message.senderAvatar, size: 32),
+          if (!isMe && showAvatar)
+            AvatarGenerator.buildAvatar(message.senderAvatar, size: 36)
+          else if (!isMe)
+            const SizedBox(width: 36),
           const SizedBox(width: 8),
           Flexible(
-            child: Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: isMe
-                    ? Theme.of(context).colorScheme.primary
-                    : Theme.of(context).colorScheme.surfaceVariant,
-                borderRadius: BorderRadius.only(
-                  topLeft: const Radius.circular(16),
-                  topRight: const Radius.circular(16),
-                  bottomLeft: Radius.circular(isMe ? 16 : 4),
-                  bottomRight: Radius.circular(isMe ? 4 : 16),
-                ),
-              ),
-              child: Column(
-                crossAxisAlignment:
-                    isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
-                children: [
-                  if (!isMe)
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 4),
-                      child: Text(
-                        message.senderName,
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.primary,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12,
-                        ),
+            child: Column(
+              crossAxisAlignment:
+                  isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+              children: [
+                Container(
+                  constraints: BoxConstraints(
+                    maxWidth:
+                        math.min(MediaQuery.of(context).size.width * 0.75, 500),
+                  ),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.only(
+                      topLeft: const Radius.circular(16),
+                      topRight: const Radius.circular(16),
+                      bottomLeft: Radius.circular(isMe || !showAvatar ? 16 : 4),
+                      bottomRight: Radius.circular(isMe && showAvatar ? 4 : 16),
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.03),
+                        blurRadius: 3,
+                        offset: const Offset(0, 1),
                       ),
-                    ),
-                  Text(
-                    message.content,
-                    style: TextStyle(
-                      fontFamily: 'Noto Color Emoji',
-                      color: isMe
-                          ? Colors.white
-                          : Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
+                    ],
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    _formatTime(message.timestamp),
-                    style: TextStyle(
-                      fontSize: 10,
-                      color: isMe
-                          ? Colors.white.withOpacity(0.7)
-                          : Theme.of(context)
-                              .colorScheme
-                              .onSurfaceVariant
-                              .withOpacity(0.7),
-                    ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (!isMe && showName)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 4),
+                          child: Text(
+                            message.senderName,
+                            style: const TextStyle(
+                              fontFamily: 'Inter',
+                              color: Color(0xFF2196F3),
+                              fontWeight: FontWeight.w500,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Flexible(
+                            child: SelectableText(
+                              message.content,
+                              style: const TextStyle(
+                                fontFamily: 'Inter',
+                                height: 1.4,
+                                color: Color(0xFF2D3843),
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                                fontFamilyFallback: ['Noto Color Emoji'],
+                              ),
+                              // Enable text selection on desktop
+                              enableInteractiveSelection: true,
+                              // Optional: customize selection controls
+                              toolbarOptions: const ToolbarOptions(
+                                copy: true,
+                                selectAll: true,
+                                cut: false,
+                                paste: false,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 1),
+                            child: Text(
+                              _formatTime(message.timestamp),
+                              style: const TextStyle(
+                                fontFamily: 'Inter',
+                                fontSize: 11,
+                                color: Color(0xFF8696A9),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
           const SizedBox(width: 8),
-          if (isMe) AvatarGenerator.buildAvatar(message.senderAvatar, size: 32),
+          if (!isMe) const SizedBox(width: 36),
         ],
       ),
     );

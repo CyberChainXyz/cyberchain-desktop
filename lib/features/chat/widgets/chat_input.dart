@@ -5,10 +5,12 @@ import 'dart:math' as math;
 
 class ChatInput extends StatefulWidget {
   final Function(String) onSendMessage;
+  final FocusNode? focusNode;
 
   const ChatInput({
     super.key,
     required this.onSendMessage,
+    this.focusNode,
   });
 
   @override
@@ -17,7 +19,7 @@ class ChatInput extends StatefulWidget {
 
 class _ChatInputState extends State<ChatInput> with WidgetsBindingObserver {
   final _textController = TextEditingController();
-  final _focusNode = FocusNode();
+  late final FocusNode _focusNode;
   bool _canSend = false;
   OverlayEntry? _overlayEntry;
   final _emojiButtonKey = GlobalKey();
@@ -26,11 +28,8 @@ class _ChatInputState extends State<ChatInput> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
+    _focusNode = widget.focusNode ?? FocusNode();
     WidgetsBinding.instance.addObserver(this);
-    // Request focus when mounted
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _focusNode.requestFocus();
-    });
   }
 
   @override
@@ -38,21 +37,21 @@ class _ChatInputState extends State<ChatInput> with WidgetsBindingObserver {
     WidgetsBinding.instance.removeObserver(this);
     _hideEmojiPicker();
     _textController.dispose();
-    _focusNode.dispose();
+    if (widget.focusNode == null) {
+      _focusNode.dispose();
+    }
     super.dispose();
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) {
-      _focusNode.requestFocus();
-    }
+    // Do nothing, let parent handle focus
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _focusNode.requestFocus();
+    // Do nothing, let parent handle focus
   }
 
   void _handleSubmitted(String text) {
@@ -252,21 +251,21 @@ class _ChatInputState extends State<ChatInput> with WidgetsBindingObserver {
   IconData _getCategoryIcon(Category category) {
     switch (category) {
       case Category.RECENT:
-        return Icons.history;
+        return Icons.access_time;
       case Category.SMILEYS:
         return Icons.emoji_emotions_outlined;
       case Category.ANIMALS:
-        return Icons.pets_outlined;
+        return Icons.pets;
       case Category.FOODS:
-        return Icons.restaurant_outlined;
+        return Icons.restaurant;
       case Category.TRAVEL:
         return Icons.travel_explore;
       case Category.ACTIVITIES:
-        return Icons.sports_basketball_outlined;
+        return Icons.sports_soccer;
       case Category.OBJECTS:
         return Icons.lightbulb_outline;
       case Category.SYMBOLS:
-        return Icons.tag;
+        return Icons.emoji_symbols;
       case Category.FLAGS:
         return Icons.flag_outlined;
     }
@@ -275,87 +274,70 @@ class _ChatInputState extends State<ChatInput> with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 4,
-            offset: const Offset(0, -2),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Row(
+        children: [
+          MouseRegion(
+            onEnter: (_) => _showEmojiPicker(),
+            child: IconButton(
+              key: _emojiButtonKey,
+              onPressed: () {}, // Empty onPressed as we're using hover
+              icon: const Icon(Icons.emoji_emotions_outlined),
+              color: const Color(0xFF95A5A6),
+            ),
           ),
-        ],
-      ),
-      child: SafeArea(
-        child: Focus(
-          onFocusChange: (hasFocus) {
-            if (!hasFocus) {
-              Future.delayed(const Duration(milliseconds: 100), () {
-                if (mounted) {
-                  _focusNode.requestFocus();
-                }
-              });
-            }
-          },
-          child: Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  controller: _textController,
-                  focusNode: _focusNode,
-                  textCapitalization: TextCapitalization.sentences,
-                  style: const TextStyle(
-                    fontFamily: 'Noto Color Emoji',
-                  ),
-                  decoration: InputDecoration(
-                    hintText: 'Type a message',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(24),
-                      borderSide: BorderSide.none,
-                    ),
-                    filled: true,
-                    fillColor: Theme.of(context).colorScheme.surfaceVariant,
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 8,
-                    ),
-                    prefixIcon: MouseRegion(
-                      onEnter: (_) => _showEmojiPicker(),
-                      child: IconButton(
-                        key: _emojiButtonKey,
-                        icon: Icon(
-                          Icons.emoji_emotions_outlined,
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
-                        onPressed: () {}, // We don't need onPressed anymore
-                      ),
-                    ),
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        Icons.send,
-                        color: _canSend
-                            ? Theme.of(context).colorScheme.primary
-                            : Theme.of(context)
-                                .colorScheme
-                                .onSurface
-                                .withOpacity(0.38),
-                      ),
-                      onPressed: _canSend
-                          ? () => _handleSubmitted(_textController.text)
-                          : null,
-                    ),
-                  ),
-                  onChanged: (text) {
-                    setState(() {
-                      _canSend = text.trim().isNotEmpty;
-                    });
-                  },
-                  onSubmitted: _handleSubmitted,
+          Expanded(
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(
+                  color: const Color(0xFFE0E0E0),
+                  width: 1,
                 ),
               ),
-            ],
+              child: TextField(
+                controller: _textController,
+                focusNode: _focusNode,
+                onChanged: (text) {
+                  setState(() {
+                    _canSend = text.trim().isNotEmpty;
+                  });
+                },
+                onSubmitted: _handleSubmitted,
+                decoration: const InputDecoration(
+                  hintText: 'Type a message',
+                  hintStyle: TextStyle(
+                    color: Color(0xFF95A5A6),
+                    fontSize: 16,
+                  ),
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 10,
+                  ),
+                  border: InputBorder.none,
+                  isDense: true,
+                ),
+                style: const TextStyle(
+                  color: Color(0xFF2C3E50),
+                  fontSize: 14,
+                  fontFamily: 'Inter',
+                  fontFamilyFallback: ['Noto Color Emoji'],
+                ),
+                textInputAction: TextInputAction.send,
+                maxLines: null,
+              ),
+            ),
           ),
-        ),
+          IconButton(
+            onPressed:
+                _canSend ? () => _handleSubmitted(_textController.text) : null,
+            icon: const Icon(Icons.send),
+            color: _canSend
+                ? Theme.of(context).colorScheme.primary
+                : const Color(0xFF95A5A6),
+          ),
+        ],
       ),
     );
   }
