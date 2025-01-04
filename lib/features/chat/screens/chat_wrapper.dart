@@ -32,8 +32,8 @@ class _ChatWrapperState extends ConsumerState<ChatWrapper> {
         Navigator(
           key: _navigatorKey,
           onGenerateRoute: (settings) {
-            // If we have a user and are connected, show chat screen
-            if (chatState.currentUser != null && chatState.isConnected) {
+            // Only check for user existence, not connection state
+            if (chatState.currentUser != null) {
               return PageRouteBuilder(
                 pageBuilder: (context, animation, secondaryAnimation) =>
                     const ChatScreen(),
@@ -41,7 +41,7 @@ class _ChatWrapperState extends ConsumerState<ChatWrapper> {
               );
             }
 
-            // Otherwise show setup screen
+            // Show setup screen only when no user exists
             return PageRouteBuilder(
               pageBuilder: (context, animation, secondaryAnimation) =>
                   const UserSetupScreen(),
