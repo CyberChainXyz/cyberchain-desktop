@@ -25,6 +25,7 @@ Download the latest version for your platform from our [Releases Page](https://g
 ![Download Screen](screenshots/download.png)
 ![Mining Interface](screenshots/mining.png)
 ![Node Management](screenshots/node.png)
+![Anonymous Chat](screenshots/chat.png)
 ![About Screen](screenshots/about.png)
 
 ## License
