@@ -5,7 +5,9 @@ import '../widgets/message_bubble.dart';
 import '../widgets/chat_input.dart';
 import '../widgets/date_separator.dart';
 import '../models/chat_message.dart';
+import '../models/chat_channel.dart';
 import 'dart:math' as math;
+import 'package:url_launcher/url_launcher.dart';
 
 class HexagonPainter extends CustomPainter {
   final Color color;
@@ -266,6 +268,99 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
     );
   }
 
+  void _showChannelSelectionDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Row(
+          children: [
+            Icon(
+              Icons.language,
+              size: 24,
+              color: Color(0xFF2196F3),
+            ),
+            const SizedBox(width: 8),
+            Text(
+              'Select Language Channel',
+              style: TextStyle(
+                fontFamily: 'Inter',
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF2D3843),
+              ),
+            ),
+          ],
+        ),
+        contentPadding: const EdgeInsets.fromLTRB(8, 20, 8, 24),
+        content: SizedBox(
+          width: 300,
+          child: Consumer(
+            builder: (context, ref, _) {
+              final chatState = ref.watch(chatProvider);
+              return ListView.builder(
+                shrinkWrap: true,
+                itemCount: chatState.channels.length,
+                itemBuilder: (context, index) {
+                  final channel = chatState.channels[index];
+                  final isSelected = channel.id == chatState.currentChannel?.id;
+                  return Material(
+                    color: Colors.transparent,
+                    child: ListTile(
+                      dense: true,
+                      onTap: () {
+                        ref.read(chatProvider.notifier).switchChannel(channel);
+                        Navigator.of(context).pop();
+                      },
+                      selected: isSelected,
+                      selectedTileColor: Color(0xFF2196F3).withOpacity(0.08),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      title: Text(
+                        channel.name,
+                        style: TextStyle(
+                          fontFamily: 'Inter',
+                          fontFamilyFallback: ['Noto Color Emoji'],
+                          fontSize: 15,
+                          fontWeight:
+                              isSelected ? FontWeight.w600 : FontWeight.w400,
+                          color: isSelected
+                              ? Color(0xFF2196F3)
+                              : Color(0xFF2D3843),
+                        ),
+                      ),
+                      leading: isSelected
+                          ? Icon(
+                              Icons.check_circle,
+                              color: Color(0xFF2196F3),
+                              size: 20,
+                            )
+                          : SizedBox(width: 20),
+                    ),
+                  );
+                },
+              );
+            },
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(
+              'Cancel',
+              style: TextStyle(
+                fontFamily: 'Inter',
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: Color(0xFF95A5A6),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final chatState = ref.watch(chatProvider);
@@ -282,39 +377,92 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
       appBar: AppBar(
         backgroundColor: Colors.white,
         automaticallyImplyLeading: false,
-        title: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: _showRulesDialog,
-            borderRadius: BorderRadius.circular(4),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.info_outline,
-                    size: 16,
-                    color: Color(0xFF95A5A6),
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Click to view chat rules and information',
-                    style: TextStyle(
-                      fontFamily: 'Inter',
-                      fontSize: 13,
-                      color: Color(0xFF95A5A6),
-                      fontWeight: FontWeight.w400,
-                    ),
-                  ),
-                ],
+        title: Row(
+          children: [
+            Text(
+              chatState.currentChannel?.name ?? '',
+              style: const TextStyle(
+                fontFamily: 'Inter',
+                fontFamilyFallback: ['Noto Color Emoji'],
+                fontSize: 14,
+                color: Color(0xFF2D3843),
               ),
             ),
-          ),
+            if (!chatState.isConnected)
+              Padding(
+                padding: const EdgeInsets.only(left: 8),
+                child: SizedBox(
+                  width: 14,
+                  height: 14,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      Theme.of(context).colorScheme.error,
+                    ),
+                  ),
+                ),
+              ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: _showRulesDialog,
+                  borderRadius: BorderRadius.circular(4),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.info_outline,
+                        size: 16,
+                        color: Color(0xFF95A5A6),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Click to view chat rules',
+                        style: TextStyle(
+                          fontFamily: 'Inter',
+                          fontSize: 13,
+                          color: Color(0xFF95A5A6),
+                          fontWeight: FontWeight.w400,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
         centerTitle: false,
         elevation: 1,
         toolbarHeight: 48,
+        actions: [
+          IconButton(
+            icon: const Icon(
+              Icons.language,
+              size: 20,
+              color: Color(0xFF95A5A6),
+            ),
+            onPressed: () => _showChannelSelectionDialog(),
+            tooltip: 'Select Language Channel',
+          ),
+          IconButton(
+            icon: const Icon(
+              Icons.help_outline,
+              size: 20,
+              color: Color(0xFF95A5A6),
+            ),
+            onPressed: () {
+              launchUrl(
+                Uri.parse('https://github.com/orgs/CyberChainXyz/discussions'),
+                mode: LaunchMode.externalApplication,
+              );
+            },
+            tooltip: 'Community Discussions',
+          ),
+          const SizedBox(width: 8),
+        ],
       ),
       body: Container(
         decoration: const BoxDecoration(

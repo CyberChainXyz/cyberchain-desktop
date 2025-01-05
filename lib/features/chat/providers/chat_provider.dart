@@ -3,7 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import '../models/chat_message.dart';
 import '../models/chat_user.dart';
+import '../models/chat_channel.dart';
 import '../services/websocket_chat_service.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 part 'chat_provider.freezed.dart';
 
@@ -13,6 +16,8 @@ class ChatState with _$ChatState {
     @Default(false) bool isConnected,
     @Default(true) bool isLoading,
     @Default([]) List<ChatMessage> messages,
+    @Default([]) List<ChatChannel> channels,
+    ChatChannel? currentChannel,
     ChatUser? currentUser,
     String? error,
   }) = _ChatState;
@@ -34,6 +39,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
   StreamSubscription<ChatMessage>? _messageSubscription;
   StreamSubscription<List<ChatMessage>>? _initialMessagesSubscription;
   bool _initialized = false;
+  static const String _channelsUrl = 'https://chat.cyberchain.xyz/api/channels';
 
   ChatNotifier(this._chatService)
       : super(ChatState(
@@ -58,6 +64,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
           currentUser: user,
           isLoading: false,
         );
+        await loadChannels();
       } else {
         state = state.copyWith(
           isLoading: false,
@@ -72,6 +79,67 @@ class ChatNotifier extends StateNotifier<ChatState> {
         isLoading: false,
         error: e.toString(),
       );
+    }
+  }
+
+  Future<void> loadChannels() async {
+    try {
+      final response = await http.get(Uri.parse(_channelsUrl));
+      if (response.statusCode != 200) {
+        throw Exception('Failed to load channels');
+      }
+
+      final List<dynamic> channelsJson = jsonDecode(response.body);
+      final channels =
+          channelsJson.map((json) => ChatChannel.fromJson(json)).toList();
+
+      if (!mounted) return;
+      state = state.copyWith(
+        channels: channels,
+        currentChannel: state.currentChannel ?? channels.first,
+      );
+
+      // If we have a current user but no connection, connect to the default channel
+      if (state.currentUser != null && !state.isConnected) {
+        await switchChannel(state.currentChannel!);
+      }
+    } catch (e) {
+      if (!mounted) return;
+      state = state.copyWith(error: e.toString());
+    }
+  }
+
+  Future<void> switchChannel(ChatChannel channel) async {
+    if (!mounted) return;
+    try {
+      state = state.copyWith(error: null);
+
+      // Disconnect from current channel if connected
+      if (state.isConnected) {
+        await disconnect();
+      }
+
+      // Update current channel
+      state = state.copyWith(
+        currentChannel: channel,
+        messages: [], // Clear messages when switching channels
+      );
+
+      // Connect to new channel
+      await _chatService.connect(channelId: channel.id);
+
+      if (!mounted) return;
+      state = state.copyWith(
+        isConnected: true,
+        error: null,
+      );
+    } catch (e) {
+      if (!mounted) return;
+      state = state.copyWith(
+        isConnected: false,
+        error: e.toString(),
+      );
+      rethrow;
     }
   }
 
@@ -128,6 +196,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
       state = state.copyWith(
         currentUser: user,
       );
+      await loadChannels();
     } catch (e) {
       if (!mounted) return;
       state = state.copyWith(
@@ -138,10 +207,10 @@ class ChatNotifier extends StateNotifier<ChatState> {
   }
 
   Future<void> connect() async {
-    if (!mounted) return;
+    if (!mounted || state.currentChannel == null) return;
     try {
       state = state.copyWith(error: null);
-      await _chatService.connect();
+      await _chatService.connect(channelId: state.currentChannel!.id);
       if (!mounted) return;
       state = state.copyWith(
         isConnected: true,

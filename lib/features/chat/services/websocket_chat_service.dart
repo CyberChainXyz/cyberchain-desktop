@@ -9,11 +9,14 @@ import '../models/chat_user.dart';
 import 'chat_service.dart';
 
 class WebSocketChatService implements ChatService {
-  static const String _baseUrl = 'http://localhost:8080';
-  static const String _wsUrl =
-      'ws://localhost:8080/ws/2d4c5d200fb43eaacde191b69bb8fb27';
+  static const String _baseUrl = 'https://chat.cyberchain.xyz';
+  static const String _wsUrlTemplate =
+      'wss://chat.cyberchain.xyz/ws/{channel_id}';
   static const String _userKey = 'chat_user';
   static const Duration _retryInterval = Duration(seconds: 3);
+
+  String _getWsUrl(String channelId) =>
+      _wsUrlTemplate.replaceAll('{channel_id}', channelId);
 
   WebSocketChannel? _channel;
   final _messageController = StreamController<ChatMessage>.broadcast();
@@ -24,6 +27,7 @@ class WebSocketChatService implements ChatService {
   Timer? _reconnectTimer;
   final Completer<void> _initCompleter = Completer<void>();
   bool _isDisposed = false;
+  String? _currentChannelId;
 
   WebSocketChatService() {
     _loadSavedUser();
@@ -87,7 +91,7 @@ class WebSocketChatService implements ChatService {
   }
 
   @override
-  Future<void> connect() async {
+  Future<void> connect({required String channelId}) async {
     debugPrint('Start connecting to websocket');
     if (_currentUser == null) {
       debugPrint('User not created');
@@ -99,10 +103,11 @@ class WebSocketChatService implements ChatService {
       return;
     }
 
+    _currentChannelId = channelId;
     debugPrint('Connecting to WebSocket with userId: ${_currentUser!.id}');
     try {
       _channel = WebSocketChannel.connect(
-        Uri.parse(_wsUrl),
+        Uri.parse(_getWsUrl(channelId)),
         protocols: [_currentUser!.id, _currentUser!.secretKey],
       );
 
@@ -163,13 +168,13 @@ class WebSocketChatService implements ChatService {
   void _startReconnectTimer() {
     _reconnectTimer?.cancel();
     _reconnectTimer = Timer.periodic(_retryInterval, (timer) async {
-      if (_isConnected || _isDisposed) {
+      if (_isConnected || _isDisposed || _currentChannelId == null) {
         _stopReconnectTimer();
         return;
       }
 
       try {
-        await connect();
+        await connect(channelId: _currentChannelId!);
       } catch (e) {
         debugPrint('Reconnection attempt failed: $e');
       }
@@ -187,6 +192,7 @@ class WebSocketChatService implements ChatService {
     _stopReconnectTimer();
     await _channel?.sink.close();
     _isConnected = false;
+    _currentChannelId = null;
   }
 
   void dispose() {

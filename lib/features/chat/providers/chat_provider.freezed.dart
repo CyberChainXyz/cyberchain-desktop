@@ -19,6 +19,8 @@ mixin _$ChatState {
   bool get isConnected => throw _privateConstructorUsedError;
   bool get isLoading => throw _privateConstructorUsedError;
   List<ChatMessage> get messages => throw _privateConstructorUsedError;
+  List<ChatChannel> get channels => throw _privateConstructorUsedError;
+  ChatChannel? get currentChannel => throw _privateConstructorUsedError;
   ChatUser? get currentUser => throw _privateConstructorUsedError;
   String? get error => throw _privateConstructorUsedError;
 
@@ -38,9 +40,12 @@ abstract class $ChatStateCopyWith<$Res> {
       {bool isConnected,
       bool isLoading,
       List<ChatMessage> messages,
+      List<ChatChannel> channels,
+      ChatChannel? currentChannel,
       ChatUser? currentUser,
       String? error});
 
+  $ChatChannelCopyWith<$Res>? get currentChannel;
   $ChatUserCopyWith<$Res>? get currentUser;
 }
 
@@ -62,6 +67,8 @@ class _$ChatStateCopyWithImpl<$Res, $Val extends ChatState>
     Object? isConnected = null,
     Object? isLoading = null,
     Object? messages = null,
+    Object? channels = null,
+    Object? currentChannel = freezed,
     Object? currentUser = freezed,
     Object? error = freezed,
   }) {
@@ -78,6 +85,14 @@ class _$ChatStateCopyWithImpl<$Res, $Val extends ChatState>
           ? _value.messages
           : messages // ignore: cast_nullable_to_non_nullable
               as List<ChatMessage>,
+      channels: null == channels
+          ? _value.channels
+          : channels // ignore: cast_nullable_to_non_nullable
+              as List<ChatChannel>,
+      currentChannel: freezed == currentChannel
+          ? _value.currentChannel
+          : currentChannel // ignore: cast_nullable_to_non_nullable
+              as ChatChannel?,
       currentUser: freezed == currentUser
           ? _value.currentUser
           : currentUser // ignore: cast_nullable_to_non_nullable
@@ -87,6 +102,20 @@ class _$ChatStateCopyWithImpl<$Res, $Val extends ChatState>
           : error // ignore: cast_nullable_to_non_nullable
               as String?,
     ) as $Val);
+  }
+
+  /// Create a copy of ChatState
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $ChatChannelCopyWith<$Res>? get currentChannel {
+    if (_value.currentChannel == null) {
+      return null;
+    }
+
+    return $ChatChannelCopyWith<$Res>(_value.currentChannel!, (value) {
+      return _then(_value.copyWith(currentChannel: value) as $Val);
+    });
   }
 
   /// Create a copy of ChatState
@@ -116,9 +145,13 @@ abstract class _$$ChatStateImplCopyWith<$Res>
       {bool isConnected,
       bool isLoading,
       List<ChatMessage> messages,
+      List<ChatChannel> channels,
+      ChatChannel? currentChannel,
       ChatUser? currentUser,
       String? error});
 
+  @override
+  $ChatChannelCopyWith<$Res>? get currentChannel;
   @override
   $ChatUserCopyWith<$Res>? get currentUser;
 }
@@ -139,6 +172,8 @@ class __$$ChatStateImplCopyWithImpl<$Res>
     Object? isConnected = null,
     Object? isLoading = null,
     Object? messages = null,
+    Object? channels = null,
+    Object? currentChannel = freezed,
     Object? currentUser = freezed,
     Object? error = freezed,
   }) {
@@ -155,6 +190,14 @@ class __$$ChatStateImplCopyWithImpl<$Res>
           ? _value._messages
           : messages // ignore: cast_nullable_to_non_nullable
               as List<ChatMessage>,
+      channels: null == channels
+          ? _value._channels
+          : channels // ignore: cast_nullable_to_non_nullable
+              as List<ChatChannel>,
+      currentChannel: freezed == currentChannel
+          ? _value.currentChannel
+          : currentChannel // ignore: cast_nullable_to_non_nullable
+              as ChatChannel?,
       currentUser: freezed == currentUser
           ? _value.currentUser
           : currentUser // ignore: cast_nullable_to_non_nullable
@@ -174,9 +217,12 @@ class _$ChatStateImpl implements _ChatState {
       {this.isConnected = false,
       this.isLoading = true,
       final List<ChatMessage> messages = const [],
+      final List<ChatChannel> channels = const [],
+      this.currentChannel,
       this.currentUser,
       this.error})
-      : _messages = messages;
+      : _messages = messages,
+        _channels = channels;
 
   @override
   @JsonKey()
@@ -193,6 +239,17 @@ class _$ChatStateImpl implements _ChatState {
     return EqualUnmodifiableListView(_messages);
   }
 
+  final List<ChatChannel> _channels;
+  @override
+  @JsonKey()
+  List<ChatChannel> get channels {
+    if (_channels is EqualUnmodifiableListView) return _channels;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_channels);
+  }
+
+  @override
+  final ChatChannel? currentChannel;
   @override
   final ChatUser? currentUser;
   @override
@@ -200,7 +257,7 @@ class _$ChatStateImpl implements _ChatState {
 
   @override
   String toString() {
-    return 'ChatState(isConnected: $isConnected, isLoading: $isLoading, messages: $messages, currentUser: $currentUser, error: $error)';
+    return 'ChatState(isConnected: $isConnected, isLoading: $isLoading, messages: $messages, channels: $channels, currentChannel: $currentChannel, currentUser: $currentUser, error: $error)';
   }
 
   @override
@@ -213,14 +270,24 @@ class _$ChatStateImpl implements _ChatState {
             (identical(other.isLoading, isLoading) ||
                 other.isLoading == isLoading) &&
             const DeepCollectionEquality().equals(other._messages, _messages) &&
+            const DeepCollectionEquality().equals(other._channels, _channels) &&
+            (identical(other.currentChannel, currentChannel) ||
+                other.currentChannel == currentChannel) &&
             (identical(other.currentUser, currentUser) ||
                 other.currentUser == currentUser) &&
             (identical(other.error, error) || other.error == error));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, isConnected, isLoading,
-      const DeepCollectionEquality().hash(_messages), currentUser, error);
+  int get hashCode => Object.hash(
+      runtimeType,
+      isConnected,
+      isLoading,
+      const DeepCollectionEquality().hash(_messages),
+      const DeepCollectionEquality().hash(_channels),
+      currentChannel,
+      currentUser,
+      error);
 
   /// Create a copy of ChatState
   /// with the given fields replaced by the non-null parameter values.
@@ -236,6 +303,8 @@ abstract class _ChatState implements ChatState {
       {final bool isConnected,
       final bool isLoading,
       final List<ChatMessage> messages,
+      final List<ChatChannel> channels,
+      final ChatChannel? currentChannel,
       final ChatUser? currentUser,
       final String? error}) = _$ChatStateImpl;
 
@@ -245,6 +314,10 @@ abstract class _ChatState implements ChatState {
   bool get isLoading;
   @override
   List<ChatMessage> get messages;
+  @override
+  List<ChatChannel> get channels;
+  @override
+  ChatChannel? get currentChannel;
   @override
   ChatUser? get currentUser;
   @override

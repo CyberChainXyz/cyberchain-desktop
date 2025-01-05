@@ -3,7 +3,7 @@ import '../models/chat_user.dart';
 
 abstract class ChatService {
   Future<ChatUser> createUser(String name, String avatarId);
-  Future<void> connect();
+  Future<void> connect({required String channelId});
   Future<void> disconnect();
   Future<void> sendMessage(String content);
   Stream<ChatMessage> get messageStream;
