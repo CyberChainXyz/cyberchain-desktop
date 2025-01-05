@@ -7,6 +7,7 @@ import '../models/chat_channel.dart';
 import '../services/websocket_chat_service.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 
 part 'chat_provider.freezed.dart';
 
@@ -40,6 +41,59 @@ class ChatNotifier extends StateNotifier<ChatState> {
   StreamSubscription<List<ChatMessage>>? _initialMessagesSubscription;
   bool _initialized = false;
   static const String _channelsUrl = 'https://chat.cyberchain.xyz/api/channels';
+  static const bool _useHardcodedChannels = true;
+  static const String _lastChannelIdKey = 'last_channel_id';
+
+  static final List<ChatChannel> _hardcodedChannels = [
+    ChatChannel(
+      id: "de813c0f11d0f1521450ee4389674dda",
+      name: "🇬🇧 English",
+      description: "English",
+      createdAt: DateTime.parse("2025-01-05T17:37:56.011282265Z"),
+    ),
+    ChatChannel(
+      id: "7972861142c885cbb504b15e0a69c5d1",
+      name: "🇨🇳 中文",
+      description: "中文",
+      createdAt: DateTime.parse("2025-01-05T17:38:28.047464787Z"),
+    ),
+    ChatChannel(
+      id: "83a8f8ae4dc57214e75388e23aa5b0c5",
+      name: "🇯🇵 日本語",
+      description: "日本語",
+      createdAt: DateTime.parse("2025-01-05T17:40:18.705806467Z"),
+    ),
+    ChatChannel(
+      id: "30223d83427bcced40f7729cb5d12268",
+      name: "🇰🇷 한국어",
+      description: "한국어",
+      createdAt: DateTime.parse("2025-01-05T17:40:33.485538907Z"),
+    ),
+    ChatChannel(
+      id: "23c2f8fb428d8c9f00b18905c474b201",
+      name: "🇷🇺 Русский",
+      description: "Русский",
+      createdAt: DateTime.parse("2025-01-05T17:41:00.252942044Z"),
+    ),
+    ChatChannel(
+      id: "0d7d717bacd333c0fc1b6de87d3541eb",
+      name: "🇫🇷 Français",
+      description: "Français",
+      createdAt: DateTime.parse("2025-01-05T17:41:31.088885656Z"),
+    ),
+    ChatChannel(
+      id: "f2d5b468c640cb645aaf125eca9bef0b",
+      name: "🇩🇪 Deutsch",
+      description: "Deutsch",
+      createdAt: DateTime.parse("2025-01-05T17:41:52.333074516Z"),
+    ),
+    ChatChannel(
+      id: "7cce01891e8463391101df69391b3ec7",
+      name: "🇪🇸 Español",
+      description: "Español",
+      createdAt: DateTime.parse("2025-01-05T17:39:41.201169849Z"),
+    ),
+  ];
 
   ChatNotifier(this._chatService)
       : super(ChatState(
@@ -64,6 +118,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
           currentUser: user,
           isLoading: false,
         );
+        // Only load channels without connecting
         await loadChannels();
       } else {
         state = state.copyWith(
@@ -84,6 +139,28 @@ class ChatNotifier extends StateNotifier<ChatState> {
 
   Future<void> loadChannels() async {
     try {
+      final prefs = await SharedPreferences.getInstance();
+      final lastChannelId = prefs.getString(_lastChannelIdKey);
+
+      if (_useHardcodedChannels) {
+        if (!mounted) return;
+
+        // Find last used channel or default to first channel
+        ChatChannel? lastChannel;
+        if (lastChannelId != null) {
+          lastChannel = _hardcodedChannels.firstWhere(
+            (c) => c.id == lastChannelId,
+            orElse: () => _hardcodedChannels.first,
+          );
+        }
+
+        state = state.copyWith(
+          channels: _hardcodedChannels,
+          currentChannel: lastChannel ?? _hardcodedChannels.first,
+        );
+        return;
+      }
+
       final response = await http.get(Uri.parse(_channelsUrl));
       if (response.statusCode != 200) {
         throw Exception('Failed to load channels');
@@ -94,15 +171,20 @@ class ChatNotifier extends StateNotifier<ChatState> {
           channelsJson.map((json) => ChatChannel.fromJson(json)).toList();
 
       if (!mounted) return;
+
+      // Find last used channel or default to first channel
+      ChatChannel? lastChannel;
+      if (lastChannelId != null) {
+        lastChannel = channels.firstWhere(
+          (c) => c.id == lastChannelId,
+          orElse: () => channels.first,
+        );
+      }
+
       state = state.copyWith(
         channels: channels,
-        currentChannel: state.currentChannel ?? channels.first,
+        currentChannel: lastChannel ?? channels.first,
       );
-
-      // If we have a current user but no connection, connect to the default channel
-      if (state.currentUser != null && !state.isConnected) {
-        await switchChannel(state.currentChannel!);
-      }
     } catch (e) {
       if (!mounted) return;
       state = state.copyWith(error: e.toString());
@@ -113,6 +195,10 @@ class ChatNotifier extends StateNotifier<ChatState> {
     if (!mounted) return;
     try {
       state = state.copyWith(error: null);
+
+      // Save selected channel ID
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_lastChannelIdKey, channel.id);
 
       // Disconnect from current channel if connected
       if (state.isConnected) {

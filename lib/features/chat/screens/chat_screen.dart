@@ -402,36 +402,35 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
                   ),
                 ),
               ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  onTap: _showRulesDialog,
-                  borderRadius: BorderRadius.circular(4),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.info_outline,
-                        size: 16,
+            const Spacer(),
+            Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: _showRulesDialog,
+                borderRadius: BorderRadius.circular(4),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.info_outline,
+                      size: 16,
+                      color: Color(0xFF95A5A6),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Click to view chat rules',
+                      style: TextStyle(
+                        fontFamily: 'Inter',
+                        fontSize: 13,
                         color: Color(0xFF95A5A6),
+                        fontWeight: FontWeight.w400,
                       ),
-                      const SizedBox(width: 8),
-                      Text(
-                        'Click to view chat rules',
-                        style: TextStyle(
-                          fontFamily: 'Inter',
-                          fontSize: 13,
-                          color: Color(0xFF95A5A6),
-                          fontWeight: FontWeight.w400,
-                        ),
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
             ),
+            const Spacer(),
           ],
         ),
         centerTitle: false,
@@ -484,7 +483,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
                 ),
               ),
             ),
-            if (!chatState.isConnected)
+            if (!chatState.isConnected && 0 == 1)
               Positioned(
                 top: 8,
                 left: 0,
