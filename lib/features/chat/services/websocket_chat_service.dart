@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:developer' as developer;
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
@@ -10,7 +10,8 @@ import 'chat_service.dart';
 
 class WebSocketChatService implements ChatService {
   static const String _baseUrl = 'http://localhost:8080';
-  static const String _wsUrl = 'ws://localhost:8080/ws/chat';
+  static const String _wsUrl =
+      'ws://localhost:8080/ws/2d4c5d200fb43eaacde191b69bb8fb27';
   static const String _userKey = 'chat_user';
   static const Duration _retryInterval = Duration(seconds: 3);
 
@@ -36,12 +37,9 @@ class WebSocketChatService implements ChatService {
       final userJson = prefs.getString(_userKey);
       if (userJson != null) {
         _currentUser = ChatUser.fromJson(jsonDecode(userJson));
-        developer.log('Loaded saved user: ${_currentUser!.id}');
-        // Automatically connect if we have a saved user
-        await connect();
       }
     } catch (e) {
-      developer.log('Error loading saved user: $e', error: e);
+      // Error handling
     } finally {
       _initCompleter.complete();
     }
@@ -51,9 +49,8 @@ class WebSocketChatService implements ChatService {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(_userKey, jsonEncode(user.toJson()));
-      developer.log('Saved user to preferences: ${user.id}');
     } catch (e) {
-      developer.log('Error saving user: $e', error: e);
+      // Error handling
     }
   }
 
@@ -65,7 +62,6 @@ class WebSocketChatService implements ChatService {
 
   @override
   Future<ChatUser> createUser(String name, String avatarId) async {
-    developer.log('Creating user: $name with avatarId: $avatarId');
     try {
       final response = await http.post(
         Uri.parse('$_baseUrl/api/users'),
@@ -76,73 +72,77 @@ class WebSocketChatService implements ChatService {
         }),
       );
 
-      developer.log(
-          'Create user response: ${response.statusCode} - ${response.body}');
-
       if (response.statusCode != 200) {
         throw Exception(
             'Failed to create user: ${response.statusCode} - ${response.body}');
       }
 
       final responseData = jsonDecode(response.body) as Map<String, dynamic>;
-      developer.log('Decoded response data: $responseData');
-
       _currentUser = ChatUser.fromJson(responseData);
       await _saveUser(_currentUser!);
-      developer.log('User created successfully: ${_currentUser!.id}');
       return _currentUser!;
-    } catch (e, stackTrace) {
-      developer.log('Error creating user: $e',
-          error: e, stackTrace: stackTrace);
+    } catch (e) {
       rethrow;
     }
   }
 
   @override
   Future<void> connect() async {
+    debugPrint('Start connecting to websocket');
     if (_currentUser == null) {
+      debugPrint('User not created');
       throw Exception('User not created');
     }
 
     if (_isConnected) {
+      debugPrint('WebSocket already connected');
       return;
     }
 
-    developer.log('Connecting to WebSocket with userId: ${_currentUser!.id}');
+    debugPrint('Connecting to WebSocket with userId: ${_currentUser!.id}');
     try {
       _channel = WebSocketChannel.connect(
-        Uri.parse('$_wsUrl?userId=${_currentUser!.id}'),
+        Uri.parse(_wsUrl),
+        protocols: [_currentUser!.id, _currentUser!.secretKey],
       );
+
+      // Wait for the connection to be established
+      await _channel!.ready;
+      debugPrint('WebSocket connection established');
 
       _channel!.stream.listen(
         (message) {
+          debugPrint('Received raw message: $message');
           final data = jsonDecode(message);
           if (data['type'] == 'initial_messages') {
             final messages = (data['messages'] as List)
                 .map((m) => ChatMessage.fromJson(m))
                 .toList();
-            developer.log('Received ${messages.length} initial messages');
+            debugPrint('Received ${messages.length} initial messages');
             _initialMessagesController.add(messages);
           } else {
-            developer.log('Received message: ${data['content']}');
+            debugPrint('Received message: ${data['content']}');
             _messageController.add(ChatMessage.fromJson(data));
           }
         },
         onDone: () {
-          developer.log('WebSocket connection closed');
+          debugPrint('WebSocket connection closed normally');
           _handleDisconnection();
         },
-        onError: (error) {
-          developer.log('WebSocket error: $error', error: error);
+        onError: (error, stackTrace) {
+          debugPrint('WebSocket error: $error');
+          debugPrint('Stack trace: $stackTrace');
           _handleDisconnection();
         },
+        cancelOnError: false,
       );
 
       _isConnected = true;
       _stopReconnectTimer();
-      developer.log('WebSocket connection established');
-    } catch (e) {
-      developer.log('Error connecting to WebSocket: $e', error: e);
+      debugPrint('WebSocket setup completed successfully');
+    } catch (e, stack) {
+      debugPrint('Error connecting to WebSocket: $e');
+      debugPrint('Stack trace: $stack');
       _handleDisconnection();
       rethrow;
     }
@@ -171,7 +171,7 @@ class WebSocketChatService implements ChatService {
       try {
         await connect();
       } catch (e) {
-        developer.log('Reconnection attempt failed: $e', error: e);
+        debugPrint('Reconnection attempt failed: $e');
       }
     });
   }
@@ -183,7 +183,7 @@ class WebSocketChatService implements ChatService {
 
   @override
   Future<void> disconnect() async {
-    developer.log('Disconnecting from WebSocket');
+    debugPrint('Disconnecting from WebSocket');
     _stopReconnectTimer();
     await _channel?.sink.close();
     _isConnected = false;
@@ -210,7 +210,7 @@ class WebSocketChatService implements ChatService {
       'timestamp': DateTime.now().toIso8601String(),
     };
 
-    developer.log('Sending message: $content');
+    debugPrint('Sending message: $content');
     _channel!.sink.add(jsonEncode(message));
   }
 

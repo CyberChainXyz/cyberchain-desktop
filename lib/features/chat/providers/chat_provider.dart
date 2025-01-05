@@ -56,14 +56,13 @@ class ChatNotifier extends StateNotifier<ChatState> {
       if (user != null) {
         state = state.copyWith(
           currentUser: user,
-          isLoading: true,
+          isLoading: false,
         );
-        await connect();
+      } else {
+        state = state.copyWith(
+          isLoading: false,
+        );
       }
-
-      state = state.copyWith(
-        isLoading: false,
-      );
 
       _setupSubscriptions();
       _monitorConnection();
@@ -123,17 +122,15 @@ class ChatNotifier extends StateNotifier<ChatState> {
   Future<void> createUser(String username, String avatar) async {
     if (!mounted) return;
     try {
-      state = state.copyWith(isLoading: true, error: null);
+      state = state.copyWith(error: null);
       final user = await _chatService.createUser(username, avatar);
       if (!mounted) return;
       state = state.copyWith(
         currentUser: user,
-        isLoading: false,
       );
     } catch (e) {
       if (!mounted) return;
       state = state.copyWith(
-        isLoading: false,
         error: e.toString(),
       );
       rethrow;
@@ -143,19 +140,17 @@ class ChatNotifier extends StateNotifier<ChatState> {
   Future<void> connect() async {
     if (!mounted) return;
     try {
-      state = state.copyWith(isLoading: true, error: null);
+      state = state.copyWith(error: null);
       await _chatService.connect();
       if (!mounted) return;
       state = state.copyWith(
         isConnected: true,
-        isLoading: false,
         error: null,
       );
     } catch (e) {
       if (!mounted) return;
       state = state.copyWith(
         isConnected: false,
-        isLoading: false,
         error: e.toString(),
       );
       rethrow;

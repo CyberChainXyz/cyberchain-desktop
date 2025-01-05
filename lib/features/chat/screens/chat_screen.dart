@@ -76,6 +76,15 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
     WidgetsBinding.instance.addObserver(this);
     _scrollController.addListener(_onScroll);
     _scrollToBottom();
+
+    // Initialize WebSocket connection
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final chatState = ref.read(chatProvider);
+      final chatNotifier = ref.read(chatProvider.notifier);
+      if (chatState.currentUser != null && !chatState.isConnected) {
+        chatNotifier.connect();
+      }
+    });
   }
 
   @override
@@ -313,8 +322,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              Color(0xFF9CCC65), // Darker green at top
-              Color(0xFFC5E1A5), // Lighter green at bottom
+              Color(0xFF9CCC65),
+              Color(0xFFC5E1A5),
             ],
           ),
         ),
@@ -323,10 +332,57 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
             Positioned.fill(
               child: CustomPaint(
                 painter: HexagonPainter(
-                  color: Color(0xFF33691E), // Even darker green for pattern
+                  color: Color(0xFF33691E),
                 ),
               ),
             ),
+            if (!chatState.isConnected)
+              Positioned(
+                top: 8,
+                left: 0,
+                right: 0,
+                child: Center(
+                  child: Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: Colors.red.shade100,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: Colors.red.shade300),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 4,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                                Colors.red.shade700),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Reconnecting to chat...',
+                          style: TextStyle(
+                            color: Colors.red.shade700,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
             Column(
               children: [
                 Expanded(

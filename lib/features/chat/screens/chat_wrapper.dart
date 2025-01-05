@@ -27,6 +27,20 @@ class _ChatWrapperState extends ConsumerState<ChatWrapper> {
       );
     }
 
+    // Listen to currentUser changes and update navigation
+    ref.listen<ChatState>(chatProvider, (previous, next) {
+      if (previous?.currentUser == null && next.currentUser != null) {
+        // User was just created, force navigation update
+        _navigatorKey.currentState?.pushReplacement(
+          PageRouteBuilder(
+            pageBuilder: (context, animation, secondaryAnimation) =>
+                const ChatScreen(),
+            transitionDuration: Duration.zero,
+          ),
+        );
+      }
+    });
+
     return Stack(
       children: [
         Navigator(
@@ -49,46 +63,6 @@ class _ChatWrapperState extends ConsumerState<ChatWrapper> {
             );
           },
         ),
-        if (chatState.currentUser != null && !chatState.isConnected)
-          Positioned(
-            top: MediaQuery.of(context).padding.top + 8,
-            left: 0,
-            right: 0,
-            child: Center(
-              child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                decoration: BoxDecoration(
-                  color: Colors.red.shade100,
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: Colors.red.shade300),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        valueColor:
-                            AlwaysStoppedAnimation<Color>(Colors.red.shade700),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      'Reconnecting...',
-                      style: TextStyle(
-                        color: Colors.red.shade700,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
       ],
     );
   }

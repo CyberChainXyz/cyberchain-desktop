@@ -149,7 +149,6 @@ class _UserSetupScreenState extends ConsumerState<UserSetupScreen> {
         _nameController.text.trim(),
         AvatarGenerator.generateAvatarId(_currentSeed!, _currentStyle),
       );
-      await notifier.connect();
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
