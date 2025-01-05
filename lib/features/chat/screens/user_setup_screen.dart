@@ -15,6 +15,7 @@ class _UserSetupScreenState extends ConsumerState<UserSetupScreen> {
   String? _currentSeed;
   DicebearStyle _currentStyle = DicebearStyle.avataaars;
   bool _isLoading = false;
+  bool _isSubmitting = false;
 
   @override
   void dispose() {
@@ -135,8 +136,9 @@ class _UserSetupScreenState extends ConsumerState<UserSetupScreen> {
       return;
     }
 
-    if (_isLoading) return;
+    if (_isLoading || _isSubmitting) return;
 
+    _isSubmitting = true;
     setState(() {
       _isLoading = true;
     });
@@ -156,6 +158,7 @@ class _UserSetupScreenState extends ConsumerState<UserSetupScreen> {
       }
     } finally {
       if (mounted) {
+        _isSubmitting = false;
         setState(() {
           _isLoading = false;
         });
@@ -169,7 +172,7 @@ class _UserSetupScreenState extends ConsumerState<UserSetupScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Setup Profile'),
+        title: const Text('Anonymous Chat Room'),
         centerTitle: true,
       ),
       body: Column(
@@ -284,7 +287,8 @@ class _UserSetupScreenState extends ConsumerState<UserSetupScreen> {
                 width: double.infinity,
                 height: 48,
                 child: FilledButton(
-                  onPressed: _isLoading ? null : _handleSubmit,
+                  onPressed:
+                      (_isLoading || _isSubmitting) ? null : _handleSubmit,
                   style: FilledButton.styleFrom(
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
