@@ -140,8 +140,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
     final currentMessage = messages[index];
     final nextMessage = messages[index + 1];
 
-    return currentMessage.senderId != nextMessage.senderId ||
-        nextMessage.timestamp.difference(currentMessage.timestamp).inMinutes >
+    return currentMessage.userId != nextMessage.userId ||
+        nextMessage.createdAt.difference(currentMessage.createdAt).inMinutes >
             2;
   }
 
@@ -150,7 +150,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
     final currentMessage = messages[index];
     final previousMessage = messages[index - 1];
 
-    return currentMessage.senderId != previousMessage.senderId;
+    return currentMessage.userId != previousMessage.userId;
   }
 
   bool _shouldShowDate(int index, List<ChatMessage> messages) {
@@ -159,14 +159,14 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
     final previousMessage = messages[index - 1];
 
     final currentDate = DateTime(
-      currentMessage.timestamp.year,
-      currentMessage.timestamp.month,
-      currentMessage.timestamp.day,
+      currentMessage.createdAt.year,
+      currentMessage.createdAt.month,
+      currentMessage.createdAt.day,
     );
     final previousDate = DateTime(
-      previousMessage.timestamp.year,
-      previousMessage.timestamp.month,
-      previousMessage.timestamp.day,
+      previousMessage.createdAt.year,
+      previousMessage.createdAt.month,
+      previousMessage.createdAt.day,
     );
 
     return currentDate != previousDate;
@@ -420,7 +420,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
                           itemBuilder: (context, index) {
                             final message = chatState.messages[index];
                             final isMe =
-                                message.senderId == chatState.currentUser?.id;
+                                message.userId == chatState.currentUser?.id;
 
                             return Column(
                               children: [
@@ -429,7 +429,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
                                     padding: const EdgeInsets.symmetric(
                                         vertical: 16.0),
                                     child:
-                                        DateSeparator(date: message.timestamp),
+                                        DateSeparator(date: message.createdAt),
                                   ),
                                 MessageBubble(
                                   message: message,

@@ -30,7 +30,7 @@ class MessageBubble extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           if (!isMe && showAvatar)
-            AvatarGenerator.buildAvatar(message.senderAvatar, size: 36)
+            AvatarGenerator.buildAvatar(message.avatar, size: 36)
           else if (!isMe)
             const SizedBox(width: 36),
           const SizedBox(width: 8),
@@ -71,7 +71,7 @@ class MessageBubble extends StatelessWidget {
                         Padding(
                           padding: const EdgeInsets.only(bottom: 4),
                           child: Text(
-                            message.senderName,
+                            message.username,
                             style: const TextStyle(
                               fontFamily: 'Inter',
                               color: Color(0xFF2196F3),
@@ -110,7 +110,7 @@ class MessageBubble extends StatelessWidget {
                           Padding(
                             padding: const EdgeInsets.only(bottom: 1),
                             child: Text(
-                              _formatTime(message.timestamp),
+                              _formatTime(message.createdAt),
                               style: const TextStyle(
                                 fontFamily: 'Inter',
                                 fontSize: 11,

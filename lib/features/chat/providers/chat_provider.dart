@@ -163,11 +163,10 @@ class ChatNotifier extends StateNotifier<ChatState> {
     state = state.copyWith(isConnected: false);
   }
 
-  Future<void> sendMessage(String content,
-      {MessageType type = MessageType.text}) async {
+  Future<void> sendMessage(String content) async {
     if (!mounted) return;
     try {
-      await _chatService.sendMessage(content, type);
+      await _chatService.sendMessage(content);
     } catch (e) {
       state = state.copyWith(error: e.toString());
       rethrow;

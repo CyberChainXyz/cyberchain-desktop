@@ -20,14 +20,18 @@ ChatMessage _$ChatMessageFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$ChatMessage {
+  @JsonKey(name: 'id')
   String get id => throw _privateConstructorUsedError;
-  String get senderId => throw _privateConstructorUsedError;
-  String get senderName => throw _privateConstructorUsedError;
-  String get senderAvatar => throw _privateConstructorUsedError;
+  @JsonKey(name: 'user_id')
+  String get userId => throw _privateConstructorUsedError;
+  @JsonKey(name: 'username')
+  String get username => throw _privateConstructorUsedError;
+  @JsonKey(name: 'avatar')
+  String get avatar => throw _privateConstructorUsedError;
+  @JsonKey(name: 'content')
   String get content => throw _privateConstructorUsedError;
-  DateTime get timestamp => throw _privateConstructorUsedError;
-  MessageType get type => throw _privateConstructorUsedError;
-  int get version => throw _privateConstructorUsedError;
+  @JsonKey(name: 'created_at')
+  DateTime get createdAt => throw _privateConstructorUsedError;
 
   /// Serializes this ChatMessage to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -46,14 +50,12 @@ abstract class $ChatMessageCopyWith<$Res> {
       _$ChatMessageCopyWithImpl<$Res, ChatMessage>;
   @useResult
   $Res call(
-      {String id,
-      String senderId,
-      String senderName,
-      String senderAvatar,
-      String content,
-      DateTime timestamp,
-      MessageType type,
-      int version});
+      {@JsonKey(name: 'id') String id,
+      @JsonKey(name: 'user_id') String userId,
+      @JsonKey(name: 'username') String username,
+      @JsonKey(name: 'avatar') String avatar,
+      @JsonKey(name: 'content') String content,
+      @JsonKey(name: 'created_at') DateTime createdAt});
 }
 
 /// @nodoc
@@ -72,47 +74,37 @@ class _$ChatMessageCopyWithImpl<$Res, $Val extends ChatMessage>
   @override
   $Res call({
     Object? id = null,
-    Object? senderId = null,
-    Object? senderName = null,
-    Object? senderAvatar = null,
+    Object? userId = null,
+    Object? username = null,
+    Object? avatar = null,
     Object? content = null,
-    Object? timestamp = null,
-    Object? type = null,
-    Object? version = null,
+    Object? createdAt = null,
   }) {
     return _then(_value.copyWith(
       id: null == id
           ? _value.id
           : id // ignore: cast_nullable_to_non_nullable
               as String,
-      senderId: null == senderId
-          ? _value.senderId
-          : senderId // ignore: cast_nullable_to_non_nullable
+      userId: null == userId
+          ? _value.userId
+          : userId // ignore: cast_nullable_to_non_nullable
               as String,
-      senderName: null == senderName
-          ? _value.senderName
-          : senderName // ignore: cast_nullable_to_non_nullable
+      username: null == username
+          ? _value.username
+          : username // ignore: cast_nullable_to_non_nullable
               as String,
-      senderAvatar: null == senderAvatar
-          ? _value.senderAvatar
-          : senderAvatar // ignore: cast_nullable_to_non_nullable
+      avatar: null == avatar
+          ? _value.avatar
+          : avatar // ignore: cast_nullable_to_non_nullable
               as String,
       content: null == content
           ? _value.content
           : content // ignore: cast_nullable_to_non_nullable
               as String,
-      timestamp: null == timestamp
-          ? _value.timestamp
-          : timestamp // ignore: cast_nullable_to_non_nullable
+      createdAt: null == createdAt
+          ? _value.createdAt
+          : createdAt // ignore: cast_nullable_to_non_nullable
               as DateTime,
-      type: null == type
-          ? _value.type
-          : type // ignore: cast_nullable_to_non_nullable
-              as MessageType,
-      version: null == version
-          ? _value.version
-          : version // ignore: cast_nullable_to_non_nullable
-              as int,
     ) as $Val);
   }
 }
@@ -126,14 +118,12 @@ abstract class _$$ChatMessageImplCopyWith<$Res>
   @override
   @useResult
   $Res call(
-      {String id,
-      String senderId,
-      String senderName,
-      String senderAvatar,
-      String content,
-      DateTime timestamp,
-      MessageType type,
-      int version});
+      {@JsonKey(name: 'id') String id,
+      @JsonKey(name: 'user_id') String userId,
+      @JsonKey(name: 'username') String username,
+      @JsonKey(name: 'avatar') String avatar,
+      @JsonKey(name: 'content') String content,
+      @JsonKey(name: 'created_at') DateTime createdAt});
 }
 
 /// @nodoc
@@ -150,47 +140,37 @@ class __$$ChatMessageImplCopyWithImpl<$Res>
   @override
   $Res call({
     Object? id = null,
-    Object? senderId = null,
-    Object? senderName = null,
-    Object? senderAvatar = null,
+    Object? userId = null,
+    Object? username = null,
+    Object? avatar = null,
     Object? content = null,
-    Object? timestamp = null,
-    Object? type = null,
-    Object? version = null,
+    Object? createdAt = null,
   }) {
     return _then(_$ChatMessageImpl(
       id: null == id
           ? _value.id
           : id // ignore: cast_nullable_to_non_nullable
               as String,
-      senderId: null == senderId
-          ? _value.senderId
-          : senderId // ignore: cast_nullable_to_non_nullable
+      userId: null == userId
+          ? _value.userId
+          : userId // ignore: cast_nullable_to_non_nullable
               as String,
-      senderName: null == senderName
-          ? _value.senderName
-          : senderName // ignore: cast_nullable_to_non_nullable
+      username: null == username
+          ? _value.username
+          : username // ignore: cast_nullable_to_non_nullable
               as String,
-      senderAvatar: null == senderAvatar
-          ? _value.senderAvatar
-          : senderAvatar // ignore: cast_nullable_to_non_nullable
+      avatar: null == avatar
+          ? _value.avatar
+          : avatar // ignore: cast_nullable_to_non_nullable
               as String,
       content: null == content
           ? _value.content
           : content // ignore: cast_nullable_to_non_nullable
               as String,
-      timestamp: null == timestamp
-          ? _value.timestamp
-          : timestamp // ignore: cast_nullable_to_non_nullable
+      createdAt: null == createdAt
+          ? _value.createdAt
+          : createdAt // ignore: cast_nullable_to_non_nullable
               as DateTime,
-      type: null == type
-          ? _value.type
-          : type // ignore: cast_nullable_to_non_nullable
-              as MessageType,
-      version: null == version
-          ? _value.version
-          : version // ignore: cast_nullable_to_non_nullable
-              as int,
     ));
   }
 }
@@ -199,40 +179,38 @@ class __$$ChatMessageImplCopyWithImpl<$Res>
 @JsonSerializable()
 class _$ChatMessageImpl implements _ChatMessage {
   const _$ChatMessageImpl(
-      {required this.id,
-      required this.senderId,
-      required this.senderName,
-      required this.senderAvatar,
-      required this.content,
-      required this.timestamp,
-      this.type = MessageType.text,
-      this.version = 1});
+      {@JsonKey(name: 'id') required this.id,
+      @JsonKey(name: 'user_id') required this.userId,
+      @JsonKey(name: 'username') required this.username,
+      @JsonKey(name: 'avatar') required this.avatar,
+      @JsonKey(name: 'content') required this.content,
+      @JsonKey(name: 'created_at') required this.createdAt});
 
   factory _$ChatMessageImpl.fromJson(Map<String, dynamic> json) =>
       _$$ChatMessageImplFromJson(json);
 
   @override
+  @JsonKey(name: 'id')
   final String id;
   @override
-  final String senderId;
+  @JsonKey(name: 'user_id')
+  final String userId;
   @override
-  final String senderName;
+  @JsonKey(name: 'username')
+  final String username;
   @override
-  final String senderAvatar;
+  @JsonKey(name: 'avatar')
+  final String avatar;
   @override
+  @JsonKey(name: 'content')
   final String content;
   @override
-  final DateTime timestamp;
-  @override
-  @JsonKey()
-  final MessageType type;
-  @override
-  @JsonKey()
-  final int version;
+  @JsonKey(name: 'created_at')
+  final DateTime createdAt;
 
   @override
   String toString() {
-    return 'ChatMessage(id: $id, senderId: $senderId, senderName: $senderName, senderAvatar: $senderAvatar, content: $content, timestamp: $timestamp, type: $type, version: $version)';
+    return 'ChatMessage(id: $id, userId: $userId, username: $username, avatar: $avatar, content: $content, createdAt: $createdAt)';
   }
 
   @override
@@ -241,23 +219,19 @@ class _$ChatMessageImpl implements _ChatMessage {
         (other.runtimeType == runtimeType &&
             other is _$ChatMessageImpl &&
             (identical(other.id, id) || other.id == id) &&
-            (identical(other.senderId, senderId) ||
-                other.senderId == senderId) &&
-            (identical(other.senderName, senderName) ||
-                other.senderName == senderName) &&
-            (identical(other.senderAvatar, senderAvatar) ||
-                other.senderAvatar == senderAvatar) &&
+            (identical(other.userId, userId) || other.userId == userId) &&
+            (identical(other.username, username) ||
+                other.username == username) &&
+            (identical(other.avatar, avatar) || other.avatar == avatar) &&
             (identical(other.content, content) || other.content == content) &&
-            (identical(other.timestamp, timestamp) ||
-                other.timestamp == timestamp) &&
-            (identical(other.type, type) || other.type == type) &&
-            (identical(other.version, version) || other.version == version));
+            (identical(other.createdAt, createdAt) ||
+                other.createdAt == createdAt));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, id, senderId, senderName,
-      senderAvatar, content, timestamp, type, version);
+  int get hashCode => Object.hash(
+      runtimeType, id, userId, username, avatar, content, createdAt);
 
   /// Create a copy of ChatMessage
   /// with the given fields replaced by the non-null parameter values.
@@ -277,34 +251,35 @@ class _$ChatMessageImpl implements _ChatMessage {
 
 abstract class _ChatMessage implements ChatMessage {
   const factory _ChatMessage(
-      {required final String id,
-      required final String senderId,
-      required final String senderName,
-      required final String senderAvatar,
-      required final String content,
-      required final DateTime timestamp,
-      final MessageType type,
-      final int version}) = _$ChatMessageImpl;
+          {@JsonKey(name: 'id') required final String id,
+          @JsonKey(name: 'user_id') required final String userId,
+          @JsonKey(name: 'username') required final String username,
+          @JsonKey(name: 'avatar') required final String avatar,
+          @JsonKey(name: 'content') required final String content,
+          @JsonKey(name: 'created_at') required final DateTime createdAt}) =
+      _$ChatMessageImpl;
 
   factory _ChatMessage.fromJson(Map<String, dynamic> json) =
       _$ChatMessageImpl.fromJson;
 
   @override
+  @JsonKey(name: 'id')
   String get id;
   @override
-  String get senderId;
+  @JsonKey(name: 'user_id')
+  String get userId;
   @override
-  String get senderName;
+  @JsonKey(name: 'username')
+  String get username;
   @override
-  String get senderAvatar;
+  @JsonKey(name: 'avatar')
+  String get avatar;
   @override
+  @JsonKey(name: 'content')
   String get content;
   @override
-  DateTime get timestamp;
-  @override
-  MessageType get type;
-  @override
-  int get version;
+  @JsonKey(name: 'created_at')
+  DateTime get createdAt;
 
   /// Create a copy of ChatMessage
   /// with the given fields replaced by the non-null parameter values.

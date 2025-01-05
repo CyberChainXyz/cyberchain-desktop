@@ -6,21 +6,14 @@ part 'chat_message.g.dart';
 @freezed
 class ChatMessage with _$ChatMessage {
   const factory ChatMessage({
-    required String id,
-    required String senderId,
-    required String senderName,
-    required String senderAvatar,
-    required String content,
-    required DateTime timestamp,
-    @Default(MessageType.text) MessageType type,
-    @Default(1) int version,
+    @JsonKey(name: 'id') required String id,
+    @JsonKey(name: 'user_id') required String userId,
+    @JsonKey(name: 'username') required String username,
+    @JsonKey(name: 'avatar') required String avatar,
+    @JsonKey(name: 'content') required String content,
+    @JsonKey(name: 'created_at') required DateTime createdAt,
   }) = _ChatMessage;
 
   factory ChatMessage.fromJson(Map<String, dynamic> json) =>
       _$ChatMessageFromJson(json);
-}
-
-enum MessageType {
-  text,
-  emoji,
 }

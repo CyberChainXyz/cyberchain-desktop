@@ -9,29 +9,19 @@ part of 'chat_message.dart';
 _$ChatMessageImpl _$$ChatMessageImplFromJson(Map<String, dynamic> json) =>
     _$ChatMessageImpl(
       id: json['id'] as String,
-      senderId: json['senderId'] as String,
-      senderName: json['senderName'] as String,
-      senderAvatar: json['senderAvatar'] as String,
+      userId: json['user_id'] as String,
+      username: json['username'] as String,
+      avatar: json['avatar'] as String,
       content: json['content'] as String,
-      timestamp: DateTime.parse(json['timestamp'] as String),
-      type: $enumDecodeNullable(_$MessageTypeEnumMap, json['type']) ??
-          MessageType.text,
-      version: (json['version'] as num?)?.toInt() ?? 1,
+      createdAt: DateTime.parse(json['created_at'] as String),
     );
 
 Map<String, dynamic> _$$ChatMessageImplToJson(_$ChatMessageImpl instance) =>
     <String, dynamic>{
       'id': instance.id,
-      'senderId': instance.senderId,
-      'senderName': instance.senderName,
-      'senderAvatar': instance.senderAvatar,
+      'user_id': instance.userId,
+      'username': instance.username,
+      'avatar': instance.avatar,
       'content': instance.content,
-      'timestamp': instance.timestamp.toIso8601String(),
-      'type': _$MessageTypeEnumMap[instance.type]!,
-      'version': instance.version,
+      'created_at': instance.createdAt.toIso8601String(),
     };
-
-const _$MessageTypeEnumMap = {
-  MessageType.text: 'text',
-  MessageType.emoji: 'emoji',
-};

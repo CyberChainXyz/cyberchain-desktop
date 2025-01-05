@@ -198,20 +198,13 @@ class WebSocketChatService implements ChatService {
   }
 
   @override
-  Future<void> sendMessage(String content, MessageType type) async {
+  Future<void> sendMessage(String content) async {
     if (!_isConnected || _currentUser == null) {
       throw Exception('Not connected');
     }
 
-    final message = {
-      'type': type.toString().split('.').last,
-      'content': content,
-      'senderId': _currentUser!.id,
-      'timestamp': DateTime.now().toIso8601String(),
-    };
-
     debugPrint('Sending message: $content');
-    _channel!.sink.add(jsonEncode(message));
+    _channel!.sink.add(content);
   }
 
   @override

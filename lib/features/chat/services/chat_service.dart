@@ -5,7 +5,7 @@ abstract class ChatService {
   Future<ChatUser> createUser(String name, String avatarId);
   Future<void> connect();
   Future<void> disconnect();
-  Future<void> sendMessage(String content, MessageType type);
+  Future<void> sendMessage(String content);
   Stream<ChatMessage> get messageStream;
   Stream<List<ChatMessage>> get initialMessages;
   bool get isConnected;
