@@ -5,7 +5,6 @@ import '../widgets/message_bubble.dart';
 import '../widgets/chat_input.dart';
 import '../widgets/date_separator.dart';
 import '../models/chat_message.dart';
-import '../models/chat_channel.dart';
 import 'dart:math' as math;
 import 'package:url_launcher/url_launcher.dart';
 

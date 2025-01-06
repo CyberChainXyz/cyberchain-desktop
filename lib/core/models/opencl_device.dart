@@ -34,15 +34,15 @@ class OpenCLDevice {
       final line = lines[i].trim();
       if (line.isEmpty) continue;
 
-      // Parse line like: [1] Intel(R) Iris(R) Xe Graphics [0x9a49] (Vendor: Intel(R) Corporation)
-      final match = RegExp(r'\[(\d+)\] (.*?) \[(.*?)\] \(Vendor: (.*?)\)')
-          .firstMatch(line);
+      // Parse line like: [1] Device Name (Vendor: Vendor Name)
+      final match =
+          RegExp(r'\[(\d+)\] (.*?) \(Vendor: (.*?)\)').firstMatch(line);
 
       if (match != null) {
         devices.add(OpenCLDevice(
           id: int.parse(match.group(1)!),
           name: match.group(2)!,
-          vendor: match.group(4)!,
+          vendor: match.group(3)!,
         ));
       }
     }

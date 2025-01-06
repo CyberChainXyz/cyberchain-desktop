@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
@@ -92,19 +91,15 @@ class WebSocketChatService implements ChatService {
 
   @override
   Future<void> connect({required String channelId}) async {
-    debugPrint('Start connecting to websocket');
     if (_currentUser == null) {
-      debugPrint('User not created');
       throw Exception('User not created');
     }
 
     if (_isConnected) {
-      debugPrint('WebSocket already connected');
       return;
     }
 
     _currentChannelId = channelId;
-    debugPrint('Connecting to WebSocket with userId: ${_currentUser!.id}');
     try {
       _channel = WebSocketChannel.connect(
         Uri.parse(_getWsUrl(channelId)),
@@ -113,30 +108,23 @@ class WebSocketChatService implements ChatService {
 
       // Wait for the connection to be established
       await _channel!.ready;
-      debugPrint('WebSocket connection established');
 
       _channel!.stream.listen(
         (message) {
-          debugPrint('Received raw message: $message');
           final data = jsonDecode(message);
           if (data['type'] == 'initial_messages') {
             final messages = (data['messages'] as List)
                 .map((m) => ChatMessage.fromJson(m))
                 .toList();
-            debugPrint('Received ${messages.length} initial messages');
             _initialMessagesController.add(messages);
           } else {
-            debugPrint('Received message: ${data['content']}');
             _messageController.add(ChatMessage.fromJson(data));
           }
         },
         onDone: () {
-          debugPrint('WebSocket connection closed normally');
           _handleDisconnection();
         },
         onError: (error, stackTrace) {
-          debugPrint('WebSocket error: $error');
-          debugPrint('Stack trace: $stackTrace');
           _handleDisconnection();
         },
         cancelOnError: false,
@@ -144,10 +132,7 @@ class WebSocketChatService implements ChatService {
 
       _isConnected = true;
       _stopReconnectTimer();
-      debugPrint('WebSocket setup completed successfully');
-    } catch (e, stack) {
-      debugPrint('Error connecting to WebSocket: $e');
-      debugPrint('Stack trace: $stack');
+    } catch (e) {
       _handleDisconnection();
       rethrow;
     }
@@ -176,7 +161,7 @@ class WebSocketChatService implements ChatService {
       try {
         await connect(channelId: _currentChannelId!);
       } catch (e) {
-        debugPrint('Reconnection attempt failed: $e');
+        // ignore
       }
     });
   }
@@ -188,7 +173,6 @@ class WebSocketChatService implements ChatService {
 
   @override
   Future<void> disconnect() async {
-    debugPrint('Disconnecting from WebSocket');
     _stopReconnectTimer();
     await _channel?.sink.close();
     _isConnected = false;
@@ -209,7 +193,6 @@ class WebSocketChatService implements ChatService {
       throw Exception('Not connected');
     }
 
-    debugPrint('Sending message: $content');
     _channel!.sink.add(content);
   }
 
