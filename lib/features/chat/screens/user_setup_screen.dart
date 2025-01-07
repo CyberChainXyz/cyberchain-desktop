@@ -221,7 +221,7 @@ class _UserSetupScreenState extends ConsumerState<UserSetupScreen> {
                           color: colorScheme.primary,
                           borderRadius: BorderRadius.circular(12),
                           child: InkWell(
-                            onTap: _showAvatarPicker,
+                            onTap: _isLoading ? null : _showAvatarPicker,
                             borderRadius: BorderRadius.circular(12),
                             child: Container(
                               padding: const EdgeInsets.all(8),
@@ -241,6 +241,7 @@ class _UserSetupScreenState extends ConsumerState<UserSetupScreen> {
                   // Name Input
                   TextField(
                     controller: _nameController,
+                    enabled: !_isLoading,
                     decoration: InputDecoration(
                       labelText: 'Your Name',
                       hintText: 'Enter a display name',
