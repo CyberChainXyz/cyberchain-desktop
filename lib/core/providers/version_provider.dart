@@ -8,7 +8,24 @@ final currentVersionProvider = FutureProvider<String>((ref) async {
   return versionService.getCurrentVersion();
 });
 
-final hasUpdateProvider = FutureProvider<bool>((ref) async {
+final hasUpdateProvider =
+    StateNotifierProvider<_HasUpdateNotifier, bool>((ref) {
   final versionService = ref.watch(versionServiceProvider);
-  return versionService.hasUpdate();
+  return _HasUpdateNotifier(versionService);
 });
+
+class _HasUpdateNotifier extends StateNotifier<bool> {
+  final VersionService _versionService;
+
+  _HasUpdateNotifier(this._versionService) : super(false) {
+    _versionService.startPeriodicCheck((hasUpdate) {
+      state = hasUpdate;
+    });
+  }
+
+  @override
+  void dispose() {
+    _versionService.stopPeriodicCheck();
+    super.dispose();
+  }
+}

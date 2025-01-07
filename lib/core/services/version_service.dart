@@ -1,6 +1,8 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'dart:async';
 import 'package:package_info_plus/package_info_plus.dart';
+import '../constants/app_constants.dart';
 
 class VersionService {
   static const String githubUrl =
@@ -9,6 +11,31 @@ class VersionService {
       'https://api.github.com/repos/OpenCyberXyz/ccx-desktop/releases/latest';
 
   String? _latestReleaseUrl;
+  Timer? _timer;
+  void Function(bool)? _onUpdateAvailable;
+
+  void startPeriodicCheck(void Function(bool) onUpdateAvailable) {
+    _onUpdateAvailable = onUpdateAvailable;
+    _timer?.cancel();
+    _timer = Timer.periodic(const Duration(hours: 1), (_) {
+      checkForUpdate();
+    });
+    // Check immediately when started
+    checkForUpdate();
+  }
+
+  void stopPeriodicCheck() {
+    _timer?.cancel();
+    _timer = null;
+    _onUpdateAvailable = null;
+  }
+
+  Future<void> checkForUpdate() async {
+    if (_onUpdateAvailable != null) {
+      final updateAvailable = await hasUpdate();
+      _onUpdateAvailable!(updateAvailable);
+    }
+  }
 
   Future<String> getCurrentVersion() async {
     final packageInfo = await PackageInfo.fromPlatform();

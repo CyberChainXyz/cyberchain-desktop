@@ -126,7 +126,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      if (hasUpdate.value == true)
+                      if (hasUpdate)
                         InkWell(
                           onTap: _launchReleasePage,
                           child: Container(
@@ -136,8 +136,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               vertical: 6,
                             ),
                             decoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.primary,
+                              color: Colors.red[600],
                               borderRadius: BorderRadius.circular(16),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.red.withOpacity(0.3),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
                             ),
                             child: const Row(
                               mainAxisSize: MainAxisSize.min,
@@ -153,6 +160,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                   style: TextStyle(
                                     color: Colors.white,
                                     fontSize: 12,
+                                    fontWeight: FontWeight.bold,
                                   ),
                                 ),
                               ],

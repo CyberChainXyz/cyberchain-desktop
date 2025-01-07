@@ -30,10 +30,6 @@ class _CCXDesktopAppState extends ConsumerState<CCXDesktopApp> {
   @override
   void initState() {
     super.initState();
-    // Trigger update check when app starts
-    Future.delayed(Duration.zero, () {
-      ref.read(hasUpdateProvider);
-    });
   }
 
   @override
