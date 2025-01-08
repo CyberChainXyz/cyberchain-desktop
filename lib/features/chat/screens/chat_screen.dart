@@ -7,6 +7,7 @@ import '../widgets/date_separator.dart';
 import '../models/chat_message.dart';
 import 'dart:math' as math;
 import 'package:url_launcher/url_launcher.dart';
+import '../../../core/theme/app_theme.dart';
 
 class HexagonPainter extends CustomPainter {
   final Color color;
@@ -317,15 +318,15 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
                       ),
                       title: Text(
                         channel.name,
-                        style: TextStyle(
-                          fontFamily: 'Inter',
-                          fontFamilyFallback: ['Noto Color Emoji'],
-                          fontSize: 15,
-                          fontWeight:
-                              isSelected ? FontWeight.w600 : FontWeight.w400,
-                          color: isSelected
-                              ? Color(0xFF2196F3)
-                              : Color(0xFF2D3843),
+                        style: AppTextStyle.withEmojiFonts(
+                          TextStyle(
+                            fontSize: 15,
+                            fontWeight:
+                                isSelected ? FontWeight.w600 : FontWeight.w400,
+                            color: isSelected
+                                ? Color(0xFF2196F3)
+                                : Color(0xFF2D3843),
+                          ),
                         ),
                       ),
                       leading: isSelected
@@ -380,11 +381,11 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
           children: [
             Text(
               chatState.currentChannel?.name ?? '',
-              style: const TextStyle(
-                fontFamily: 'Inter',
-                fontFamilyFallback: ['Noto Color Emoji'],
-                fontSize: 14,
-                color: Color(0xFF2D3843),
+              style: AppTextStyle.withEmojiFonts(
+                const TextStyle(
+                  fontSize: 14,
+                  color: Color(0xFF2D3843),
+                ),
               ),
             ),
             if (!chatState.isConnected)

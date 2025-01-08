@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/chat_message.dart';
 import '../utils/avatar_generator.dart';
 import 'dart:math' as math;
+import '../../../core/theme/app_theme.dart';
 
 class MessageBubble extends StatelessWidget {
   final ChatMessage message;
@@ -87,13 +88,13 @@ class MessageBubble extends StatelessWidget {
                           Flexible(
                             child: SelectableText(
                               message.content,
-                              style: const TextStyle(
-                                fontFamily: 'Inter',
-                                height: 1.4,
-                                color: Color(0xFF2D3843),
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500,
-                                fontFamilyFallback: ['Noto Color Emoji'],
+                              style: AppTextStyle.withEmojiFonts(
+                                const TextStyle(
+                                  height: 1.4,
+                                  color: Color(0xFF2D3843),
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
+                                ),
                               ),
                               // Enable text selection on desktop
                               enableInteractiveSelection: true,

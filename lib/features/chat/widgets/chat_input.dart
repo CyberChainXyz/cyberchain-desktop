@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import '../screens/chat_screen.dart';
 import 'dart:math' as math;
+import '../../../core/theme/app_theme.dart';
 
 class ChatInput extends StatefulWidget {
   final Future<void> Function(String) onSendMessage;
@@ -346,13 +347,13 @@ class _ChatInputState extends State<ChatInput> with WidgetsBindingObserver {
                   border: InputBorder.none,
                   isDense: true,
                 ),
-                style: TextStyle(
-                  color: widget.enabled
-                      ? const Color(0xFF2C3E50)
-                      : const Color(0xFF999999),
-                  fontSize: 14,
-                  fontFamily: 'Inter',
-                  fontFamilyFallback: ['Noto Color Emoji'],
+                style: AppTextStyle.withEmojiFonts(
+                  TextStyle(
+                    color: widget.enabled
+                        ? const Color(0xFF2C3E50)
+                        : const Color(0xFF999999),
+                    fontSize: 14,
+                  ),
                 ),
                 textInputAction: TextInputAction.send,
                 maxLines: null,

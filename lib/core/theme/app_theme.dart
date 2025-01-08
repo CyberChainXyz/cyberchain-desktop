@@ -1,5 +1,25 @@
 import 'package:flutter/material.dart';
 
+class AppTextStyle {
+  static TextStyle withEmojiFonts(TextStyle style) {
+    return style.copyWith(
+      fontFamily: 'Inter',
+      fontFamilyFallback: [
+        'Noto Color Emoji',
+        'Microsoft YaHei',
+        'PingFang SC',
+        'Noto Sans CJK',
+        'Arial',
+        'Roboto',
+        'Noto Sans Arabic',
+        'Scheherazade',
+        'Noto Sans Cyrillic',
+        'Noto Sans Devanagari',
+      ],
+    );
+  }
+}
+
 class AppTheme {
   static ThemeData get light {
     return ThemeData(
