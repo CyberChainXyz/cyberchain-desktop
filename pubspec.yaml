@@ -110,6 +110,17 @@ flutter:
 
   assets:
     - assets/images/
+    - assets/avatars/adventurer/
+    - assets/avatars/avataaars/
+    - assets/avatars/big-ears/
+    - assets/avatars/bottts/
+    - assets/avatars/fun-emoji/
+    - assets/avatars/lorelei/
+    - assets/avatars/notionists/
+    - assets/avatars/open-peeps/
+    - assets/avatars/personas/
+    - assets/avatars/pixel-art/
+    - assets/avatars/thumbs/
 
   fonts:
     - family: Noto Color Emoji

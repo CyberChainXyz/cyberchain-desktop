@@ -19,8 +19,6 @@ enum DicebearStyle {
 }
 
 class AvatarGenerator {
-  static const _baseUrl = 'https://api.dicebear.com/9.x';
-
   // Fixed seeds for consistent avatars
   static const List<String> seeds = [
     'felix',
@@ -91,12 +89,12 @@ class AvatarGenerator {
     return (parts[2], _getStyleFromPath(parts[1]));
   }
 
-  static String getAvatarUrl(
+  static String getAvatarAssetPath(
     String seed, {
     DicebearStyle style = DicebearStyle.avataaars,
   }) {
     final stylePath = _getStylePath(style);
-    return '$_baseUrl/$stylePath/svg?seed=$seed';
+    return 'assets/avatars/$stylePath/$seed.svg';
   }
 
   static Widget buildAvatar(
@@ -104,12 +102,12 @@ class AvatarGenerator {
     double size = 48,
     DicebearStyle style = DicebearStyle.avataaars,
   }) {
-    final url = getAvatarUrl(seed, style: style);
+    final assetPath = getAvatarAssetPath(seed, style: style);
 
     return ClipRRect(
       borderRadius: BorderRadius.circular(8),
-      child: SvgPicture.network(
-        url,
+      child: SvgPicture.asset(
+        assetPath,
         width: size,
         height: size,
         placeholderBuilder: (context) => Container(
@@ -136,7 +134,11 @@ class AvatarGenerator {
     double size = 48,
   }) {
     final (seed, style) = parseAvatarId(avatarId);
-    return buildAvatar(seed, style: style, size: size);
+    return buildAvatar(
+      seed,
+      style: style,
+      size: size,
+    );
   }
 
   static Widget buildAvatarGrid(

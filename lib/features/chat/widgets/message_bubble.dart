@@ -30,7 +30,7 @@ class MessageBubble extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           if (!isMe && showAvatar)
-            AvatarGenerator.buildAvatar(message.avatar, size: 36)
+            AvatarGenerator.buildAvatarFromId(message.avatar, size: 36)
           else if (!isMe)
             const SizedBox(width: 36),
           const SizedBox(width: 8),
