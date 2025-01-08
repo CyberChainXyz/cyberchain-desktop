@@ -126,4 +126,6 @@ flutter:
     - family: Noto Color Emoji
       fonts:
         - asset: assets/fonts/NotoColorEmoji.ttf
+    - family: Inter
+      fonts:
         - asset: assets/fonts/InterNormal.ttf
