@@ -78,7 +78,21 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           path: artifacts
+
+      - name: Calculate SHA256 Checksums
+        run: |
+          cd artifacts
+          echo "## SHA256 Checksums" > ../checksums.md
+          echo '```' >> ../checksums.md
+          for dir in */; do
+            cd "$dir"
+            sha256sum * >> ../../checksums.md
+            cd ..
+          done
+          echo '```' >> ../checksums.md
+
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
-          files: artifacts/**/* 
+          files: artifacts/**/*
+          body_path: checksums.md 
