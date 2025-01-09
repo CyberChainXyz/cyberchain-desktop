@@ -6,14 +6,14 @@ class AddressValidator {
 
   static bool _isValidEVMAddress(String address) {
     try {
-      EthereumAddress.fromHex(address);
+      EthereumAddress.fromHex(address, enforceEip55: true);
       return true;
     } catch (e) {
       return false;
     }
   }
 
-  static bool isValidCCXAddress(String? address) {
+  static bool isValidMiningAddress(String? address) {
     if (address == null || address.isEmpty) {
       return false;
     }
@@ -28,7 +28,7 @@ class AddressValidator {
     return _isValidEVMAddress(address);
   }
 
-  static String? validateCCXAddress(String? address) {
+  static String? validateMiningAddress(String? address) {
     if (address == null || address.isEmpty) {
       return 'Please enter a CCX address';
     }
@@ -41,7 +41,7 @@ class AddressValidator {
       return 'Address must be at least 42 characters long (including 0x prefix)';
     }
 
-    if (!isValidCCXAddress(address)) {
+    if (!isValidMiningAddress(address)) {
       return 'Invalid CCX address format. Must be an EVM address (0x...) or EVM address with multiple suffixes (0x...{./@}name{./@}name...)';
     }
 

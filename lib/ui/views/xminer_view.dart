@@ -142,7 +142,7 @@ class _XMinerViewState extends ConsumerState<XMinerView> {
                                 if (!_focusNode.hasFocus) {
                                   final value = _controller.text;
                                   final error =
-                                      AddressValidator.validateCCXAddress(
+                                      AddressValidator.validateMiningAddress(
                                           value);
                                   setState(() {
                                     _addressError = error;
@@ -398,7 +398,7 @@ class _XMinerViewState extends ConsumerState<XMinerView> {
                               : (isStarting ? 'Starting...' : 'Start')),
                           onPressed: isOperating ||
                                   isRunning ||
-                                  !AddressValidator.isValidCCXAddress(
+                                  !AddressValidator.isValidMiningAddress(
                                       ccxAddress) ||
                                   selectedPool == null ||
                                   selectedDevices.isEmpty
@@ -423,7 +423,7 @@ class _XMinerViewState extends ConsumerState<XMinerView> {
                             backgroundColor: isRunning
                                 ? (isOperating ? Colors.grey : Colors.red)
                                 : (isOperating ||
-                                        !AddressValidator.isValidCCXAddress(
+                                        !AddressValidator.isValidMiningAddress(
                                             ccxAddress) ||
                                         selectedPool == null ||
                                         selectedDevices.isEmpty
