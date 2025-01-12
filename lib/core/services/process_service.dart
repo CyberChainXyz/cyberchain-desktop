@@ -19,6 +19,10 @@ class ProcessService extends StateNotifier<Map<String, Process>> {
   bool isProcessStarting(String name) => _startingProcesses[name] ?? false;
   bool isProcessRunning(String name) => _processes.containsKey(name);
 
+  void _notifyStateChange() {
+    state = Map.from(_processes);
+  }
+
   void _appendOutput(String name, String output) {
     _outputs[name] = (_outputs[name] ?? '') + output;
 
@@ -44,11 +48,18 @@ class ProcessService extends StateNotifier<Map<String, Process>> {
     }
 
     _startingProcesses[name] = true;
+    _notifyStateChange();
 
     // Clear output when starting
     _outputs[name] = '';
     if (name == 'go-cyberchain') {
       _ref.read(goCyberchainOutputProvider.notifier).clear();
+      if (!arguments.contains('-http')) {
+        arguments = [...arguments, '-http'];
+      }
+      if (!arguments.contains('-ws')) {
+        arguments = [...arguments, '-ws'];
+      }
     } else if (name == 'xMiner') {
       _ref.read(xMinerOutputProvider.notifier).clear();
     }
@@ -70,6 +81,7 @@ class ProcessService extends StateNotifier<Map<String, Process>> {
 
       _processes[name] = process;
       _startingProcesses[name] = false;
+      _notifyStateChange();
 
       // Handle stdout
       process.stdout
@@ -103,6 +115,7 @@ class ProcessService extends StateNotifier<Map<String, Process>> {
       });
     } catch (e) {
       _startingProcesses[name] = false;
+      _notifyStateChange();
       _appendOutput(name, '\nError starting program: $e\n');
       rethrow;
     }
@@ -118,6 +131,7 @@ class ProcessService extends StateNotifier<Map<String, Process>> {
     try {
       // Set stopping state first
       _stoppingProcesses[name] = true;
+      _notifyStateChange();
 
       // Send stop signal immediately
       if (Platform.isWindows) {
@@ -159,6 +173,7 @@ class ProcessService extends StateNotifier<Map<String, Process>> {
       // Update state only after process is confirmed to be stopped
       _processes.remove(name);
       _stoppingProcesses[name] = false;
+      _notifyStateChange();
       _appendOutput(name, '\nProgram stopped\n');
     } catch (e) {
       // Even on error, wait for process to be really gone
@@ -170,6 +185,7 @@ class ProcessService extends StateNotifier<Map<String, Process>> {
 
       _processes.remove(name);
       _stoppingProcesses[name] = false;
+      _notifyStateChange();
       _appendOutput(name, '\nError stopping program: $e\n');
       rethrow;
     }
@@ -181,6 +197,7 @@ class ProcessService extends StateNotifier<Map<String, Process>> {
     _processes.remove(name);
     _stoppingProcesses[name] = false;
     _startingProcesses[name] = false;
+    _notifyStateChange();
 
     if (exitCode != 0) {
       _appendOutput(name, '\nProgram exited with error code: $exitCode\n');
@@ -202,6 +219,7 @@ class ProcessService extends StateNotifier<Map<String, Process>> {
     _stoppingProcesses.clear();
     _startingProcesses.clear();
     _outputs.clear();
+    _notifyStateChange();
     super.dispose();
   }
 }

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import '../../core/providers/service_providers.dart';
 import '../../core/providers/output_providers.dart';
 import '../../core/providers/mining_providers.dart';
+import '../../core/providers/blockchain_providers.dart';
 
 class GoCyberchainView extends ConsumerStatefulWidget {
   const GoCyberchainView({super.key});
@@ -13,6 +15,21 @@ class GoCyberchainView extends ConsumerStatefulWidget {
 
 class _GoCyberchainViewState extends ConsumerState<GoCyberchainView> {
   final ScrollController _scrollController = ScrollController();
+  final _numberFormat = NumberFormat('#,###');
+
+  String _formatBigInt(BigInt? value) {
+    if (value == null) return '--';
+    final str = value.toString();
+    final buffer = StringBuffer();
+    final length = str.length;
+    for (var i = 0; i < length; i++) {
+      if (i > 0 && (length - i) % 3 == 0) {
+        buffer.write(',');
+      }
+      buffer.write(str[i]);
+    }
+    return buffer.toString();
+  }
 
   @override
   void dispose() {
@@ -28,6 +45,64 @@ class _GoCyberchainViewState extends ConsumerState<GoCyberchainView> {
         curve: Curves.easeOut,
       );
     }
+  }
+
+  Widget _buildMetricsCard() {
+    final metrics = ref.watch(blockchainMetricsNotifierProvider);
+    final processService = ref.watch(processServiceProvider.notifier);
+    final isRunning = processService.isProcessRunning('go-cyberchain');
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            _buildMetricItem(
+              'Block Height',
+              isRunning ? metrics.value?.blockHeight.toString() ?? '--' : '--',
+              Icons.layers,
+            ),
+            _buildMetricItem(
+              'Difficulty',
+              isRunning ? _formatBigInt(metrics.value?.difficulty) : '--',
+              Icons.speed,
+            ),
+            _buildMetricItem(
+              'Peers',
+              isRunning ? metrics.value?.peerCount.toString() ?? '--' : '--',
+              Icons.people,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMetricItem(String label, String value, IconData icon) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 20, color: Theme.of(context).colorScheme.primary),
+            const SizedBox(width: 8),
+            Text(
+              label,
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
+          ],
+        ),
+        const SizedBox(height: 4),
+        Text(
+          value,
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+        ),
+      ],
+    );
   }
 
   @override
@@ -89,6 +164,8 @@ class _GoCyberchainViewState extends ConsumerState<GoCyberchainView> {
               ),
             ),
           ),
+          const SizedBox(height: 16),
+          _buildMetricsCard(),
           const SizedBox(height: 16),
           Expanded(
             child: Card(
