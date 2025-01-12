@@ -105,7 +105,7 @@ class _XMinerViewState extends ConsumerState<XMinerView> {
                 ),
               ),
             ),
-          const SizedBox(height: 16),
+          // const SizedBox(height: 16),
           Card(
             child: Padding(
               padding: const EdgeInsets.all(16.0),
