@@ -214,23 +214,20 @@ class _XMinerViewState extends ConsumerState<XMinerView> {
                                                                           left:
                                                                               16.0),
                                                                   child: Row(
-                                                                    mainAxisSize:
-                                                                        MainAxisSize
-                                                                            .min,
                                                                     children: [
-                                                                      Flexible(
-                                                                        child:
-                                                                            Text(
-                                                                          server
-                                                                              .name,
-                                                                          overflow:
-                                                                              TextOverflow.ellipsis,
+                                                                      Text(
+                                                                        server
+                                                                            .name,
+                                                                        style:
+                                                                            const TextStyle(
+                                                                          fontWeight:
+                                                                              FontWeight.w500,
                                                                         ),
                                                                       ),
                                                                       const SizedBox(
                                                                           width:
-                                                                              8),
-                                                                      Flexible(
+                                                                              4),
+                                                                      Expanded(
                                                                         child:
                                                                             Text(
                                                                           server
