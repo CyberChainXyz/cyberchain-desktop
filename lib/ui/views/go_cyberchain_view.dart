@@ -113,6 +113,7 @@ class _GoCyberchainViewState extends ConsumerState<GoCyberchainView> {
     final isStarting = processService.isProcessStarting('go-cyberchain');
     final output = ref.watch(goCyberchainOutputProvider);
     final savedArgs = ref.watch(goCyberchainArgsProvider);
+    final metrics = ref.watch(blockchainMetricsNotifierProvider);
 
     final isOperating = isStopping || isStarting;
 
@@ -150,22 +151,39 @@ class _GoCyberchainViewState extends ConsumerState<GoCyberchainView> {
                       foregroundColor: Colors.white,
                     ),
                   ),
-                  if (savedArgs.isNotEmpty) ...[
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Text(
-                        'Arguments: ${savedArgs.join(" ")}',
-                        style: Theme.of(context).textTheme.bodySmall,
-                        overflow: TextOverflow.ellipsis,
-                      ),
+                  const SizedBox(width: 32),
+                  Expanded(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        _buildMetricItem(
+                          'Block Height',
+                          isRunning
+                              ? metrics.value?.blockHeight.toString() ?? '--'
+                              : '--',
+                          Icons.layers,
+                        ),
+                        _buildMetricItem(
+                          'Difficulty',
+                          isRunning
+                              ? _formatBigInt(metrics.value?.difficulty)
+                              : '--',
+                          Icons.speed,
+                        ),
+                        _buildMetricItem(
+                          'Peers',
+                          isRunning
+                              ? metrics.value?.peerCount.toString() ?? '--'
+                              : '--',
+                          Icons.people,
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
                 ],
               ),
             ),
           ),
-          const SizedBox(height: 16),
-          _buildMetricsCard(),
           const SizedBox(height: 16),
           Expanded(
             child: Card(
