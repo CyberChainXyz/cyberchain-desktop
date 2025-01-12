@@ -3,10 +3,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/providers/app_state_provider.dart';
 import '../../core/providers/service_providers.dart';
 import '../../core/constants/app_constants.dart';
+import '../../core/services/update_checker.dart';
 import 'home_screen.dart';
 
 class DownloadScreen extends ConsumerStatefulWidget {
-  const DownloadScreen({super.key});
+  final bool fromHome;
+
+  const DownloadScreen({
+    super.key,
+    this.fromHome = false,
+  });
 
   @override
   ConsumerState<DownloadScreen> createState() => _DownloadScreenState();
@@ -22,31 +28,53 @@ class _DownloadScreenState extends ConsumerState<DownloadScreen> {
   @override
   void initState() {
     super.initState();
-    _checkProgramStatus();
+    _checkLocalVersions();
+    _checkLatestVersions();
   }
 
-  Future<void> _checkProgramStatus() async {
+  Future<void> _checkLocalVersions() async {
+    try {
+      final programInfoService = ref.read(programInfoServiceProvider);
+      final programs = [AppConstants.goCyberchainRepo, AppConstants.xMinerRepo];
+
+      for (final program in programs) {
+        final info = await programInfoService.getProgramInfo(program);
+        if (mounted) {
+          setState(() {
+            _localVersions[program] = info?.version;
+          });
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _error = 'Failed to check local versions: $e';
+        });
+      }
+    }
+  }
+
+  Future<void> _checkLatestVersions() async {
     setState(() {
       _isChecking = true;
     });
 
     try {
-      final programInfoService = ref.read(programInfoServiceProvider);
       final githubService = ref.read(githubServiceProvider);
-
       final programs = [AppConstants.goCyberchainRepo, AppConstants.xMinerRepo];
+
       for (final program in programs) {
-        final info = await programInfoService.getProgramInfo(program);
         final latestVersion = await githubService.getLatestVersion(program);
-        setState(() {
-          _localVersions[program] = info?.version;
-          _latestVersions[program] = latestVersion;
-        });
+        if (mounted) {
+          setState(() {
+            _latestVersions[program] = latestVersion;
+          });
+        }
       }
     } catch (e) {
       if (mounted) {
         setState(() {
-          _error = 'Failed to check program status: $e';
+          _error = 'Failed to check latest versions: $e';
         });
       }
     } finally {
@@ -275,7 +303,8 @@ class _DownloadScreenState extends ConsumerState<DownloadScreen> {
                   setState(() {
                     _error = null;
                   });
-                  _checkProgramStatus();
+                  _checkLocalVersions();
+                  _checkLatestVersions();
                 },
                 child: const Text('Retry'),
               ),
@@ -286,6 +315,17 @@ class _DownloadScreenState extends ConsumerState<DownloadScreen> {
     }
 
     return Scaffold(
+      appBar: widget.fromHome
+          ? AppBar(
+              leading: IconButton(
+                icon: const Icon(Icons.arrow_back),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  ref.read(programsUpdateProvider.notifier).checkUpdates();
+                },
+              ),
+            )
+          : null,
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(

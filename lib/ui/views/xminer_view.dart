@@ -163,99 +163,169 @@ class _XMinerViewState extends ConsumerState<XMinerView> {
                                 data: (pools) {
                                   final selectedServer =
                                       ref.watch(selectedPoolProvider);
-                                  return DropdownButtonFormField<
-                                      MiningPoolServer>(
-                                    isExpanded: true,
-                                    decoration: const InputDecoration(
-                                      labelText: 'Mining Pool',
-                                      border: OutlineInputBorder(),
-                                      contentPadding: EdgeInsets.symmetric(
-                                        horizontal: 12,
-                                        vertical: 16,
-                                      ),
-                                    ),
-                                    value: selectedServer,
-                                    items: pools
-                                        .expand<
-                                            DropdownMenuItem<
-                                                MiningPoolServer>>((pool) => [
-                                              DropdownMenuItem<
-                                                  MiningPoolServer>(
-                                                enabled: false,
-                                                value: null,
-                                                child: Text(
-                                                  pool.name,
-                                                  style: const TextStyle(
-                                                    fontWeight: FontWeight.bold,
-                                                    color: Colors.grey,
-                                                  ),
+                                  return Stack(
+                                    children: [
+                                      Row(
+                                        children: [
+                                          Expanded(
+                                            child: DropdownButtonFormField<
+                                                MiningPoolServer>(
+                                              isExpanded: true,
+                                              decoration: const InputDecoration(
+                                                labelText: 'Mining Pool',
+                                                border: OutlineInputBorder(),
+                                                contentPadding:
+                                                    EdgeInsets.symmetric(
+                                                  horizontal: 12,
+                                                  vertical: 16,
                                                 ),
                                               ),
-                                              ...pool.servers.map(
-                                                (server) => DropdownMenuItem<
-                                                    MiningPoolServer>(
-                                                  value: server,
-                                                  child: Padding(
-                                                    padding:
-                                                        const EdgeInsets.only(
-                                                            left: 16.0),
-                                                    child: Row(
-                                                      mainAxisSize:
-                                                          MainAxisSize.min,
-                                                      children: [
-                                                        Flexible(
-                                                          child: Text(
-                                                            server.name,
-                                                            overflow:
-                                                                TextOverflow
-                                                                    .ellipsis,
-                                                          ),
-                                                        ),
-                                                        const SizedBox(
-                                                            width: 8),
-                                                        Flexible(
-                                                          child: Text(
-                                                            server.url,
-                                                            overflow:
-                                                                TextOverflow
-                                                                    .ellipsis,
-                                                            style: TextStyle(
-                                                              fontSize: 12,
-                                                              color: Theme.of(
-                                                                      context)
-                                                                  .textTheme
-                                                                  .bodySmall
-                                                                  ?.color,
+                                              value: selectedServer,
+                                              items: pools
+                                                  .expand<
+                                                          DropdownMenuItem<
+                                                              MiningPoolServer>>(
+                                                      (pool) => [
+                                                            DropdownMenuItem<
+                                                                MiningPoolServer>(
+                                                              enabled: false,
+                                                              value: null,
+                                                              child: Text(
+                                                                pool.name,
+                                                                style:
+                                                                    const TextStyle(
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .bold,
+                                                                  color: Colors
+                                                                      .grey,
+                                                                ),
+                                                              ),
                                                             ),
-                                                          ),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                ),
-                                              ),
-                                            ])
-                                        .toList(),
-                                    onChanged: (MiningPoolServer? value) {
-                                      if (value != null) {
-                                        ref
-                                            .read(selectedPoolProvider.notifier)
-                                            .setPool(value);
-                                      }
-                                    },
+                                                            ...pool.servers.map(
+                                                              (server) =>
+                                                                  DropdownMenuItem<
+                                                                      MiningPoolServer>(
+                                                                value: server,
+                                                                child: Padding(
+                                                                  padding:
+                                                                      const EdgeInsets
+                                                                          .only(
+                                                                          left:
+                                                                              16.0),
+                                                                  child: Row(
+                                                                    mainAxisSize:
+                                                                        MainAxisSize
+                                                                            .min,
+                                                                    children: [
+                                                                      Flexible(
+                                                                        child:
+                                                                            Text(
+                                                                          server
+                                                                              .name,
+                                                                          overflow:
+                                                                              TextOverflow.ellipsis,
+                                                                        ),
+                                                                      ),
+                                                                      const SizedBox(
+                                                                          width:
+                                                                              8),
+                                                                      Flexible(
+                                                                        child:
+                                                                            Text(
+                                                                          server
+                                                                              .url,
+                                                                          overflow:
+                                                                              TextOverflow.ellipsis,
+                                                                          style:
+                                                                              TextStyle(
+                                                                            fontSize:
+                                                                                12,
+                                                                            color:
+                                                                                Theme.of(context).textTheme.bodySmall?.color,
+                                                                          ),
+                                                                        ),
+                                                                      ),
+                                                                    ],
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                            ),
+                                                          ])
+                                                  .toList(),
+                                              onChanged:
+                                                  (MiningPoolServer? value) {
+                                                if (value != null) {
+                                                  ref
+                                                      .read(selectedPoolProvider
+                                                          .notifier)
+                                                      .setPool(value);
+                                                }
+                                              },
+                                            ),
+                                          ),
+                                          const SizedBox(width: 8),
+                                          IconButton(
+                                            icon: const Icon(Icons.refresh),
+                                            onPressed: ref
+                                                    .watch(miningPoolsProvider)
+                                                    .isRefreshing
+                                                ? null
+                                                : () => ref
+                                                    .read(miningPoolsProvider
+                                                        .notifier)
+                                                    .refresh(),
+                                            tooltip: 'Refresh pools',
+                                          ),
+                                        ],
+                                      ),
+                                      if (ref
+                                          .watch(miningPoolsProvider)
+                                          .isRefreshing)
+                                        const Positioned(
+                                          right: 48,
+                                          top: 16,
+                                          child: SizedBox(
+                                            width: 16,
+                                            height: 16,
+                                            child: CircularProgressIndicator(
+                                              strokeWidth: 2,
+                                            ),
+                                          ),
+                                        ),
+                                    ],
                                   );
                                 },
-                                loading: () => const SizedBox(
-                                  height: 56,
-                                  child: Center(
-                                    child: CircularProgressIndicator(),
+                                error: (error, stack) =>
+                                    DropdownButtonFormField<MiningPoolServer>(
+                                  isExpanded: true,
+                                  decoration: InputDecoration(
+                                    labelText: 'Mining Pool',
+                                    border: const OutlineInputBorder(),
+                                    errorText: 'Failed to load pools',
+                                    contentPadding: const EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                      vertical: 16,
+                                    ),
                                   ),
+                                  value: ref.watch(selectedPoolProvider),
+                                  items: const [],
+                                  onChanged: null,
                                 ),
-                                error: (error, stack) => SizedBox(
-                                  height: 56,
-                                  child: Center(
-                                    child: Text('Error: $error'),
+                                loading: () =>
+                                    DropdownButtonFormField<MiningPoolServer>(
+                                  isExpanded: true,
+                                  decoration: const InputDecoration(
+                                    labelText: 'Mining Pool',
+                                    border: OutlineInputBorder(),
+                                    contentPadding: EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                      vertical: 16,
+                                    ),
                                   ),
+                                  value: null,
+                                  items: const [],
+                                  onChanged: null,
                                 ),
                               ),
                         ),

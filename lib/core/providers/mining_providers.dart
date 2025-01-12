@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/mining_pool.dart';
 import '../services/pool_service.dart';
@@ -8,14 +9,60 @@ final poolServiceProvider = Provider<PoolService>((ref) {
   return PoolService();
 });
 
-final miningPoolsProvider = FutureProvider<List<MiningPool>>((ref) async {
-  final poolService = ref.watch(poolServiceProvider);
-  // Load local pools first for immediate UI update
-  final localPools = await poolService.loadLocalPools();
-  // Then fetch latest pools in background
-  poolService.fetchPools();
-  return localPools;
+/// Provides mining pools with immediate local data and background server update
+final miningPoolsProvider =
+    AsyncNotifierProvider<MiningPoolsNotifier, List<MiningPool>>(() {
+  return MiningPoolsNotifier();
 });
+
+class MiningPoolsNotifier extends AsyncNotifier<List<MiningPool>> {
+  @override
+  Future<List<MiningPool>> build() async {
+    // Load local pools immediately
+    final poolService = ref.watch(poolServiceProvider);
+    final localPools = await poolService.loadLocalPools();
+
+    // Start fetching server pools in background
+    _fetchServerPools();
+
+    return localPools;
+  }
+
+  Future<void> _fetchServerPools() async {
+    final poolService = ref.read(poolServiceProvider);
+    try {
+      final serverPools = await poolService.fetchPools();
+      final currentPools = state.valueOrNull ?? [];
+      if (_arePoolsDifferent(currentPools, serverPools)) {
+        state = AsyncData(serverPools);
+      }
+    } catch (e) {
+      // If fetch fails, keep using local pools
+      // No need to update state since we're already showing local pools
+    }
+  }
+
+  bool _arePoolsDifferent(List<MiningPool> a, List<MiningPool> b) {
+    if (a.length != b.length) return true;
+    for (var i = 0; i < a.length; i++) {
+      if (a[i].name != b[i].name ||
+          a[i].servers.length != b[i].servers.length) {
+        return true;
+      }
+      for (var j = 0; j < a[i].servers.length; j++) {
+        if (a[i].servers[j].name != b[i].servers[j].name ||
+            a[i].servers[j].url != b[i].servers[j].url) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  Future<void> refresh() async {
+    _fetchServerPools();
+  }
+}
 
 class SelectedDevicesNotifier extends StateNotifier<Set<String>> {
   final PreferencesService _preferencesService;
