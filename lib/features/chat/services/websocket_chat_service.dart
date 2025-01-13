@@ -24,6 +24,7 @@ class WebSocketChatService implements ChatService {
       StreamController<List<ChatMessage>>.broadcast();
   ChatUser? _currentUser;
   bool _isConnected = false;
+  bool _isConnecting = false;
   Timer? _reconnectTimer;
   final Completer<void> _initCompleter = Completer<void>();
   bool _isDisposed = false;
@@ -101,10 +102,11 @@ class WebSocketChatService implements ChatService {
       throw Exception('User not created');
     }
 
-    if (_isConnected) {
+    if (_isConnected || _isConnecting) {
       return;
     }
 
+    _isConnecting = true;
     _currentChannelId = channelId;
     try {
       _channel = WebSocketChannel.connect(
@@ -145,6 +147,8 @@ class WebSocketChatService implements ChatService {
     } catch (e) {
       _handleDisconnection();
       rethrow;
+    } finally {
+      _isConnecting = false;
     }
   }
 
