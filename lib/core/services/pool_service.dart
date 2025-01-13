@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:async';
-import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 import '../models/mining_pool.dart';
+import '../utils/custom_http_client.dart';
 
 class PoolService {
   static const String poolsUrl = 'https://file.cyberchain.xyz/pools.json';
@@ -63,7 +63,7 @@ class PoolService {
 
   Future<List<MiningPool>> fetchPools() async {
     try {
-      final client = http.Client();
+      final client = getClient();
       try {
         final response = await client
             .get(Uri.parse(poolsUrl))

@@ -5,9 +5,9 @@ import '../models/chat_message.dart';
 import '../models/chat_user.dart';
 import '../models/chat_channel.dart';
 import '../services/websocket_chat_service.dart';
-import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../../core/utils/custom_http_client.dart';
 
 part 'chat_provider.freezed.dart';
 
@@ -161,7 +161,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
         return;
       }
 
-      final response = await http.get(Uri.parse(_channelsUrl));
+      final response = await getClient().get(Uri.parse(_channelsUrl));
       if (response.statusCode != 200) {
         throw Exception('Failed to load channels');
       }

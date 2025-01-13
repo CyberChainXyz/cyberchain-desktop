@@ -1,11 +1,12 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import '../models/chat_message.dart';
 import '../models/chat_user.dart';
 import 'chat_service.dart';
+import '../../../core/utils/custom_http_client.dart';
+import '../../../core/utils/user_agent_utils.dart';
 
 class WebSocketChatService implements ChatService {
   static const String _baseUrl = 'https://chat.cyberchain.xyz';
@@ -66,24 +67,29 @@ class WebSocketChatService implements ChatService {
   @override
   Future<ChatUser> createUser(String name, String avatarId) async {
     try {
-      final response = await http.post(
-        Uri.parse('$_baseUrl/api/users'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'username': name,
-          'avatar': avatarId,
-        }),
-      );
+      final client = getClient();
+      try {
+        final response = await client.post(
+          Uri.parse('$_baseUrl/api/users'),
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode({
+            'username': name,
+            'avatar': avatarId,
+          }),
+        );
 
-      if (response.statusCode != 200) {
-        throw Exception(
-            'Failed to create user: ${response.statusCode} - ${response.body}');
+        if (response.statusCode != 200) {
+          throw Exception(
+              'Failed to create user: ${response.statusCode} - ${response.body}');
+        }
+
+        final responseData = jsonDecode(response.body) as Map<String, dynamic>;
+        _currentUser = ChatUser.fromJson(responseData);
+        await _saveUser(_currentUser!);
+        return _currentUser!;
+      } finally {
+        client.close();
       }
-
-      final responseData = jsonDecode(response.body) as Map<String, dynamic>;
-      _currentUser = ChatUser.fromJson(responseData);
-      await _saveUser(_currentUser!);
-      return _currentUser!;
     } catch (e) {
       rethrow;
     }
@@ -103,7 +109,11 @@ class WebSocketChatService implements ChatService {
     try {
       _channel = WebSocketChannel.connect(
         Uri.parse(_getWsUrl(channelId)),
-        protocols: [_currentUser!.id, _currentUser!.secretKey],
+        protocols: [
+          _currentUser!.id,
+          _currentUser!.secretKey,
+          UserAgentUtils.getUserAgent(),
+        ],
       );
 
       // Wait for the connection to be established

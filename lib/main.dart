@@ -3,9 +3,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/providers/service_providers.dart';
 import 'ui/screens/home_screen.dart';
 import 'ui/screens/download_screen.dart';
+import 'core/utils/user_agent_utils.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize User-Agent before any HTTP requests
+  await UserAgentUtils.initialize();
+
   runApp(
     const ProviderScope(
       child: CCXDesktopApp(),
