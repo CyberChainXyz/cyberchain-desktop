@@ -161,14 +161,14 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
     final previousMessage = messages[index - 1];
 
     final currentDate = DateTime(
-      currentMessage.createdAt.year,
-      currentMessage.createdAt.month,
-      currentMessage.createdAt.day,
+      currentMessage.createdAt.toLocal().year,
+      currentMessage.createdAt.toLocal().month,
+      currentMessage.createdAt.toLocal().day,
     );
     final previousDate = DateTime(
-      previousMessage.createdAt.year,
-      previousMessage.createdAt.month,
-      previousMessage.createdAt.day,
+      previousMessage.createdAt.toLocal().year,
+      previousMessage.createdAt.toLocal().month,
+      previousMessage.createdAt.toLocal().day,
     );
 
     return currentDate != previousDate;
