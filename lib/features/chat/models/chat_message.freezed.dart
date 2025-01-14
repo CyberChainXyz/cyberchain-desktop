@@ -32,6 +32,8 @@ mixin _$ChatMessage {
   String get content => throw _privateConstructorUsedError;
   @JsonKey(name: 'created_at')
   DateTime get createdAt => throw _privateConstructorUsedError;
+  @JsonKey(name: 'is_deleted', defaultValue: false)
+  bool get isDeleted => throw _privateConstructorUsedError;
 
   /// Serializes this ChatMessage to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -55,7 +57,8 @@ abstract class $ChatMessageCopyWith<$Res> {
       @JsonKey(name: 'username') String username,
       @JsonKey(name: 'avatar') String avatar,
       @JsonKey(name: 'content') String content,
-      @JsonKey(name: 'created_at') DateTime createdAt});
+      @JsonKey(name: 'created_at') DateTime createdAt,
+      @JsonKey(name: 'is_deleted', defaultValue: false) bool isDeleted});
 }
 
 /// @nodoc
@@ -79,6 +82,7 @@ class _$ChatMessageCopyWithImpl<$Res, $Val extends ChatMessage>
     Object? avatar = null,
     Object? content = null,
     Object? createdAt = null,
+    Object? isDeleted = null,
   }) {
     return _then(_value.copyWith(
       id: null == id
@@ -105,6 +109,10 @@ class _$ChatMessageCopyWithImpl<$Res, $Val extends ChatMessage>
           ? _value.createdAt
           : createdAt // ignore: cast_nullable_to_non_nullable
               as DateTime,
+      isDeleted: null == isDeleted
+          ? _value.isDeleted
+          : isDeleted // ignore: cast_nullable_to_non_nullable
+              as bool,
     ) as $Val);
   }
 }
@@ -123,7 +131,8 @@ abstract class _$$ChatMessageImplCopyWith<$Res>
       @JsonKey(name: 'username') String username,
       @JsonKey(name: 'avatar') String avatar,
       @JsonKey(name: 'content') String content,
-      @JsonKey(name: 'created_at') DateTime createdAt});
+      @JsonKey(name: 'created_at') DateTime createdAt,
+      @JsonKey(name: 'is_deleted', defaultValue: false) bool isDeleted});
 }
 
 /// @nodoc
@@ -145,6 +154,7 @@ class __$$ChatMessageImplCopyWithImpl<$Res>
     Object? avatar = null,
     Object? content = null,
     Object? createdAt = null,
+    Object? isDeleted = null,
   }) {
     return _then(_$ChatMessageImpl(
       id: null == id
@@ -171,6 +181,10 @@ class __$$ChatMessageImplCopyWithImpl<$Res>
           ? _value.createdAt
           : createdAt // ignore: cast_nullable_to_non_nullable
               as DateTime,
+      isDeleted: null == isDeleted
+          ? _value.isDeleted
+          : isDeleted // ignore: cast_nullable_to_non_nullable
+              as bool,
     ));
   }
 }
@@ -184,7 +198,9 @@ class _$ChatMessageImpl implements _ChatMessage {
       @JsonKey(name: 'username') required this.username,
       @JsonKey(name: 'avatar') required this.avatar,
       @JsonKey(name: 'content') required this.content,
-      @JsonKey(name: 'created_at') required this.createdAt});
+      @JsonKey(name: 'created_at') required this.createdAt,
+      @JsonKey(name: 'is_deleted', defaultValue: false)
+      required this.isDeleted});
 
   factory _$ChatMessageImpl.fromJson(Map<String, dynamic> json) =>
       _$$ChatMessageImplFromJson(json);
@@ -207,10 +223,13 @@ class _$ChatMessageImpl implements _ChatMessage {
   @override
   @JsonKey(name: 'created_at')
   final DateTime createdAt;
+  @override
+  @JsonKey(name: 'is_deleted', defaultValue: false)
+  final bool isDeleted;
 
   @override
   String toString() {
-    return 'ChatMessage(id: $id, userId: $userId, username: $username, avatar: $avatar, content: $content, createdAt: $createdAt)';
+    return 'ChatMessage(id: $id, userId: $userId, username: $username, avatar: $avatar, content: $content, createdAt: $createdAt, isDeleted: $isDeleted)';
   }
 
   @override
@@ -225,13 +244,15 @@ class _$ChatMessageImpl implements _ChatMessage {
             (identical(other.avatar, avatar) || other.avatar == avatar) &&
             (identical(other.content, content) || other.content == content) &&
             (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt));
+                other.createdAt == createdAt) &&
+            (identical(other.isDeleted, isDeleted) ||
+                other.isDeleted == isDeleted));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(
-      runtimeType, id, userId, username, avatar, content, createdAt);
+      runtimeType, id, userId, username, avatar, content, createdAt, isDeleted);
 
   /// Create a copy of ChatMessage
   /// with the given fields replaced by the non-null parameter values.
@@ -251,13 +272,14 @@ class _$ChatMessageImpl implements _ChatMessage {
 
 abstract class _ChatMessage implements ChatMessage {
   const factory _ChatMessage(
-          {@JsonKey(name: 'id') required final String id,
-          @JsonKey(name: 'user_id') required final String userId,
-          @JsonKey(name: 'username') required final String username,
-          @JsonKey(name: 'avatar') required final String avatar,
-          @JsonKey(name: 'content') required final String content,
-          @JsonKey(name: 'created_at') required final DateTime createdAt}) =
-      _$ChatMessageImpl;
+      {@JsonKey(name: 'id') required final String id,
+      @JsonKey(name: 'user_id') required final String userId,
+      @JsonKey(name: 'username') required final String username,
+      @JsonKey(name: 'avatar') required final String avatar,
+      @JsonKey(name: 'content') required final String content,
+      @JsonKey(name: 'created_at') required final DateTime createdAt,
+      @JsonKey(name: 'is_deleted', defaultValue: false)
+      required final bool isDeleted}) = _$ChatMessageImpl;
 
   factory _ChatMessage.fromJson(Map<String, dynamic> json) =
       _$ChatMessageImpl.fromJson;
@@ -280,6 +302,9 @@ abstract class _ChatMessage implements ChatMessage {
   @override
   @JsonKey(name: 'created_at')
   DateTime get createdAt;
+  @override
+  @JsonKey(name: 'is_deleted', defaultValue: false)
+  bool get isDeleted;
 
   /// Create a copy of ChatMessage
   /// with the given fields replaced by the non-null parameter values.

@@ -87,13 +87,23 @@ class MessageBubble extends StatelessWidget {
                         children: [
                           Flexible(
                             child: SelectableText(
-                              message.content,
+                              message.isDeleted
+                                  ? 'Message deleted'
+                                  : message.content,
                               style: AppTextStyle.withEmojiFonts(
-                                const TextStyle(
+                                TextStyle(
                                   height: 1.4,
-                                  color: Color(0xFF2D3843),
+                                  color: message.isDeleted
+                                      ? const Color(0xFF95A5A6)
+                                      : const Color(0xFF2D3843),
                                   fontSize: 14,
                                   fontWeight: FontWeight.w500,
+                                  fontStyle: message.isDeleted
+                                      ? FontStyle.italic
+                                      : FontStyle.normal,
+                                  decoration: message.isDeleted
+                                      ? TextDecoration.lineThrough
+                                      : null,
                                 ),
                               ),
                               // Enable text selection on desktop

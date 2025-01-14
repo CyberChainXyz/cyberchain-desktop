@@ -7,12 +7,23 @@ import '../models/chat_user.dart';
 import 'chat_service.dart';
 import '../../../core/utils/custom_http_client.dart';
 import '../../../core/utils/user_agent_utils.dart';
+import 'package:flutter/foundation.dart';
 
 class WebSocketChatService implements ChatService {
-  static const String _baseUrl = 'https://chat.cyberchain.xyz';
-  static const String _wsUrlTemplate =
+  static const String _productionBaseUrl = 'https://chat.cyberchain.xyz';
+  static const String _debugBaseUrl = 'http://127.0.0.1:8080';
+  static const String _productionWsUrlTemplate =
       'wss://chat.cyberchain.xyz/ws/{channel_id}';
-  static const String _userKey = 'chat_user';
+  static const String _debugWsUrlTemplate =
+      'ws://127.0.0.1:8080/ws/{channel_id}';
+
+  static String get _baseUrl => kDebugMode ? _debugBaseUrl : _productionBaseUrl;
+  static String get _wsUrlTemplate =>
+      kDebugMode ? _debugWsUrlTemplate : _productionWsUrlTemplate;
+  static const String _productionUserKey = 'chat_user';
+  static const String _debugUserKey = 'debug_chat_user';
+  static const String _userKey =
+      kDebugMode ? _debugUserKey : _productionUserKey;
   static const Duration _retryInterval = Duration(seconds: 3);
 
   String _getWsUrl(String channelId) =>
