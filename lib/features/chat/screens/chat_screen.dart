@@ -4,6 +4,7 @@ import '../providers/chat_provider.dart';
 import '../widgets/message_bubble.dart';
 import '../widgets/chat_input.dart';
 import '../widgets/date_separator.dart';
+import '../widgets/notification_marquee.dart';
 import '../models/chat_message.dart';
 import 'dart:math' as math;
 import 'package:url_launcher/url_launcher.dart';
@@ -402,35 +403,10 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
                   ),
                 ),
               ),
-            const Spacer(),
-            Material(
-              color: Colors.transparent,
-              child: InkWell(
-                onTap: _showRulesDialog,
-                borderRadius: BorderRadius.circular(4),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.info_outline,
-                      size: 16,
-                      color: Color(0xFF95A5A6),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      'Click to view chat rules',
-                      style: TextStyle(
-                        fontFamily: 'Inter',
-                        fontSize: 13,
-                        color: Color(0xFF95A5A6),
-                        fontWeight: FontWeight.w400,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+            const SizedBox(width: 16),
+            const Expanded(
+              child: NotificationMarquee(),
             ),
-            const Spacer(),
           ],
         ),
         centerTitle: false,
@@ -445,6 +421,15 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
             ),
             onPressed: () => _showChannelSelectionDialog(),
             tooltip: 'Select Language Channel',
+          ),
+          IconButton(
+            icon: const Icon(
+              Icons.info_outline,
+              size: 20,
+              color: Color(0xFF95A5A6),
+            ),
+            onPressed: _showRulesDialog,
+            tooltip: 'Chat Rules',
           ),
           IconButton(
             icon: const Icon(

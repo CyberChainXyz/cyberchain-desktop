@@ -40,6 +40,7 @@ class _CCXDesktopAppState extends ConsumerState<CCXDesktopApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'CCX Desktop',
+      debugShowCheckedModeBanner: false, // Hide the debug banner
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
