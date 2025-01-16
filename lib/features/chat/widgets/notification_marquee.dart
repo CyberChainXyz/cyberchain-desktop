@@ -31,11 +31,12 @@ class _NotificationMarqueeState extends ConsumerState<NotificationMarquee> {
     _displayTimer?.cancel();
     _displayTimer = Timer(const Duration(seconds: 3), () {
       if (!mounted) return;
+
+      final notifications = ref.read(notificationProvider).notifications;
+      if (notifications.isEmpty) return;
+
       setState(() {
-        final notifications = ref.read(notificationProvider).notifications;
-        if (notifications.isNotEmpty) {
-          _currentIndex = (_currentIndex + 1) % notifications.length;
-        }
+        _currentIndex = (_currentIndex + 1) % notifications.length;
       });
       _scheduleNextNotification();
     });
@@ -45,9 +46,9 @@ class _NotificationMarqueeState extends ConsumerState<NotificationMarquee> {
   void didUpdateWidget(covariant NotificationMarquee oldWidget) {
     super.didUpdateWidget(oldWidget);
     final notifications = ref.read(notificationProvider).notifications;
-    if (notifications.isNotEmpty && _currentIndex >= notifications.length) {
+    if (_currentIndex >= notifications.length) {
       setState(() {
-        _currentIndex = 0;
+        _currentIndex = notifications.isEmpty ? 0 : notifications.length - 1;
       });
     }
   }
@@ -219,6 +220,10 @@ class _NotificationMarqueeState extends ConsumerState<NotificationMarquee> {
       return const SizedBox.shrink();
     }
 
+    if (_currentIndex >= notifications.length) {
+      _currentIndex = 0;
+    }
+
     final notification = notifications[_currentIndex];
     final isLink = notification.type == 'link';
 
@@ -243,7 +248,7 @@ class _NotificationMarqueeState extends ConsumerState<NotificationMarquee> {
             color: Colors.transparent,
             child: InkWell(
               onTap: () {
-                _showNotificationDialog(notifications[_currentIndex]);
+                _showNotificationDialog(notification);
               },
               hoverColor: const Color(0xFF2196F3).withOpacity(0.05),
               splashColor: const Color(0xFF2196F3).withOpacity(0.1),
