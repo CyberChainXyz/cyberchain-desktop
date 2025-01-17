@@ -57,6 +57,13 @@ jobs:
         if: runner.os == 'macOS'
         run: cp -r ${{ matrix.build-path }}/ccx_desktop.app ccx-desktop-${{ github.ref_name }}/
 
+      - name: Copy vc_redist dlls
+        if: runner.os == 'Windows'
+        run: |
+          cp C:\Windows\System32\msvcp140.dll ccx-desktop-${{ github.ref_name }}/
+          cp C:\Windows\System32\vcruntime140.dll ccx-desktop-${{ github.ref_name }}/
+          cp C:\Windows\System32\vcruntime140_1.dll ccx-desktop-${{ github.ref_name }}/
+
       - name: Archive Release
         uses: thedoctor0/zip-release@0.7.6
         with:
