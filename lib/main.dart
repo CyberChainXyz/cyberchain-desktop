@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/providers/service_providers.dart';
@@ -31,14 +33,74 @@ class CCXDesktopApp extends ConsumerStatefulWidget {
 }
 
 class _CCXDesktopAppState extends ConsumerState<CCXDesktopApp> {
+  late final AppLifecycleListener _listener;
+  final _navigatorKey = GlobalKey<NavigatorState>();
+
   @override
   void initState() {
     super.initState();
+    _listener = AppLifecycleListener(
+      onExitRequested: _handleExitRequest,
+    );
+  }
+
+  @override
+  void dispose() {
+    _listener.dispose();
+    super.dispose();
+  }
+
+  Future<AppExitResponse> _handleExitRequest() async {
+    final processService = ref.read(processServiceProvider.notifier);
+    final isGoCyberchainRunning =
+        processService.isProcessRunning('go-cyberchain');
+    final isXMinerRunning = processService.isProcessRunning('xMiner');
+
+    if (isGoCyberchainRunning || isXMinerRunning) {
+      final shouldExit = await showDialog<bool>(
+        context: _navigatorKey.currentContext ?? context,
+        barrierDismissible: false,
+        builder: (BuildContext context) => AlertDialog(
+          title: const Text('Confirm Exit'),
+          content: Text(isXMinerRunning
+              ? 'Mining processes are still running. Are you sure you want to exit?'
+              : 'Node process is still running. Are you sure you want to exit?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: const Text('Exit'),
+            ),
+          ],
+        ),
+      );
+      // debugPrint('shouldExit: $shouldExit');
+      if (shouldExit != true) {
+        return AppExitResponse.cancel;
+      }
+
+      // Stop mining processes before exit
+      if (isGoCyberchainRunning) {
+        // debugPrint('Stopping go-cyberchain');
+        await processService.stopProgram('go-cyberchain');
+      }
+      if (isXMinerRunning) {
+        // debugPrint('Stopping xMiner');
+        await processService.stopProgram('xMiner');
+      }
+      // debugPrint('Exiting application');
+    }
+
+    return AppExitResponse.exit;
   }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      navigatorKey: _navigatorKey,
       title: 'CCX Desktop',
       debugShowCheckedModeBanner: false, // Hide the debug banner
       theme: ThemeData(
