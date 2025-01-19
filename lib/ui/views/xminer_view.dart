@@ -8,6 +8,7 @@ import '../../core/models/mining_pool.dart';
 import '../../core/utils/address_validator.dart';
 import '../../core/providers/output_providers.dart';
 import '../../core/providers/error_provider.dart';
+import '../../core/widgets/log_viewer.dart';
 
 class XMinerView extends ConsumerStatefulWidget {
   const XMinerView({super.key});
@@ -533,27 +534,10 @@ class _XMinerViewState extends ConsumerState<XMinerView> {
                           color: Colors.grey[900],
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        child: RawScrollbar(
-                          controller: _scrollController,
-                          thumbVisibility: true,
-                          trackVisibility: true,
-                          thickness: 12,
-                          thumbColor: Colors.grey[600],
-                          radius: const Radius.circular(4),
-                          child: SingleChildScrollView(
-                            controller: _scrollController,
-                            child: SelectableText(
-                              output.isNotEmpty
-                                  ? output
-                                  : (isRunning
-                                      ? 'Starting program...'
-                                      : 'Program is not running'),
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontFamily: 'monospace',
-                              ),
-                            ),
-                          ),
+                        child: LogViewer(
+                          output: output,
+                          isRunning: isRunning,
+                          emptyMessage: 'Program is not running',
                         ),
                       ),
                     ),
