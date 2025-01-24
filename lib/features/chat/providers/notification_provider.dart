@@ -27,7 +27,7 @@ final notificationProvider =
 class NotificationNotifier extends StateNotifier<NotificationState> {
   final Ref _ref;
   Timer? _timer;
-  static const String _notificationsUrl = kDebugMode
+  static const String _notificationsUrl = (kDebugMode && 1==0)
       ? 'http://127.0.0.1:8080/api/notifications'
       : 'https://chat.cyberchain.xyz/api/notifications';
 

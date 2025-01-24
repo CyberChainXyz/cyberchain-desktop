@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
+import 'package:web_socket_channel/io.dart';
 import '../models/chat_message.dart';
 import '../models/chat_user.dart';
 import 'chat_service.dart';
@@ -17,9 +18,10 @@ class WebSocketChatService implements ChatService {
   static const String _debugWsUrlTemplate =
       'ws://127.0.0.1:8080/ws/{channel_id}';
 
-  static String get _baseUrl => kDebugMode ? _debugBaseUrl : _productionBaseUrl;
+  static String get _baseUrl =>
+      kDebugMode && 1 == 0 ? _debugBaseUrl : _productionBaseUrl;
   static String get _wsUrlTemplate =>
-      kDebugMode ? _debugWsUrlTemplate : _productionWsUrlTemplate;
+      kDebugMode && 1 == 0 ? _debugWsUrlTemplate : _productionWsUrlTemplate;
   static const String _productionUserKey = 'chat_user';
   static const String _debugUserKey = 'debug_chat_user';
   static const String _userKey =
@@ -120,13 +122,19 @@ class WebSocketChatService implements ChatService {
     _isConnecting = true;
     _currentChannelId = channelId;
     try {
-      _channel = WebSocketChannel.connect(
-        Uri.parse(_getWsUrl(channelId)),
+      final wsUrl = Uri.parse(_getWsUrl(channelId));
+      _channel = IOWebSocketChannel.connect(
+        wsUrl,
         protocols: [
           _currentUser!.id,
           _currentUser!.secretKey,
           UserAgentUtils.getUserAgent(),
         ],
+        headers: {
+          'User-Agent': UserAgentUtils.getUserAgent(),
+        },
+        pingInterval: const Duration(seconds: 15),
+        connectTimeout: const Duration(seconds: 15),
       );
 
       // Wait for the connection to be established
