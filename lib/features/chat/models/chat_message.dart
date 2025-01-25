@@ -13,6 +13,7 @@ class ChatMessage with _$ChatMessage {
     @JsonKey(name: 'content') required String content,
     @JsonKey(name: 'created_at') required DateTime createdAt,
     @JsonKey(name: 'is_deleted', defaultValue: false) required bool isDeleted,
+    @JsonKey(name: 'is_init', defaultValue: false) required bool isInit,
   }) = _ChatMessage;
 
   factory ChatMessage.fromJson(Map<String, dynamic> json) =>

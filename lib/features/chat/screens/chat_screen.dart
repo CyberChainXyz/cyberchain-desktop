@@ -9,6 +9,7 @@ import '../models/chat_message.dart';
 import 'dart:math' as math;
 import 'package:url_launcher/url_launcher.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/services/app_notification_service.dart';
 
 class HexagonPainter extends CustomPainter {
   final Color color;
@@ -413,6 +414,27 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
         elevation: 1,
         toolbarHeight: 48,
         actions: [
+          Consumer(
+            builder: (context, ref, _) {
+              final isEnabled = ref.watch(notificationSettingsProvider);
+              return IconButton(
+                icon: Icon(
+                  isEnabled
+                      ? Icons.notifications_active
+                      : Icons.notifications_off,
+                  size: 20,
+                  color: isEnabled
+                      ? const Color(0xFF2196F3)
+                      : const Color(0xFF95A5A6),
+                ),
+                onPressed: () =>
+                    ref.read(notificationSettingsProvider.notifier).toggle(),
+                tooltip: isEnabled
+                    ? 'Disable Notifications'
+                    : 'Enable Notifications',
+              );
+            },
+          ),
           IconButton(
             icon: const Icon(
               Icons.language,

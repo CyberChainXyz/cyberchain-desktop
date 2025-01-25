@@ -6,6 +6,7 @@ import '../../../core/utils/custom_http_client.dart';
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import '../providers/chat_provider.dart';
+import '../../../core/services/app_notification_service.dart';
 
 part 'notification_provider.freezed.dart';
 
@@ -27,11 +28,15 @@ final notificationProvider =
 class NotificationNotifier extends StateNotifier<NotificationState> {
   final Ref _ref;
   Timer? _timer;
-  static const String _notificationsUrl = (kDebugMode && 1==0)
+  late final AppNotificationService _notificationService;
+  bool _isFirstFetch = true;
+  static const String _notificationsUrl = (kDebugMode && 1 == 0)
       ? 'http://127.0.0.1:8080/api/notifications'
       : 'https://chat.cyberchain.xyz/api/notifications';
 
-  NotificationNotifier(this._ref) : super(const NotificationState()) {
+  NotificationNotifier(this._ref)
+      : _notificationService = _ref.read(appNotificationServiceProvider),
+        super(const NotificationState()) {
     _init();
   }
 
@@ -82,6 +87,27 @@ class NotificationNotifier extends StateNotifier<NotificationState> {
           NotificationResponse.fromJson(jsonDecode(response.body));
 
       if (!mounted) return;
+
+      // Check for new notifications, but skip notifications on first fetch
+      if (!_isFirstFetch) {
+        final oldNotifications = state.notifications;
+        final newNotifications = notificationResponse.notifications;
+
+        // Show system notifications for new notifications
+        final isEnabled = _ref.read(notificationSettingsProvider);
+        if (isEnabled) {
+          for (final notification in newNotifications) {
+            if (!oldNotifications.any((n) => n.id == notification.id)) {
+              _notificationService.showNotification(
+                title: 'New Notification',
+                message: notification.content,
+              );
+            }
+          }
+        }
+      }
+
+      _isFirstFetch = false;
       state = state.copyWith(
         notifications: notificationResponse.notifications,
         isLoading: false,

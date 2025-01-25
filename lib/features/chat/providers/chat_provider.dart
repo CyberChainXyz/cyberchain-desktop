@@ -8,6 +8,7 @@ import '../services/websocket_chat_service.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/utils/custom_http_client.dart';
+import '../../../core/services/app_notification_service.dart';
 
 part 'chat_provider.freezed.dart';
 
@@ -32,7 +33,7 @@ final chatServiceProvider = Provider<WebSocketChatService>((ref) {
 });
 
 final chatProvider = StateNotifierProvider<ChatNotifier, ChatState>((ref) {
-  return ChatNotifier(_chatService);
+  return ChatNotifier(_chatService, ref);
 });
 
 class ChatNotifier extends StateNotifier<ChatState> {
@@ -43,6 +44,8 @@ class ChatNotifier extends StateNotifier<ChatState> {
   static const String _channelsUrl = 'https://chat.cyberchain.xyz/api/channels';
   static const bool _useHardcodedChannels = true;
   static const String _lastChannelIdKey = 'last_channel_id';
+  late final AppNotificationService _notificationService;
+  final Ref _ref;
 
   static final List<ChatChannel> _hardcodedChannels = [
     ChatChannel(
@@ -95,8 +98,9 @@ class ChatNotifier extends StateNotifier<ChatState> {
     ),
   ];
 
-  ChatNotifier(this._chatService)
-      : super(ChatState(
+  ChatNotifier(this._chatService, this._ref)
+      : _notificationService = _ref.read(appNotificationServiceProvider),
+        super(ChatState(
           isLoading: true,
           currentUser: null,
           isConnected: false,
@@ -253,6 +257,18 @@ class ChatNotifier extends StateNotifier<ChatState> {
         final messages = [...state.messages];
         if (!messages.any((m) => m.id == message.id)) {
           state = state.copyWith(messages: [...messages, message]);
+
+          // Show notification for new messages that are not init messages
+          if (message.userId != state.currentUser?.id && !message.isInit) {
+            final isEnabled = _ref.read(notificationSettingsProvider);
+            if (isEnabled) {
+              _notificationService.showChatMessage(
+                title: state.currentChannel?.name ?? 'New Message',
+                message: message.content,
+                sender: message.username,
+              );
+            }
+          }
         }
       },
     );

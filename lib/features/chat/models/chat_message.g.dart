@@ -15,6 +15,7 @@ _$ChatMessageImpl _$$ChatMessageImplFromJson(Map<String, dynamic> json) =>
       content: json['content'] as String,
       createdAt: DateTime.parse(json['created_at'] as String),
       isDeleted: json['is_deleted'] as bool? ?? false,
+      isInit: json['is_init'] as bool? ?? false,
     );
 
 Map<String, dynamic> _$$ChatMessageImplToJson(_$ChatMessageImpl instance) =>
@@ -26,4 +27,5 @@ Map<String, dynamic> _$$ChatMessageImplToJson(_$ChatMessageImpl instance) =>
       'content': instance.content,
       'created_at': instance.createdAt.toIso8601String(),
       'is_deleted': instance.isDeleted,
+      'is_init': instance.isInit,
     };

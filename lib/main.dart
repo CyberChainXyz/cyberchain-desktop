@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/providers/service_providers.dart';
+import 'core/services/app_notification_service.dart';
 import 'ui/screens/home_screen.dart';
 import 'ui/screens/download_screen.dart';
 import 'core/utils/user_agent_utils.dart';
@@ -13,9 +14,16 @@ void main() async {
   // Initialize User-Agent before any HTTP requests
   await UserAgentUtils.initialize();
 
+  // Initialize notification service
+  final notificationService = AppNotificationService();
+  await notificationService.initialize();
+
   runApp(
-    const ProviderScope(
-      child: CCXDesktopApp(),
+    ProviderScope(
+      overrides: [
+        appNotificationServiceProvider.overrideWithValue(notificationService),
+      ],
+      child: const CCXDesktopApp(),
     ),
   );
 }
