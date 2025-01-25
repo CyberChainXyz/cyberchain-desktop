@@ -41,7 +41,7 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           sudo apt-get update
-          sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev
+          sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev libnotify-dev
       - run: flutter config --enable-${{ runner.os == 'macOS' && 'macos' || runner.os == 'Windows' && 'windows' || 'linux' }}-desktop
       - run: flutter pub get
       - run: flutter build ${{ runner.os == 'macOS' && 'macos' || runner.os == 'Windows' && 'windows' || 'linux' }} --release
