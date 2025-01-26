@@ -22,6 +22,8 @@ NotificationAction _$NotificationActionFromJson(Map<String, dynamic> json) {
 mixin _$NotificationAction {
   String get label => throw _privateConstructorUsedError;
   String get link => throw _privateConstructorUsedError;
+  @JsonKey(name: 'need_token')
+  bool get needToken => throw _privateConstructorUsedError;
 
   /// Serializes this NotificationAction to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -39,7 +41,8 @@ abstract class $NotificationActionCopyWith<$Res> {
           NotificationAction value, $Res Function(NotificationAction) then) =
       _$NotificationActionCopyWithImpl<$Res, NotificationAction>;
   @useResult
-  $Res call({String label, String link});
+  $Res call(
+      {String label, String link, @JsonKey(name: 'need_token') bool needToken});
 }
 
 /// @nodoc
@@ -59,6 +62,7 @@ class _$NotificationActionCopyWithImpl<$Res, $Val extends NotificationAction>
   $Res call({
     Object? label = null,
     Object? link = null,
+    Object? needToken = null,
   }) {
     return _then(_value.copyWith(
       label: null == label
@@ -69,6 +73,10 @@ class _$NotificationActionCopyWithImpl<$Res, $Val extends NotificationAction>
           ? _value.link
           : link // ignore: cast_nullable_to_non_nullable
               as String,
+      needToken: null == needToken
+          ? _value.needToken
+          : needToken // ignore: cast_nullable_to_non_nullable
+              as bool,
     ) as $Val);
   }
 }
@@ -81,7 +89,8 @@ abstract class _$$NotificationActionImplCopyWith<$Res>
       __$$NotificationActionImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({String label, String link});
+  $Res call(
+      {String label, String link, @JsonKey(name: 'need_token') bool needToken});
 }
 
 /// @nodoc
@@ -99,6 +108,7 @@ class __$$NotificationActionImplCopyWithImpl<$Res>
   $Res call({
     Object? label = null,
     Object? link = null,
+    Object? needToken = null,
   }) {
     return _then(_$NotificationActionImpl(
       label: null == label
@@ -109,6 +119,10 @@ class __$$NotificationActionImplCopyWithImpl<$Res>
           ? _value.link
           : link // ignore: cast_nullable_to_non_nullable
               as String,
+      needToken: null == needToken
+          ? _value.needToken
+          : needToken // ignore: cast_nullable_to_non_nullable
+              as bool,
     ));
   }
 }
@@ -116,7 +130,10 @@ class __$$NotificationActionImplCopyWithImpl<$Res>
 /// @nodoc
 @JsonSerializable()
 class _$NotificationActionImpl implements _NotificationAction {
-  const _$NotificationActionImpl({required this.label, required this.link});
+  const _$NotificationActionImpl(
+      {required this.label,
+      required this.link,
+      @JsonKey(name: 'need_token') this.needToken = false});
 
   factory _$NotificationActionImpl.fromJson(Map<String, dynamic> json) =>
       _$$NotificationActionImplFromJson(json);
@@ -125,10 +142,13 @@ class _$NotificationActionImpl implements _NotificationAction {
   final String label;
   @override
   final String link;
+  @override
+  @JsonKey(name: 'need_token')
+  final bool needToken;
 
   @override
   String toString() {
-    return 'NotificationAction(label: $label, link: $link)';
+    return 'NotificationAction(label: $label, link: $link, needToken: $needToken)';
   }
 
   @override
@@ -137,12 +157,14 @@ class _$NotificationActionImpl implements _NotificationAction {
         (other.runtimeType == runtimeType &&
             other is _$NotificationActionImpl &&
             (identical(other.label, label) || other.label == label) &&
-            (identical(other.link, link) || other.link == link));
+            (identical(other.link, link) || other.link == link) &&
+            (identical(other.needToken, needToken) ||
+                other.needToken == needToken));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, label, link);
+  int get hashCode => Object.hash(runtimeType, label, link, needToken);
 
   /// Create a copy of NotificationAction
   /// with the given fields replaced by the non-null parameter values.
@@ -163,8 +185,10 @@ class _$NotificationActionImpl implements _NotificationAction {
 
 abstract class _NotificationAction implements NotificationAction {
   const factory _NotificationAction(
-      {required final String label,
-      required final String link}) = _$NotificationActionImpl;
+          {required final String label,
+          required final String link,
+          @JsonKey(name: 'need_token') final bool needToken}) =
+      _$NotificationActionImpl;
 
   factory _NotificationAction.fromJson(Map<String, dynamic> json) =
       _$NotificationActionImpl.fromJson;
@@ -173,6 +197,9 @@ abstract class _NotificationAction implements NotificationAction {
   String get label;
   @override
   String get link;
+  @override
+  @JsonKey(name: 'need_token')
+  bool get needToken;
 
   /// Create a copy of NotificationAction
   /// with the given fields replaced by the non-null parameter values.
@@ -195,6 +222,8 @@ mixin _$Notification {
   List<NotificationAction> get actions => throw _privateConstructorUsedError;
   @JsonKey(name: 'created_at')
   DateTime get createdAt => throw _privateConstructorUsedError;
+  @JsonKey(name: 'need_token')
+  bool get needToken => throw _privateConstructorUsedError;
 
   /// Serializes this Notification to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -218,7 +247,8 @@ abstract class $NotificationCopyWith<$Res> {
       String content,
       String type,
       List<NotificationAction> actions,
-      @JsonKey(name: 'created_at') DateTime createdAt});
+      @JsonKey(name: 'created_at') DateTime createdAt,
+      @JsonKey(name: 'need_token') bool needToken});
 }
 
 /// @nodoc
@@ -242,6 +272,7 @@ class _$NotificationCopyWithImpl<$Res, $Val extends Notification>
     Object? type = null,
     Object? actions = null,
     Object? createdAt = null,
+    Object? needToken = null,
   }) {
     return _then(_value.copyWith(
       id: null == id
@@ -268,6 +299,10 @@ class _$NotificationCopyWithImpl<$Res, $Val extends Notification>
           ? _value.createdAt
           : createdAt // ignore: cast_nullable_to_non_nullable
               as DateTime,
+      needToken: null == needToken
+          ? _value.needToken
+          : needToken // ignore: cast_nullable_to_non_nullable
+              as bool,
     ) as $Val);
   }
 }
@@ -286,7 +321,8 @@ abstract class _$$NotificationImplCopyWith<$Res>
       String content,
       String type,
       List<NotificationAction> actions,
-      @JsonKey(name: 'created_at') DateTime createdAt});
+      @JsonKey(name: 'created_at') DateTime createdAt,
+      @JsonKey(name: 'need_token') bool needToken});
 }
 
 /// @nodoc
@@ -308,6 +344,7 @@ class __$$NotificationImplCopyWithImpl<$Res>
     Object? type = null,
     Object? actions = null,
     Object? createdAt = null,
+    Object? needToken = null,
   }) {
     return _then(_$NotificationImpl(
       id: null == id
@@ -334,6 +371,10 @@ class __$$NotificationImplCopyWithImpl<$Res>
           ? _value.createdAt
           : createdAt // ignore: cast_nullable_to_non_nullable
               as DateTime,
+      needToken: null == needToken
+          ? _value.needToken
+          : needToken // ignore: cast_nullable_to_non_nullable
+              as bool,
     ));
   }
 }
@@ -347,7 +388,8 @@ class _$NotificationImpl implements _Notification {
       required this.content,
       required this.type,
       required final List<NotificationAction> actions,
-      @JsonKey(name: 'created_at') required this.createdAt})
+      @JsonKey(name: 'created_at') required this.createdAt,
+      @JsonKey(name: 'need_token') this.needToken = false})
       : _actions = actions;
 
   factory _$NotificationImpl.fromJson(Map<String, dynamic> json) =>
@@ -372,10 +414,13 @@ class _$NotificationImpl implements _Notification {
   @override
   @JsonKey(name: 'created_at')
   final DateTime createdAt;
+  @override
+  @JsonKey(name: 'need_token')
+  final bool needToken;
 
   @override
   String toString() {
-    return 'Notification(id: $id, title: $title, content: $content, type: $type, actions: $actions, createdAt: $createdAt)';
+    return 'Notification(id: $id, title: $title, content: $content, type: $type, actions: $actions, createdAt: $createdAt, needToken: $needToken)';
   }
 
   @override
@@ -389,13 +434,15 @@ class _$NotificationImpl implements _Notification {
             (identical(other.type, type) || other.type == type) &&
             const DeepCollectionEquality().equals(other._actions, _actions) &&
             (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt));
+                other.createdAt == createdAt) &&
+            (identical(other.needToken, needToken) ||
+                other.needToken == needToken));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(runtimeType, id, title, content, type,
-      const DeepCollectionEquality().hash(_actions), createdAt);
+      const DeepCollectionEquality().hash(_actions), createdAt, needToken);
 
   /// Create a copy of Notification
   /// with the given fields replaced by the non-null parameter values.
@@ -415,13 +462,13 @@ class _$NotificationImpl implements _Notification {
 
 abstract class _Notification implements Notification {
   const factory _Notification(
-          {required final String id,
-          required final String title,
-          required final String content,
-          required final String type,
-          required final List<NotificationAction> actions,
-          @JsonKey(name: 'created_at') required final DateTime createdAt}) =
-      _$NotificationImpl;
+      {required final String id,
+      required final String title,
+      required final String content,
+      required final String type,
+      required final List<NotificationAction> actions,
+      @JsonKey(name: 'created_at') required final DateTime createdAt,
+      @JsonKey(name: 'need_token') final bool needToken}) = _$NotificationImpl;
 
   factory _Notification.fromJson(Map<String, dynamic> json) =
       _$NotificationImpl.fromJson;
@@ -439,6 +486,9 @@ abstract class _Notification implements Notification {
   @override
   @JsonKey(name: 'created_at')
   DateTime get createdAt;
+  @override
+  @JsonKey(name: 'need_token')
+  bool get needToken;
 
   /// Create a copy of Notification
   /// with the given fields replaced by the non-null parameter values.

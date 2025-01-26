@@ -63,9 +63,9 @@ class _NotificationMarqueeState extends ConsumerState<NotificationMarquee> {
     final notificationState = ref.read(notificationProvider);
     final userToken = notificationState.userToken;
 
-    Uri _buildUrl(String baseUrl) {
+    Uri _buildUrl(String baseUrl, {bool needToken = false}) {
       final uri = Uri.parse(baseUrl);
-      if (userToken == null) return uri;
+      if (!needToken || userToken == null) return uri;
 
       final queryParams = Map<String, String>.from(uri.queryParameters)
         ..['user_token'] = userToken;
@@ -75,7 +75,7 @@ class _NotificationMarqueeState extends ConsumerState<NotificationMarquee> {
 
     if (notification.type == 'link') {
       launchUrl(
-        _buildUrl(notification.content),
+        _buildUrl(notification.content, needToken: notification.needToken),
         mode: LaunchMode.externalApplication,
       );
       return;
@@ -169,7 +169,8 @@ class _NotificationMarqueeState extends ConsumerState<NotificationMarquee> {
                                 return ElevatedButton(
                                   onPressed: () {
                                     launchUrl(
-                                      _buildUrl(action.link),
+                                      _buildUrl(action.link,
+                                          needToken: action.needToken),
                                       mode: LaunchMode.externalApplication,
                                     );
                                   },

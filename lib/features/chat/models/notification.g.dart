@@ -11,6 +11,7 @@ _$NotificationActionImpl _$$NotificationActionImplFromJson(
     _$NotificationActionImpl(
       label: json['label'] as String,
       link: json['link'] as String,
+      needToken: json['need_token'] as bool? ?? false,
     );
 
 Map<String, dynamic> _$$NotificationActionImplToJson(
@@ -18,6 +19,7 @@ Map<String, dynamic> _$$NotificationActionImplToJson(
     <String, dynamic>{
       'label': instance.label,
       'link': instance.link,
+      'need_token': instance.needToken,
     };
 
 _$NotificationImpl _$$NotificationImplFromJson(Map<String, dynamic> json) =>
@@ -30,6 +32,7 @@ _$NotificationImpl _$$NotificationImplFromJson(Map<String, dynamic> json) =>
           .map((e) => NotificationAction.fromJson(e as Map<String, dynamic>))
           .toList(),
       createdAt: DateTime.parse(json['created_at'] as String),
+      needToken: json['need_token'] as bool? ?? false,
     );
 
 Map<String, dynamic> _$$NotificationImplToJson(_$NotificationImpl instance) =>
@@ -40,6 +43,7 @@ Map<String, dynamic> _$$NotificationImplToJson(_$NotificationImpl instance) =>
       'type': instance.type,
       'actions': instance.actions,
       'created_at': instance.createdAt.toIso8601String(),
+      'need_token': instance.needToken,
     };
 
 _$NotificationResponseImpl _$$NotificationResponseImplFromJson(

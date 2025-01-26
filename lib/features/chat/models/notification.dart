@@ -8,6 +8,7 @@ class NotificationAction with _$NotificationAction {
   const factory NotificationAction({
     required String label,
     required String link,
+    @JsonKey(name: 'need_token') @Default(false) bool needToken,
   }) = _NotificationAction;
 
   factory NotificationAction.fromJson(Map<String, dynamic> json) =>
@@ -23,6 +24,7 @@ class Notification with _$Notification {
     required String type,
     required List<NotificationAction> actions,
     @JsonKey(name: 'created_at') required DateTime createdAt,
+    @JsonKey(name: 'need_token') @Default(false) bool needToken,
   }) = _Notification;
 
   factory Notification.fromJson(Map<String, dynamic> json) =>
