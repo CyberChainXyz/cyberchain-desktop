@@ -30,6 +30,18 @@ class _DownloadScreenState extends ConsumerState<DownloadScreen> {
     super.initState();
     _checkLocalVersions();
     _checkLatestVersions();
+
+    final downloadProgress = ref.watch(downloadProgressProvider);
+    if (downloadProgress.downloading.contains(AppConstants.goCyberchainRepo)) {
+      setState(() {
+        _downloadingPrograms.add(AppConstants.goCyberchainRepo);
+      });
+    }
+    if (downloadProgress.downloading.contains(AppConstants.xMinerRepo)) {
+      setState(() {
+        _downloadingPrograms.add(AppConstants.xMinerRepo);
+      });
+    }
   }
 
   Future<void> _checkLocalVersions() async {
@@ -95,18 +107,37 @@ class _DownloadScreenState extends ConsumerState<DownloadScreen> {
     try {
       final updateService = ref.read(updateServiceProvider.notifier);
       final downloadProgress = ref.read(downloadProgressProvider.notifier);
+      final processService = ref.read(processServiceProvider.notifier);
+      final downloadState = ref.read(downloadProgressProvider);
 
-      downloadProgress.startDownload(program);
-
+      // Stop the program before downloading
       try {
-        await updateService.updateProgram(
-          program,
-          onProgress: (progress) {
-            downloadProgress.updateProgress(program, progress);
-          },
-        );
-      } finally {
-        downloadProgress.finishDownload(program);
+        if (processService.isProcessRunning(program)) {
+          await processService.stopProgram(program);
+        }
+      } catch (e) {
+        // Ignore error if program is not running or fails to stop
+      }
+
+      if (!downloadState.downloading.contains(program)) {
+        downloadProgress.startDownload(program);
+
+        try {
+          await updateService.updateProgram(
+            program,
+            onProgress: (progress) {
+              downloadProgress.updateProgress(program, progress);
+            },
+          );
+        } finally {
+          downloadProgress.finishDownload(program);
+        }
+
+        ref.read(programsUpdateProvider.notifier).checkUpdates();
+      } else {
+        while (downloadState.downloading.contains(program)) {
+          await Future.delayed(const Duration(milliseconds: 100));
+        }
       }
 
       if (mounted) {
@@ -123,9 +154,13 @@ class _DownloadScreenState extends ConsumerState<DownloadScreen> {
         ].every((p) => _localVersions[p] != null);
 
         if (allProgramsInstalled) {
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (context) => const HomeScreen()),
-          );
+          if (widget.fromHome) {
+            Navigator.of(context).pop();
+          } else {
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(builder: (context) => const HomeScreen()),
+            );
+          }
         }
       }
     } catch (e) {
