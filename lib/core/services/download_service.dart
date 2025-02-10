@@ -4,10 +4,14 @@ import 'package:path_provider/path_provider.dart';
 import '../models/program_info.dart';
 import 'package:dio/dio.dart';
 import '../../shared/utils/archive_utils.dart';
+import '../services/process_service.dart';
 
 class DownloadService {
   final Dio _dio = Dio();
+  final ProcessService _processService;
   static const String fallbackBaseUrl = 'https://file.cyberchain.xyz/fallback/';
+
+  DownloadService(this._processService);
 
   Future<String> downloadProgram(
     ProgramInfo program, {
@@ -52,6 +56,14 @@ class DownloadService {
             }
           },
         );
+      }
+
+      // Check if program is running and stop it before extraction
+      if (_processService
+          .isProcessRunning(originalProgramName ?? program.name)) {
+        await _processService.stopProgram(originalProgramName ?? program.name);
+        // Wait a bit to ensure the process is fully stopped
+        await Future.delayed(const Duration(seconds: 1));
       }
 
       // Extract the executable from the archive

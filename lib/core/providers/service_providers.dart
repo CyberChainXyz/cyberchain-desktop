@@ -18,7 +18,7 @@ final githubServiceProvider = Provider<GithubService>((ref) {
 });
 
 final downloadServiceProvider = Provider<DownloadService>((ref) {
-  return DownloadService();
+  return DownloadService(ref.watch(processServiceProvider.notifier));
 });
 
 final programInfoServiceProvider = Provider<ProgramInfoService>((ref) {
