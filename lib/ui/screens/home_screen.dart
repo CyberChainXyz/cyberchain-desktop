@@ -109,7 +109,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       ),
                       const SizedBox(height: 16),
                       Text(
-                        "2025-CCX",
+                        "CyberChain",
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w700,

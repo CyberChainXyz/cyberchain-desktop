@@ -109,7 +109,7 @@ class _CCXDesktopAppState extends ConsumerState<CCXDesktopApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       navigatorKey: _navigatorKey,
-      title: 'CCX Desktop',
+      title: 'CyberChain Desktop',
       debugShowCheckedModeBanner: false, // Hide the debug banner
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
