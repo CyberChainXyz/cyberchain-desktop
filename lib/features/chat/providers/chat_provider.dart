@@ -96,6 +96,12 @@ class ChatNotifier extends StateNotifier<ChatState> {
       description: "Español",
       createdAt: DateTime.parse("2025-01-05T17:39:41.201169849Z"),
     ),
+    ChatChannel(
+      id: "cfbb56abfea320b7706d107c4f6e51f1",
+      name: "🇵🇹 Português",
+      description: "Português",
+      createdAt: DateTime.parse("2025-02-15T15:35:27.137784869Z"),
+    ),
   ];
 
   ChatNotifier(this._chatService, this._ref)
