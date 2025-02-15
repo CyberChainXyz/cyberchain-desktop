@@ -122,7 +122,7 @@ class _XMinerViewState extends ConsumerState<XMinerView> {
                           flex: 3,
                           child: TextFormField(
                             decoration: InputDecoration(
-                              labelText: 'CCX Address',
+                              labelText: 'XCC Address',
                               border: const OutlineInputBorder(),
                               errorText: _addressError,
                               helperText:

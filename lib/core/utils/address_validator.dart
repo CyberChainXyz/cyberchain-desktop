@@ -30,7 +30,7 @@ class AddressValidator {
 
   static String? validateMiningAddress(String? address) {
     if (address == null || address.isEmpty) {
-      return 'Please enter a CCX address';
+      return 'Please enter a XCC address';
     }
 
     if (!address.startsWith('0x')) {
@@ -42,7 +42,7 @@ class AddressValidator {
     }
 
     if (!isValidMiningAddress(address)) {
-      return 'Invalid CCX address format. Must be an EVM address (0x...) or EVM address with multiple suffixes (0x...{./@}name{./@}name...)';
+      return 'Invalid XCC address format. Must be an EVM address (0x...) or EVM address with multiple suffixes (0x...{./@}name{./@}name...)';
     }
 
     return null;
