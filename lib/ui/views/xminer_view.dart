@@ -128,7 +128,7 @@ class _XMinerViewState extends ConsumerState<XMinerView> {
                               border: const OutlineInputBorder(),
                               errorText: _addressError,
                               helperText:
-                                  'EVM address (0x...) or EVM address with suffix (0x....name)',
+                                  'EVM address (0x...) or EVM address with suffix ([0x...].name)',
                               helperMaxLines: 2,
                             ),
                             onChanged: (value) {

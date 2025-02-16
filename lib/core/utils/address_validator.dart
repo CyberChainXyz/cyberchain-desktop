@@ -42,7 +42,7 @@ class AddressValidator {
     }
 
     if (!isValidMiningAddress(address)) {
-      return 'Invalid XCC address format. Must be an EVM address (0x...) or EVM address with multiple suffixes (0x...{./@}name{./@}name...)';
+      return 'Must be an EVM address (0x...) or EVM address with suffixes(0x...{./@}name{./@}name...)';
     }
 
     return null;
