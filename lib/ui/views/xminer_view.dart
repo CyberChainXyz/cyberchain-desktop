@@ -9,6 +9,7 @@ import '../../core/utils/address_validator.dart';
 import '../../core/providers/output_providers.dart';
 import '../../core/providers/error_provider.dart';
 import '../../core/widgets/log_viewer.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class XMinerView extends ConsumerStatefulWidget {
   const XMinerView({super.key});
@@ -191,16 +192,53 @@ class _XMinerViewState extends ConsumerState<XMinerView> {
                                                                 MiningPoolServer>(
                                                               enabled: false,
                                                               value: null,
-                                                              child: Text(
-                                                                pool.name,
-                                                                style:
-                                                                    const TextStyle(
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .bold,
-                                                                  color: Colors
-                                                                      .grey,
-                                                                ),
+                                                              child: Row(
+                                                                mainAxisAlignment:
+                                                                    MainAxisAlignment
+                                                                        .spaceBetween,
+                                                                children: [
+                                                                  Text(
+                                                                    pool.name,
+                                                                    style:
+                                                                        const TextStyle(
+                                                                      fontWeight:
+                                                                          FontWeight
+                                                                              .bold,
+                                                                      color: Colors
+                                                                          .grey,
+                                                                    ),
+                                                                  ),
+                                                                  if (pool.link
+                                                                      .isNotEmpty)
+                                                                    IconButton(
+                                                                      icon: const Icon(
+                                                                          Icons
+                                                                              .open_in_new,
+                                                                          size:
+                                                                              16),
+                                                                      onPressed:
+                                                                          () async {
+                                                                        final uri =
+                                                                            Uri.parse(pool.link);
+                                                                        if (await canLaunchUrl(
+                                                                            uri)) {
+                                                                          await launchUrl(
+                                                                              uri);
+                                                                        }
+                                                                      },
+                                                                      tooltip:
+                                                                          'Open pool website',
+                                                                      padding:
+                                                                          EdgeInsets
+                                                                              .zero,
+                                                                      constraints:
+                                                                          const BoxConstraints(),
+                                                                      iconSize:
+                                                                          16,
+                                                                      color: Colors
+                                                                          .grey,
+                                                                    ),
+                                                                ],
                                                               ),
                                                             ),
                                                             ...pool.servers.map(

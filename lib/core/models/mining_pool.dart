@@ -1,10 +1,12 @@
 class MiningPool {
   final String name;
+  final String link;
   final List<MiningPoolServer> servers;
 
   const MiningPool({
     required this.name,
     required this.servers,
+    this.link = '',
   });
 
   factory MiningPool.fromJson(List<dynamic> json) {
@@ -13,6 +15,7 @@ class MiningPool {
       servers: (json[1] as List<dynamic>)
           .map((server) => MiningPoolServer.fromJson(server as List<dynamic>))
           .toList(),
+      link: json.length > 2 ? json[2] as String : '',
     );
   }
 
@@ -20,6 +23,7 @@ class MiningPool {
     return [
       name,
       servers.map((server) => server.toJson()).toList(),
+      link,
     ];
   }
 }

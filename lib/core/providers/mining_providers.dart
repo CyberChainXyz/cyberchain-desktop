@@ -46,6 +46,7 @@ class MiningPoolsNotifier extends AsyncNotifier<List<MiningPool>> {
     if (a.length != b.length) return true;
     for (var i = 0; i < a.length; i++) {
       if (a[i].name != b[i].name ||
+          a[i].link != b[i].link ||
           a[i].servers.length != b[i].servers.length) {
         return true;
       }
