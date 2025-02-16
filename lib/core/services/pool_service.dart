@@ -4,6 +4,7 @@ import 'dart:async';
 import 'package:path_provider/path_provider.dart';
 import '../models/mining_pool.dart';
 import '../utils/custom_http_client.dart';
+import 'package:path/path.dart' as path;
 
 class PoolService {
   static const String poolsUrl = 'https://file.cyberchain.xyz/pools.json';
@@ -26,6 +27,8 @@ class PoolService {
       ]
     ]
   ];
+
+  static const _customPoolsFile = 'custom_pools.json';
 
   Future<String> get _localPath async {
     final directory = await getApplicationSupportDirectory();
@@ -90,5 +93,45 @@ class PoolService {
     return json
         .map((pool) => MiningPool.fromJson(pool as List<dynamic>))
         .toList();
+  }
+
+  Future<List<MiningPoolServer>> getCustomPools() async {
+    try {
+      final file = File(path.join(await _localPath, _customPoolsFile));
+      if (!await file.exists()) {
+        return [];
+      }
+      final content = await file.readAsString();
+      final List<dynamic> json = jsonDecode(content);
+      return json.map((server) => MiningPoolServer.fromJson(server)).toList();
+    } catch (e) {
+      return [];
+    }
+  }
+
+  Future<void> saveCustomPool(MiningPoolServer server) async {
+    try {
+      final file = File(path.join(await _localPath, _customPoolsFile));
+      List<MiningPoolServer> servers = await getCustomPools();
+      servers = [...servers, server];
+      await file
+          .writeAsString(jsonEncode(servers.map((s) => s.toJson()).toList()));
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<void> deleteCustomPool(MiningPoolServer server) async {
+    try {
+      final file = File(path.join(await _localPath, _customPoolsFile));
+      List<MiningPoolServer> servers = await getCustomPools();
+      servers = servers
+          .where((s) => s.url != server.url || s.name != server.name)
+          .toList();
+      await file
+          .writeAsString(jsonEncode(servers.map((s) => s.toJson()).toList()));
+    } catch (e) {
+      rethrow;
+    }
   }
 }

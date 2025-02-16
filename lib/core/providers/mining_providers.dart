@@ -21,6 +21,17 @@ class MiningPoolsNotifier extends AsyncNotifier<List<MiningPool>> {
     // Load local pools immediately
     final poolService = ref.watch(poolServiceProvider);
     final localPools = await poolService.loadLocalPools();
+    final customServers = await poolService.getCustomPools();
+
+    // Add custom pools if they exist
+    if (customServers.isNotEmpty) {
+      final customPool = MiningPool(
+        name: "Custom Pools",
+        link: "",
+        servers: customServers,
+      );
+      localPools.insert(0, customPool);
+    }
 
     // Start fetching server pools in background
     _fetchServerPools();
@@ -32,6 +43,18 @@ class MiningPoolsNotifier extends AsyncNotifier<List<MiningPool>> {
     final poolService = ref.read(poolServiceProvider);
     try {
       final serverPools = await poolService.fetchPools();
+      final customServers = await poolService.getCustomPools();
+
+      // Add custom pools to server pools if they exist
+      if (customServers.isNotEmpty) {
+        final customPool = MiningPool(
+          name: "Custom Pools",
+          link: "",
+          servers: customServers,
+        );
+        serverPools.insert(0, customPool);
+      }
+
       final currentPools = state.valueOrNull ?? [];
       if (_arePoolsDifferent(currentPools, serverPools)) {
         state = AsyncData(serverPools);

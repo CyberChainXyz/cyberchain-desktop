@@ -10,6 +10,7 @@ import '../../core/providers/output_providers.dart';
 import '../../core/providers/error_provider.dart';
 import '../../core/widgets/log_viewer.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../ui/dialogs/add_pool_dialog.dart';
 
 class XMinerView extends ConsumerStatefulWidget {
   const XMinerView({super.key});
@@ -254,34 +255,84 @@ class _XMinerViewState extends ConsumerState<XMinerView> {
                                                                               16.0),
                                                                   child: Row(
                                                                     children: [
-                                                                      Text(
-                                                                        server
-                                                                            .name,
-                                                                        style:
-                                                                            const TextStyle(
-                                                                          fontWeight:
-                                                                              FontWeight.w500,
-                                                                        ),
-                                                                      ),
-                                                                      const SizedBox(
-                                                                          width:
-                                                                              4),
                                                                       Expanded(
                                                                         child:
+                                                                            Row(
+                                                                          children: [
                                                                             Text(
-                                                                          server
-                                                                              .url,
-                                                                          overflow:
-                                                                              TextOverflow.ellipsis,
-                                                                          style:
-                                                                              TextStyle(
-                                                                            fontSize:
-                                                                                12,
-                                                                            color:
-                                                                                Theme.of(context).textTheme.bodySmall?.color,
-                                                                          ),
+                                                                              server.name,
+                                                                              style: const TextStyle(
+                                                                                fontWeight: FontWeight.w500,
+                                                                              ),
+                                                                            ),
+                                                                            const SizedBox(width: 4),
+                                                                            Expanded(
+                                                                              child: Text(
+                                                                                server.url,
+                                                                                overflow: TextOverflow.ellipsis,
+                                                                                style: TextStyle(
+                                                                                  fontSize: 12,
+                                                                                  color: Theme.of(context).textTheme.bodySmall?.color,
+                                                                                ),
+                                                                              ),
+                                                                            ),
+                                                                          ],
                                                                         ),
                                                                       ),
+                                                                      // Only show delete button for custom pools
+                                                                      if (pool.name ==
+                                                                              "Custom Pools" &&
+                                                                          server !=
+                                                                              selectedServer)
+                                                                        IconButton(
+                                                                          icon: const Icon(
+                                                                              Icons.delete,
+                                                                              size: 16),
+                                                                          onPressed:
+                                                                              () async {
+                                                                            final confirmed = await showDialog<bool>(
+                                                                                  context: context,
+                                                                                  builder: (context) => AlertDialog(
+                                                                                    title: const Text('Delete Custom Pool'),
+                                                                                    content: Text('Are you sure you want to delete "${server.name}" (${server.url})?'),
+                                                                                    actions: [
+                                                                                      TextButton(
+                                                                                        onPressed: () => Navigator.of(context).pop(false),
+                                                                                        child: const Text('Cancel'),
+                                                                                      ),
+                                                                                      TextButton(
+                                                                                        onPressed: () => Navigator.of(context).pop(true),
+                                                                                        child: const Text(
+                                                                                          'Delete',
+                                                                                          style: TextStyle(color: Colors.red),
+                                                                                        ),
+                                                                                      ),
+                                                                                    ],
+                                                                                  ),
+                                                                                ) ??
+                                                                                false;
+
+                                                                            if (confirmed) {
+                                                                              // If the server to be deleted is currently selected,
+                                                                              // clear the selection
+                                                                              if (selectedServer == server) {
+                                                                                ref.read(selectedPoolProvider.notifier).setPool(null);
+                                                                              }
+                                                                              await ref.read(poolServiceProvider).deleteCustomPool(server);
+                                                                              ref.invalidate(miningPoolsProvider);
+                                                                            }
+                                                                          },
+                                                                          tooltip:
+                                                                              'Delete custom pool',
+                                                                          padding:
+                                                                              EdgeInsets.zero,
+                                                                          constraints:
+                                                                              const BoxConstraints(),
+                                                                          iconSize:
+                                                                              16,
+                                                                          color:
+                                                                              Colors.red,
+                                                                        ),
                                                                     ],
                                                                   ),
                                                                 ),
@@ -312,6 +363,25 @@ class _XMinerViewState extends ConsumerState<XMinerView> {
                                                         .notifier)
                                                     .refresh(),
                                             tooltip: 'Refresh pools',
+                                          ),
+                                          IconButton(
+                                            icon: const Icon(Icons.add),
+                                            onPressed: () async {
+                                              final result = await showDialog<
+                                                  MiningPoolServer>(
+                                                context: context,
+                                                builder: (context) =>
+                                                    const AddPoolDialog(),
+                                              );
+                                              if (result != null) {
+                                                await ref
+                                                    .read(poolServiceProvider)
+                                                    .saveCustomPool(result);
+                                                ref.invalidate(
+                                                    miningPoolsProvider);
+                                              }
+                                            },
+                                            tooltip: 'Add custom pool',
                                           ),
                                         ],
                                       ),
