@@ -16,7 +16,7 @@ jobs:
             build-path: build/windows/x64/runner/Release
             archive-type: zip
             ext: zip
-          - os: ubuntu-20.04
+          - os: ubuntu-22.04
             build-path: build/linux/x64/release/bundle
             archive-type: tar
             ext: tar.gz
