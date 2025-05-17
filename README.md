@@ -14,7 +14,7 @@ CyberChain Desktop is the official desktop application for [CyberChain](https://
 
 ## Download
 
-Download the latest version for your platform from our [Releases Page](https://github.com/OpenCyberXyz/cyberchain-desktop/releases).
+Download the latest version for your platform from our [Releases Page](https://github.com/CyberChainXyz/cyberchain-desktop/releases).
 
 ## Support
 
