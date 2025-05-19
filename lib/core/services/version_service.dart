@@ -6,9 +6,9 @@ import '../constants/app_constants.dart';
 
 class VersionService {
   static const String githubUrl =
-      'https://github.com/OpenCyberXyz/ccx-desktop/';
+      'https://github.com/CyberChainXyz/cyberchain-desktop/';
   static const String apiUrl =
-      'https://api.github.com/repos/OpenCyberXyz/ccx-desktop/releases/latest';
+      'https://api.github.com/repos/CyberChainXyz/cyberchain-desktop/releases/latest';
 
   String? _latestReleaseUrl;
   Timer? _timer;
