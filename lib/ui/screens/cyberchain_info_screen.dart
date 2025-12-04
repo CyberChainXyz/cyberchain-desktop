@@ -98,7 +98,7 @@ class CyberchainInfoScreen extends StatelessWidget {
                     _buildLink(
                         context, 'Explorer', 'https://scan.cyberchain.xyz'),
                     _buildLink(
-                        context, 'Twitter', 'https://x.com/opencyberxyz'),
+                        context, 'Twitter', 'https://x.com/cyberchainxyz'),
                     _buildLink(
                         context, 'GitHub', 'https://github.com/CyberChainXyz'),
                     _buildLink(context, 'Discussions',
@@ -109,7 +109,7 @@ class CyberchainInfoScreen extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.only(bottom: 16),
                   child: Text(
-                    '© 2025 OpenCyber',
+                    '© 2025 CyberChain',
                     style: TextStyle(
                       color: Colors.grey[400],
                       fontSize: 14,
