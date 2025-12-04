@@ -4,21 +4,13 @@ import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 import '../models/program_info.dart';
 import 'program_info_service.dart';
+import '../../shared/utils/platform_utils.dart';
 
 /// Service to handle installing bundled programs from assets
 class AssetInstallService {
   final ProgramInfoService _programInfoService;
 
   AssetInstallService(this._programInfoService);
-
-  /// Get the actual executable name for a program
-  /// go-cyberchain uses 'ccx' as executable name
-  String _getExecutableName(String programName) {
-    if (programName == 'go-cyberchain') {
-      return Platform.isWindows ? 'ccx.exe' : 'ccx';
-    }
-    return Platform.isWindows ? '$programName.exe' : programName;
-  }
 
   /// Install a program from bundled assets to the application directory
   ///
@@ -41,7 +33,8 @@ class AssetInstallService {
     }
 
     // Get actual executable name (ccx for go-cyberchain)
-    final executableName = _getExecutableName(programName);
+    // Use PlatformUtils to ensure consistency with other services
+    final executableName = PlatformUtils.getProgramFileName(programName);
     final targetPath = path.join(programDir, executableName);
 
     // Copy the program file from assets
@@ -62,8 +55,11 @@ class AssetInstallService {
     }
 
     // Save program info
+    // Use the actual executable name (e.g., 'ccx' for go-cyberchain)
+    // to match what UpdateService saves
+    final urlProgramName = programName == 'go-cyberchain' ? 'ccx' : programName;
     final programInfo = ProgramInfo(
-      name: programName,
+      name: urlProgramName,
       version: version,
       downloadUrl: 'bundled', // Mark as bundled program
       localPath: targetPath,

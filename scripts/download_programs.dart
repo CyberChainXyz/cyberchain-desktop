@@ -19,19 +19,20 @@ String getPlatformString() {
   throw UnsupportedError('Unsupported platform');
 }
 
-/// Get the architecture string
+/// Get the architecture string (X64 or ARM64 format)
 String getArchString() {
   // Check environment variable first (useful for CI)
   final envArch = Platform.environment['BUILD_ARCH'];
-  if (envArch != null) return envArch.toLowerCase();
+  if (envArch != null) {
+    return envArch.toLowerCase().contains('arm') ? 'ARM64' : 'X64';
+  }
 
   // Fallback to runtime detection
-  if (Platform.version.contains('x64')) return 'x64';
-  if (Platform.version.contains('arm64') ||
+  if (Platform.version.contains('arm') ||
       Platform.version.contains('aarch64')) {
-    return 'arm64';
+    return 'ARM64';
   }
-  return 'x64'; // Default to x64
+  return 'X64'; // Default to X64
 }
 
 /// Get the latest version for a program from GitHub
@@ -119,7 +120,21 @@ Future<File> downloadFile(String url, String savePath) async {
   }
 }
 
-/// Extract executable from archive
+/// Get the executable name (matches ArchiveUtils logic)
+String getExecutableName(String programName) {
+  String baseName = programName;
+  switch (programName) {
+    case 'go-cyberchain':
+      baseName = 'ccx';
+      break;
+    case 'xMiner':
+      baseName = 'xMiner';
+      break;
+  }
+  return Platform.isWindows ? '$baseName.exe' : baseName;
+}
+
+/// Extract executable from archive (matches ArchiveUtils logic)
 Future<String> extractExecutable(
   String archivePath,
   String programName,
@@ -129,25 +144,33 @@ Future<String> extractExecutable(
 
   final bytes = await File(archivePath).readAsBytes();
   Archive? archive;
+  List<String> errors = [];
 
-  // Determine executable name
-  String executableName = programName == 'go-cyberchain' ? 'ccx' : programName;
-  if (Platform.isWindows) {
-    executableName = '$executableName.exe';
-  }
-
-  // Try different decoders
+  // Try GZip/Tar decoder
   try {
     archive = TarDecoder().decodeBytes(GZipDecoder().decodeBytes(bytes));
   } catch (e) {
+    errors.add('GZip/Tar decode failed: $e');
+  }
+
+  // If GZip/Tar failed, try ZIP decoder
+  if (archive == null) {
     try {
       archive = ZipDecoder().decodeBytes(bytes);
-    } catch (e2) {
-      throw Exception('Failed to decode archive: $e, $e2');
+    } catch (e) {
+      errors.add('ZIP decode failed: $e');
     }
   }
 
-  // Find the executable
+  // If both decoders failed, throw an exception with all error messages
+  if (archive == null) {
+    throw Exception('Failed to decode archive. Errors:\n${errors.join('\n')}');
+  }
+
+  // Get the correct executable name
+  final executableName = getExecutableName(programName);
+
+  // Find the executable file, which might be in a subdirectory
   final executableEntry = archive.files.firstWhere(
     (file) {
       final fileName = path.basename(file.name);
@@ -182,7 +205,7 @@ Future<void> downloadProgram(String program) async {
     exit(1);
   }
 
-  // Build download URL
+  // Build download URL (same format as update_service.dart)
   final platform = getPlatformString();
   final arch = getArchString();
   final extension = platform == 'windows' ? 'zip' : 'tar.gz';
@@ -190,12 +213,12 @@ Future<void> downloadProgram(String program) async {
   // URL program name is different for go-cyberchain
   final urlProgramName = program == 'go-cyberchain' ? 'ccx' : program;
 
-  // Capitalize platform name for URL
+  // Capitalize platform name: darwin -> Darwin, linux -> Linux, windows -> Windows
   final platformCapitalized = platform[0].toUpperCase() + platform.substring(1);
-  final archCapitalized = arch.toUpperCase();
 
+  // Format: ccx-Darwin-X64-v1.3.0.tar.gz
   final downloadUrl =
-      'https://github.com/cyberchainxyz/$program/releases/download/$version/$urlProgramName-$platformCapitalized-$archCapitalized-$version.$extension';
+      'https://github.com/cyberchainxyz/$program/releases/download/$version/$urlProgramName-$platformCapitalized-$arch-$version.$extension';
 
   // Setup directories
   final scriptDir = Directory.current;
