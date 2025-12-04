@@ -46,9 +46,34 @@ jobs:
       - run: flutter pub get
 
       - name: Download bundled programs
-        env:
-          BUILD_ARCH: ${{ runner.arch }}
-        run: dart run scripts/download_programs.dart
+        shell: bash
+        run: |
+          mkdir -p assets/programs/go-cyberchain assets/programs/xMiner
+          
+          # Download go-cyberchain v1.3.0
+          curl -L -o "ccx.${{ matrix.ext }}" "https://github.com/cyberchainxyz/go-cyberchain/releases/download/v1.3.0/ccx-${{ runner.os }}-${{ runner.arch }}-v1.3.0.${{ matrix.ext }}"
+          
+          # Download xMiner v0.2.0
+          curl -L -o "xMiner.${{ matrix.ext }}" "https://github.com/cyberchainxyz/xMiner/releases/download/v0.2.0/xMiner-${{ runner.os }}-${{ runner.arch }}-v0.2.0.${{ matrix.ext }}"
+          
+          # Extract programs
+          if [ "${{ matrix.ext }}" = "zip" ]; then
+            unzip -q ccx.${{ matrix.ext }} && cd ccx-v1.3.0 && mv ccx.exe ../assets/programs/go-cyberchain/
+            rm -rf ccx-v1.3.0
+            cd ..
+            unzip -q xMiner.${{ matrix.ext }} && cd xMiner-v0.2.0 && mv xMiner.exe ../assets/programs/xMiner/
+            rm -rf xMiner-v0.2.0
+            cd ..
+          else
+            tar -xzf ccx.${{ matrix.ext }} && cd ccx-v1.3.0 && mv ccx ../assets/programs/go-cyberchain/ && chmod +x ../assets/programs/go-cyberchain/ccx
+            rm -rf ccx-v1.3.0
+            cd ..
+            tar -xzf xMiner.${{ matrix.ext }} && cd xMiner-v0.2.0 && mv xMiner ../assets/programs/xMiner/ && chmod +x ../assets/programs/xMiner/xMiner
+            rm -rf xMiner-v0.2.0
+            cd ..
+          fi
+          
+          rm -f ccx.${{ matrix.ext }} xMiner.${{ matrix.ext }}
 
       - run: flutter build ${{ runner.os == 'macOS' && 'macos' || runner.os == 'Windows' && 'windows' || 'linux' }} --release
       
