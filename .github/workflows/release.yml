@@ -34,7 +34,7 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
-          flutter-version: 3.29.0
+          flutter-version: 3.38.3
       - run: flutter --version
 
       - name: Install Linux dependencies
@@ -44,6 +44,12 @@ jobs:
           sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev libnotify-dev
       - run: flutter config --enable-${{ runner.os == 'macOS' && 'macos' || runner.os == 'Windows' && 'windows' || 'linux' }}-desktop
       - run: flutter pub get
+
+      - name: Download bundled programs
+        env:
+          BUILD_ARCH: ${{ runner.arch }}
+        run: dart run scripts/download_programs.dart
+
       - run: flutter build ${{ runner.os == 'macOS' && 'macos' || runner.os == 'Windows' && 'windows' || 'linux' }} --release
       
       - name: Create release directory

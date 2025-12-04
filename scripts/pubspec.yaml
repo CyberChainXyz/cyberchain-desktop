@@ -1,0 +1,12 @@
+name: download_programs_script
+description: Script to download programs for bundling
+publish_to: none
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  http: ^1.2.2
+  path: ^1.9.0
+  archive: ^4.0.2
+

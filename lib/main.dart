@@ -30,7 +30,8 @@ void main() async {
 
 final programExistsProvider = FutureProvider<bool>((ref) async {
   final initService = ref.read(initServiceProvider.notifier);
-  return initService.checkProgramsExist();
+  // This will check if programs exist, and if not, install them from assets
+  return initService.ensureProgramsExist();
 });
 
 class CCXDesktopApp extends ConsumerStatefulWidget {

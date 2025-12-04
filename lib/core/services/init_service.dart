@@ -1,18 +1,21 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'update_service.dart';
 import 'program_info_service.dart';
+import 'asset_install_service.dart';
 import '../providers/app_state_provider.dart';
 
 class InitService extends StateNotifier<bool> {
   final UpdateService _updateService;
   final ProgramInfoService _programInfoService;
   final DownloadProgressNotifier _downloadProgress;
+  final AssetInstallService _assetInstallService;
   final List<String> _requiredPrograms = ['go-cyberchain', 'xMiner'];
 
   InitService(
     this._updateService,
     this._programInfoService,
     this._downloadProgress,
+    this._assetInstallService,
   ) : super(false);
 
   Future<bool> checkProgramsExist() async {
@@ -24,6 +27,34 @@ class InitService extends StateNotifier<bool> {
         }
       }
       return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  /// Install programs from bundled assets
+  /// This is called on first run to install pre-bundled programs
+  Future<void> installBundledPrograms() async {
+    try {
+      await _assetInstallService.installAllPrograms();
+      state = true;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  /// Check and auto-install programs if needed
+  /// Returns true if programs exist or were successfully installed
+  Future<bool> ensureProgramsExist() async {
+    try {
+      // First check if programs already exist
+      if (await checkProgramsExist()) {
+        return true;
+      }
+
+      // If not, install from bundled assets
+      await installBundledPrograms();
+      return await checkProgramsExist();
     } catch (e) {
       return false;
     }

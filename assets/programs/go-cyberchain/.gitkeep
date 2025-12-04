@@ -1,0 +1,6 @@
+# This file ensures the directory is tracked by Git
+# Place your go-cyberchain executable here:
+# - ccx (for Linux/macOS)
+# - ccx.exe (for Windows)
+# Note: The program is called go-cyberchain but the executable is named ccx
+

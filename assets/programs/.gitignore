@@ -1,0 +1,12 @@
+# Ignore all executable files
+go-cyberchain/ccx
+go-cyberchain/ccx.exe
+xMiner/xMiner
+xMiner/xMiner.exe
+
+# Keep directory structure
+!go-cyberchain/
+!xMiner/
+!.gitignore
+!README.md
+

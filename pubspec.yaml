@@ -115,6 +115,8 @@ flutter:
 
   assets:
     - assets/images/
+    - assets/programs/go-cyberchain/
+    - assets/programs/xMiner/
     - assets/avatars/adventurer/
     - assets/avatars/avataaars/
     - assets/avatars/big-ears/
