@@ -43,12 +43,12 @@ class UpdateService extends StateNotifier<Map<String, ProgramInfo>> {
     }
 
     final platform = PlatformUtils.getPlatformString();
-    final arch = Platform.version.contains('arm') ? 'ARM64' : 'X64';
+    final arch = PlatformUtils.getArchString();
     final extension = platform == 'windows' ? 'zip' : 'tar.gz';
     final urlProgramName = programName == 'go-cyberchain' ? 'ccx' : programName;
 
     final downloadUrl =
-        'https://github.com/cyberchainxyz/$programName/releases/download/$latestVersion/$urlProgramName-${platform.capitalize()}-$arch-$latestVersion.$extension';
+        'https://github.com/cyberchainxyz/$programName/releases/download/$latestVersion/$urlProgramName-$platform-$arch-$latestVersion.$extension';
 
     final localPath = await PlatformUtils.getProgramPath(programName);
     final program = ProgramInfo(

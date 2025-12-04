@@ -1,3 +1,4 @@
+import 'dart:ffi';
 import 'dart:io';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
@@ -28,13 +29,18 @@ class PlatformUtils {
   }
 
   static String getPlatformString() {
-    if (Platform.isWindows) return 'windows';
-    if (Platform.isMacOS) return 'darwin';
-    if (Platform.isLinux) return 'linux';
+    if (Platform.isWindows) return 'Windows';
+    if (Platform.isMacOS) return 'macOS';
+    if (Platform.isLinux) return 'Linux';
     throw UnsupportedError('Unsupported platform');
   }
 
   static String getArchString() {
-    return Platform.version.contains('x64') ? 'amd64' : 'arm64';
+    final abi = Abi.current();
+    return switch (abi) {
+      Abi.macosArm64 => 'ARM64',
+      Abi.linuxX64 || Abi.macosX64 || Abi.windowsX64 => 'X64',
+      _ => throw UnsupportedError('Unsupported architecture: $abi'),
+    };
   }
 }
