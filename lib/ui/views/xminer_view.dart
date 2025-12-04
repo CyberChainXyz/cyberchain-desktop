@@ -66,8 +66,9 @@ class _XMinerViewState extends ConsumerState<XMinerView> {
     final errors = ref.watch(errorHandlerProvider);
     final miningError = errors['mining'];
 
-    // Update controller text when ccxAddress changes
-    if (_controller.text != ccxAddress) {
+    // Update controller text when ccxAddress changes, but only if not focused
+    // to avoid interfering with user input
+    if (!_focusNode.hasFocus && _controller.text != ccxAddress) {
       _controller.text = ccxAddress;
     }
 
@@ -143,17 +144,19 @@ class _XMinerViewState extends ConsumerState<XMinerView> {
                               ..addListener(() {
                                 // Only show error when focus is lost
                                 if (!_focusNode.hasFocus) {
-                                  final value = _controller.text;
+                                  final value = _controller.text.trim();
                                   final error =
                                       AddressValidator.validateMiningAddress(
                                           value);
                                   setState(() {
                                     _addressError = error;
                                   });
-                                  // Save address regardless of validation
+                                  // Save trimmed address regardless of validation
                                   ref
                                       .read(ccxAddressProvider.notifier)
                                       .setAddress(value);
+                                  // Update controller with trimmed value
+                                  _controller.text = value;
                                 }
                               }),
                             controller: _controller,

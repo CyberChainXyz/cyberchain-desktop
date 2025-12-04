@@ -6,7 +6,7 @@ class AddressValidator {
 
   static bool _isValidEVMAddress(String address) {
     try {
-      EthereumAddress.fromHex(address, enforceEip55: true);
+      EthereumAddress.fromHex(address, enforceEip55: false);
       return true;
     } catch (e) {
       return false;
@@ -18,14 +18,17 @@ class AddressValidator {
       return false;
     }
 
+    // Trim whitespace
+    final trimmedAddress = address.trim();
+
     // For addresses with suffix
-    if (_evmAddressWithSuffixRegex.hasMatch(address)) {
-      String baseAddress = address.substring(0, 42);
+    if (_evmAddressWithSuffixRegex.hasMatch(trimmedAddress)) {
+      String baseAddress = trimmedAddress.substring(0, 42);
       return _isValidEVMAddress(baseAddress);
     }
 
     // For simple EVM addresses
-    return _isValidEVMAddress(address);
+    return _isValidEVMAddress(trimmedAddress);
   }
 
   static String? validateMiningAddress(String? address) {
@@ -33,15 +36,18 @@ class AddressValidator {
       return 'Please enter a XCC address';
     }
 
-    if (!address.startsWith('0x')) {
+    // Trim whitespace
+    final trimmedAddress = address.trim();
+
+    if (!trimmedAddress.startsWith('0x')) {
       return 'Address must start with 0x';
     }
 
-    if (address.length < 42) {
+    if (trimmedAddress.length < 42) {
       return 'Address must be at least 42 characters long (including 0x prefix)';
     }
 
-    if (!isValidMiningAddress(address)) {
+    if (!isValidMiningAddress(trimmedAddress)) {
       return 'Must be an EVM address (0x...) or EVM address with suffixes(0x...{./@}name{./@}name...)';
     }
 
