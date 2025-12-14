@@ -44,7 +44,7 @@ class UpdateService extends StateNotifier<Map<String, ProgramInfo>> {
 
     final platform = PlatformUtils.getPlatformString();
     final arch = PlatformUtils.getArchString();
-    final extension = platform == 'windows' ? 'zip' : 'tar.gz';
+    final extension = platform == 'Windows' ? 'zip' : 'tar.gz';
     final urlProgramName = programName == 'go-cyberchain' ? 'ccx' : programName;
 
     final downloadUrl =
