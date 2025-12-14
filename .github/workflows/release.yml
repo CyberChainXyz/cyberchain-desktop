@@ -20,11 +20,11 @@ jobs:
             build-path: build/linux/x64/release/bundle
             archive-type: tar
             ext: tar.gz
-          - os: macos-13
+          - os: macos-15-intel
             build-path: build/macos/Build/Products/Release
             archive-type: tar
             ext: tar.gz
-          - os: macos-14
+          - os: macos-15
             build-path: build/macos/Build/Products/Release
             archive-type: tar
             ext: tar.gz
