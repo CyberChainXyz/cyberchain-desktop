@@ -3,6 +3,7 @@ import 'update_service.dart';
 import 'program_info_service.dart';
 import 'asset_install_service.dart';
 import '../providers/app_state_provider.dart';
+import '../utils/semver_utils.dart';
 
 class InitService extends StateNotifier<bool> {
   final UpdateService _updateService;
@@ -47,17 +48,37 @@ class InitService extends StateNotifier<bool> {
   /// Returns true if programs exist or were successfully installed
   Future<bool> ensureProgramsExist() async {
     try {
-      // First check if programs already exist
-      if (await checkProgramsExist()) {
+      final isReady = await _areRequiredProgramsReady();
+      if (isReady) {
         return true;
       }
 
-      // If not, install from bundled assets
       await installBundledPrograms();
-      return await checkProgramsExist();
+      return await _areRequiredProgramsReady();
     } catch (e) {
       return false;
     }
+  }
+
+  Future<bool> _areRequiredProgramsReady() async {
+    for (final programName in _requiredPrograms) {
+      final info = await _programInfoService.getProgramInfo(programName);
+      if (info == null) {
+        return false;
+      }
+
+      final bundledVersion =
+          _assetInstallService.getBundledVersion(programName);
+      if (bundledVersion == null) {
+        continue;
+      }
+
+      if (isSemverTagOlder(info.version, bundledVersion)) {
+        return false;
+      }
+    }
+
+    return true;
   }
 
   Future<void> downloadPrograms() async {
