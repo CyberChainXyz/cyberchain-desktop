@@ -7,6 +7,7 @@ import '../../core/services/error_handler.dart';
 import '../../core/providers/service_providers.dart';
 import '../../core/providers/error_provider.dart';
 import '../../core/providers/mining_providers.dart';
+import '../../core/utils/proxy_validator.dart';
 import '../../shared/widgets/loading_dialog.dart';
 
 final miningControllerProvider =
@@ -132,6 +133,13 @@ class MiningController extends StateNotifier<void> {
         return;
       }
 
+      final proxy = _ref.read(xMinerProxyProvider).trim();
+      final proxyError = ProxyValidator.validate(proxy);
+      if (proxyError != null) {
+        _errorHandler.handleError('mining', proxyError);
+        return;
+      }
+
       // Ensure go-cyberchain is running if needed
       await _ensureGoCyberchainRunning();
 
@@ -142,6 +150,10 @@ class MiningController extends StateNotifier<void> {
         '-pass=x',
         '-pool=${_selectedServer!.url}',
       ];
+
+      if (proxy.isNotEmpty) {
+        arguments.add('-proxy=$proxy');
+      }
 
       // Start xMiner with the configured arguments
       await _processService.startProgram('xMiner', arguments);

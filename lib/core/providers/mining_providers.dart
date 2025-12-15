@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/mining_pool.dart';
 import '../services/pool_service.dart';
@@ -141,6 +140,29 @@ final ccxAddressProvider =
     StateNotifierProvider<CCXAddressNotifier, String>((ref) {
   final prefsService = ref.watch(preferencesServiceProvider);
   return CCXAddressNotifier(prefsService);
+});
+
+class XMinerProxyNotifier extends StateNotifier<String> {
+  final PreferencesService _preferencesService;
+
+  XMinerProxyNotifier(this._preferencesService) : super('') {
+    _loadSavedProxy();
+  }
+
+  Future<void> _loadSavedProxy() async {
+    state = await _preferencesService.loadXMinerProxy() ?? '';
+  }
+
+  Future<void> setProxy(String proxy) async {
+    state = proxy;
+    await _preferencesService.saveXMinerProxy(proxy);
+  }
+}
+
+final xMinerProxyProvider =
+    StateNotifierProvider<XMinerProxyNotifier, String>((ref) {
+  final prefsService = ref.watch(preferencesServiceProvider);
+  return XMinerProxyNotifier(prefsService);
 });
 
 class GoCyberchainArgsNotifier extends StateNotifier<List<String>> {

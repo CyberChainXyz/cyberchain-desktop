@@ -6,6 +6,7 @@ import '../../core/providers/opencl_devices_provider.dart';
 import '../../features/mining/mining_controller.dart';
 import '../../core/models/mining_pool.dart';
 import '../../core/utils/address_validator.dart';
+import '../../core/utils/proxy_validator.dart';
 import '../../core/providers/output_providers.dart';
 import '../../core/providers/error_provider.dart';
 import '../../core/widgets/log_viewer.dart';
@@ -25,6 +26,9 @@ class _XMinerViewState extends ConsumerState<XMinerView> {
   String? _addressError;
   final FocusNode _focusNode = FocusNode();
   final TextEditingController _controller = TextEditingController();
+  String? _proxyError;
+  final FocusNode _proxyFocusNode = FocusNode();
+  final TextEditingController _proxyController = TextEditingController();
 
   @override
   void initState() {
@@ -40,6 +44,8 @@ class _XMinerViewState extends ConsumerState<XMinerView> {
     _scrollController.dispose();
     _focusNode.dispose();
     _controller.dispose();
+    _proxyFocusNode.dispose();
+    _proxyController.dispose();
     super.dispose();
   }
 
@@ -61,15 +67,23 @@ class _XMinerViewState extends ConsumerState<XMinerView> {
     final isStarting = processService.isProcessStarting('xMiner');
     final selectedDevices = ref.watch(selectedDevicesProvider);
     final ccxAddress = ref.watch(ccxAddressProvider);
+    final proxy = ref.watch(xMinerProxyProvider);
     final selectedPool = ref.watch(selectedPoolProvider);
     final output = ref.watch(xMinerOutputProvider);
     final errors = ref.watch(errorHandlerProvider);
     final miningError = errors['mining'];
 
+    final proxyCandidate = _proxyController.text.trim();
+    final isProxyValid = ProxyValidator.validate(proxyCandidate) == null;
+
     // Update controller text when ccxAddress changes, but only if not focused
     // to avoid interfering with user input
     if (!_focusNode.hasFocus && _controller.text != ccxAddress) {
       _controller.text = ccxAddress;
+    }
+
+    if (!_proxyFocusNode.hasFocus && _proxyController.text != proxy) {
+      _proxyController.text = proxy;
     }
 
     final isOperating = isStopping || isStarting;
@@ -441,6 +455,53 @@ class _XMinerViewState extends ConsumerState<XMinerView> {
                       ],
                     ),
                     const SizedBox(height: 16),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          flex: 3,
+                          child: TextFormField(
+                            decoration: InputDecoration(
+                              labelText: 'Mining pool proxy (optional)',
+                              border: const OutlineInputBorder(),
+                              errorText: _proxyError,
+                              helperText:
+                                  'Used to connect to the mining pool. Examples: http://127.0.0.1:1080 or socks5://127.0.0.1:1080',
+                              helperMaxLines: 2,
+                            ),
+                            controller: _proxyController,
+                            textInputAction: TextInputAction.done,
+                            onChanged: (_) {
+                              if (_proxyError != null) {
+                                setState(() {
+                                  _proxyError = null;
+                                });
+                              }
+                            },
+                            focusNode: _proxyFocusNode
+                              ..addListener(() {
+                                if (!_proxyFocusNode.hasFocus) {
+                                  final value = _proxyController.text.trim();
+                                  final error = ProxyValidator.validate(value);
+                                  setState(() {
+                                    _proxyError = error;
+                                  });
+                                  ref
+                                      .read(xMinerProxyProvider.notifier)
+                                      .setProxy(value);
+                                  _proxyController.text = value;
+                                }
+                              }),
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        const Expanded(
+                          flex: 2,
+                          child: SizedBox.shrink(),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
                     const Text(
                       'Select Devices',
                       style: TextStyle(
@@ -579,6 +640,7 @@ class _XMinerViewState extends ConsumerState<XMinerView> {
                                   isRunning ||
                                   !AddressValidator.isValidMiningAddress(
                                       ccxAddress) ||
+                                  !isProxyValid ||
                                   selectedPool == null ||
                                   selectedDevices.isEmpty
                               ? (isOperating || !isRunning
@@ -604,6 +666,7 @@ class _XMinerViewState extends ConsumerState<XMinerView> {
                                 : (isOperating ||
                                         !AddressValidator.isValidMiningAddress(
                                             ccxAddress) ||
+                                        !isProxyValid ||
                                         selectedPool == null ||
                                         selectedDevices.isEmpty
                                     ? Colors.grey
