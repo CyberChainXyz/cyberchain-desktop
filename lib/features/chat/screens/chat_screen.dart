@@ -29,6 +29,7 @@ class HexagonPainter extends CustomPainter {
     final double rows = (size.height / (hexSize * 0.866)).ceil().toDouble();
     final double cols = (size.width / hexSize).ceil().toDouble();
 
+    final path = Path();
     for (var row = 0; row < rows; row++) {
       for (var col = 0; col < cols; col++) {
         final xOffset = col * hexSize * 0.75;
@@ -38,7 +39,6 @@ class HexagonPainter extends CustomPainter {
         final centerX = xOffset + (isOffset ? hexSize * 0.375 : 0);
         final centerY = yOffset;
 
-        final path = Path();
         for (var i = 0; i < 6; i++) {
           final angle = (i * 60 - 30) * math.pi / 180;
           final x = centerX + hexSize * 0.4 * math.cos(angle);
@@ -51,9 +51,9 @@ class HexagonPainter extends CustomPainter {
           }
         }
         path.close();
-        canvas.drawPath(path, paint);
       }
     }
+    canvas.drawPath(path, paint);
   }
 
   @override
@@ -484,9 +484,11 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
         child: Stack(
           children: [
             Positioned.fill(
-              child: CustomPaint(
-                painter: HexagonPainter(
-                  color: Color(0xFF33691E),
+              child: RepaintBoundary(
+                child: CustomPaint(
+                  painter: HexagonPainter(
+                    color: Color(0xFF33691E),
+                  ),
                 ),
               ),
             ),

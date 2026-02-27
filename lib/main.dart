@@ -115,6 +115,26 @@ class _CCXDesktopAppState extends ConsumerState<CCXDesktopApp> {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ButtonStyle(
+            mouseCursor: WidgetStateProperty.all(SystemMouseCursors.click),
+          ),
+        ),
+        textButtonTheme: TextButtonThemeData(
+          style: ButtonStyle(
+            mouseCursor: WidgetStateProperty.all(SystemMouseCursors.click),
+          ),
+        ),
+        outlinedButtonTheme: OutlinedButtonThemeData(
+          style: ButtonStyle(
+            mouseCursor: WidgetStateProperty.all(SystemMouseCursors.click),
+          ),
+        ),
+        iconButtonTheme: IconButtonThemeData(
+          style: ButtonStyle(
+            mouseCursor: WidgetStateProperty.all(SystemMouseCursors.click),
+          ),
+        ),
       ),
       home: const CCXDesktopHome(),
     );

@@ -10,7 +10,6 @@ class ProcessService extends StateNotifier<Map<String, Process>> {
   final Map<String, Process> _processes = {};
   final Map<String, bool> _startingProcesses = {};
   final Map<String, bool> _stoppingProcesses = {};
-  final Map<String, String> _outputs = {};
   final Ref _ref;
 
   ProcessService(this._ref) : super({});
@@ -24,7 +23,6 @@ class ProcessService extends StateNotifier<Map<String, Process>> {
   }
 
   void _appendOutput(String name, String output) {
-    _outputs[name] = (_outputs[name] ?? '') + output;
 
     // Use the appropriate output provider based on the program name
     if (name == 'go-cyberchain') {
@@ -51,7 +49,6 @@ class ProcessService extends StateNotifier<Map<String, Process>> {
     _notifyStateChange();
 
     // Clear output when starting
-    _outputs[name] = '';
     if (name == 'go-cyberchain') {
       _ref.read(goCyberchainOutputProvider.notifier).clear();
       if (!arguments.contains('-http')) {
@@ -218,7 +215,6 @@ class ProcessService extends StateNotifier<Map<String, Process>> {
     _processes.clear();
     _stoppingProcesses.clear();
     _startingProcesses.clear();
-    _outputs.clear();
     _notifyStateChange();
     super.dispose();
   }

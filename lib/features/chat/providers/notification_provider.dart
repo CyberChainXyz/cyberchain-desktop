@@ -30,6 +30,8 @@ class NotificationNotifier extends StateNotifier<NotificationState> {
   Timer? _timer;
   late final AppNotificationService _notificationService;
   bool _isFirstFetch = true;
+  bool _initialized = false;
+  bool _isFetching = false;
   static const String _notificationsUrl = (kDebugMode && 1 == 0)
       ? 'http://127.0.0.1:8080/api/notifications'
       : 'https://chat.cyberchain.xyz/api/notifications';
@@ -41,7 +43,8 @@ class NotificationNotifier extends StateNotifier<NotificationState> {
   }
 
   Future<void> _init() async {
-    if (!mounted) return;
+    if (!mounted || _initialized) return;
+    _initialized = true;
     await fetchNotifications();
     _startPolling();
   }
@@ -57,7 +60,7 @@ class NotificationNotifier extends StateNotifier<NotificationState> {
   }
 
   Future<void> fetchNotifications() async {
-    if (!mounted) return;
+    if (!mounted || _isFetching) return;
 
     final currentUser = _ref.read(chatProvider).currentUser;
     if (currentUser == null) {
@@ -68,6 +71,7 @@ class NotificationNotifier extends StateNotifier<NotificationState> {
       return;
     }
 
+    _isFetching = true;
     try {
       state = state.copyWith(isLoading: true, error: null);
 
@@ -77,7 +81,7 @@ class NotificationNotifier extends StateNotifier<NotificationState> {
           'X-User-ID': currentUser.id,
           'X-Secret-Key': currentUser.secretKey,
         },
-      );
+      ).timeout(const Duration(seconds: 10));
 
       if (response.statusCode != 200) {
         throw Exception('Failed to load notifications');
@@ -119,6 +123,8 @@ class NotificationNotifier extends StateNotifier<NotificationState> {
         isLoading: false,
         error: e.toString(),
       );
+    } finally {
+      _isFetching = false;
     }
   }
 
