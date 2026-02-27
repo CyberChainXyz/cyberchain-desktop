@@ -19,6 +19,7 @@ class CyberchainInfoScreen extends StatelessWidget {
       ),
       child: InkWell(
         onTap: () => _launchURL(url),
+        mouseCursor: SystemMouseCursors.click,
         borderRadius: BorderRadius.circular(12),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
@@ -109,7 +110,7 @@ class CyberchainInfoScreen extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.only(bottom: 16),
                   child: Text(
-                    '© 2025 CyberChain',
+                    '© 2026 CyberChain',
                     style: TextStyle(
                       color: Colors.grey[400],
                       fontSize: 14,

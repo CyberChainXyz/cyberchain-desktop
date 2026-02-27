@@ -646,6 +646,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
                     color: Colors.transparent,
                     child: InkWell(
                       onTap: _scrollToBottom,
+                      mouseCursor: SystemMouseCursors.click,
                       borderRadius: BorderRadius.circular(18),
                       child: const Icon(
                         Icons.keyboard_arrow_down,

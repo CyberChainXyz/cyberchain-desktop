@@ -248,6 +248,7 @@ class _NotificationMarqueeState extends ConsumerState<NotificationMarquee> {
           child: Material(
             color: Colors.transparent,
             child: InkWell(
+              mouseCursor: SystemMouseCursors.click,
               onTap: () {
                 _showNotificationDialog(notification);
               },

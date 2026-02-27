@@ -283,6 +283,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                   ),
                                 );
                               },
+                              mouseCursor: SystemMouseCursors.click,
                               child: Container(
                                 margin: const EdgeInsets.only(bottom: 12),
                                 padding: const EdgeInsets.symmetric(
@@ -327,6 +328,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             cursor: SystemMouseCursors.click,
                             child: InkWell(
                               onTap: _launchReleasePage,
+                              mouseCursor: SystemMouseCursors.click,
                               child: Container(
                                 margin: const EdgeInsets.only(bottom: 12),
                                 padding: const EdgeInsets.symmetric(
@@ -370,6 +372,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           cursor: SystemMouseCursors.click,
                           child: InkWell(
                             onTap: _launchGitHub,
+                            mouseCursor: SystemMouseCursors.click,
                             child: Text(
                               'v${currentVersion.value ?? ""}',
                               style: TextStyle(

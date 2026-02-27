@@ -161,6 +161,7 @@ class AvatarGenerator {
         final seed = seeds[index];
         final isSelected = seed == selectedSeed;
         return InkWell(
+          mouseCursor: SystemMouseCursors.click,
           onTap: () => onSeedSelected(seed),
           borderRadius: BorderRadius.circular(8),
           child: Container(

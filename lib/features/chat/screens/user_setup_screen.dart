@@ -221,6 +221,7 @@ class _UserSetupScreenState extends ConsumerState<UserSetupScreen> {
                           color: colorScheme.primary,
                           borderRadius: BorderRadius.circular(12),
                           child: InkWell(
+                            mouseCursor: SystemMouseCursors.click,
                             onTap: _isLoading ? null : _showAvatarPicker,
                             borderRadius: BorderRadius.circular(12),
                             child: Container(

@@ -544,6 +544,7 @@ class _XMinerViewState extends ConsumerState<XMinerView> {
                                     .contains(device.id.toString());
                                 return Card(
                                   child: InkWell(
+                                    mouseCursor: SystemMouseCursors.click,
                                     onTap: () {
                                       setState(() {
                                         if (isSelected) {
