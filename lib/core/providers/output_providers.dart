@@ -2,21 +2,25 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'dart:collection';
 
 class ProcessOutput {
-  final Queue<String> lines;
+  final ListQueue<String> lines;
   final int maxLines;
+  final int lastUpdate;
 
   ProcessOutput({
-    Queue<String>? lines,
+    ListQueue<String>? lines,
     this.maxLines = 500,
-  }) : lines = lines ?? Queue<String>();
+    this.lastUpdate = 0,
+  }) : lines = lines ?? ListQueue<String>();
 
   ProcessOutput copyWith({
-    Queue<String>? lines,
+    ListQueue<String>? lines,
     int? maxLines,
+    int? lastUpdate,
   }) {
     return ProcessOutput(
       lines: lines ?? this.lines,
       maxLines: maxLines ?? this.maxLines,
+      lastUpdate: lastUpdate ?? this.lastUpdate,
     );
   }
 
@@ -27,9 +31,8 @@ class ProcessOutput {
   int get lineCount => lines.length;
 
   String? getLine(int index) {
-    final list = linesList;
-    if (index >= 0 && index < list.length) {
-      return list[index];
+    if (index >= 0 && index < lines.length) {
+      return lines.elementAt(index);
     }
     return null;
   }
@@ -37,9 +40,7 @@ class ProcessOutput {
   List<String> search(String query) {
     if (query.isEmpty) return [];
     final lowercaseQuery = query.toLowerCase();
-    return linesList
-        .where((line) => line.toLowerCase().contains(lowercaseQuery))
-        .toList();
+    return lines.where((line) => line.toLowerCase().contains(lowercaseQuery)).toList();
   }
 }
 
@@ -48,7 +49,7 @@ class ProcessOutputNotifier extends StateNotifier<ProcessOutput> {
 
   void appendOutput(String newOutput) {
     final newLines = newOutput.split('\n');
-    final updatedLines = Queue<String>.from(state.lines);
+    final updatedLines = ListQueue<String>.from(state.lines);
 
     for (final line in newLines) {
       if (line.trim().isNotEmpty) {
@@ -59,7 +60,10 @@ class ProcessOutputNotifier extends StateNotifier<ProcessOutput> {
       }
     }
 
-    state = state.copyWith(lines: updatedLines);
+    state = state.copyWith(
+      lines: updatedLines,
+      lastUpdate: state.lastUpdate + 1,
+    );
   }
 
   void clear() {
@@ -67,11 +71,16 @@ class ProcessOutputNotifier extends StateNotifier<ProcessOutput> {
   }
 
   void setMaxLines(int maxLines) {
-    final updatedLines = Queue<String>.from(state.lines);
+    final updatedLines = ListQueue<String>.from(state.lines);
     while (updatedLines.length > maxLines) {
       updatedLines.removeFirst();
     }
-    state = ProcessOutput(lines: updatedLines, maxLines: maxLines);
+    state = state.copyWith(lines: updatedLines, maxLines: maxLines);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
   }
 }
 

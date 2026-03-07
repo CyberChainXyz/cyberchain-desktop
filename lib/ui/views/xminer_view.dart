@@ -21,7 +21,6 @@ class XMinerView extends ConsumerStatefulWidget {
 }
 
 class _XMinerViewState extends ConsumerState<XMinerView> {
-  final ScrollController _scrollController = ScrollController();
   final _formKey = GlobalKey<FormState>();
   String? _addressError;
   final FocusNode _focusNode = FocusNode();
@@ -37,26 +36,50 @@ class _XMinerViewState extends ConsumerState<XMinerView> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(miningControllerProvider.notifier).setContext(context);
     });
+
+    _focusNode.addListener(_onAddressFocusChange);
+    _proxyFocusNode.addListener(_onProxyFocusChange);
+  }
+
+  void _onAddressFocusChange() {
+    if (!_focusNode.hasFocus) {
+      final value = _controller.text.trim();
+      final error = AddressValidator.validateMiningAddress(value);
+      if (mounted) {
+        setState(() {
+          _addressError = error;
+        });
+      }
+      // Save trimmed address regardless of validation
+      ref.read(ccxAddressProvider.notifier).setAddress(value);
+      // Update controller with trimmed value
+      _controller.text = value;
+    }
+  }
+
+  void _onProxyFocusChange() {
+    if (!_proxyFocusNode.hasFocus) {
+      final value = _proxyController.text.trim();
+      final error = ProxyValidator.validate(value);
+      if (mounted) {
+        setState(() {
+          _proxyError = error;
+        });
+      }
+      ref.read(xMinerProxyProvider.notifier).setProxy(value);
+      _proxyController.text = value;
+    }
   }
 
   @override
   void dispose() {
-    _scrollController.dispose();
+    _focusNode.removeListener(_onAddressFocusChange);
+    _proxyFocusNode.removeListener(_onProxyFocusChange);
     _focusNode.dispose();
     _controller.dispose();
     _proxyFocusNode.dispose();
     _proxyController.dispose();
     super.dispose();
-  }
-
-  void _scrollToBottom() {
-    if (_scrollController.hasClients) {
-      _scrollController.animateTo(
-        _scrollController.position.maxScrollExtent,
-        duration: const Duration(milliseconds: 200),
-        curve: Curves.easeOut,
-      );
-    }
   }
 
   @override
@@ -87,8 +110,6 @@ class _XMinerViewState extends ConsumerState<XMinerView> {
     }
 
     final isOperating = isStopping || isStarting;
-
-    WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
 
     return Padding(
       padding: const EdgeInsets.all(16.0),
@@ -154,25 +175,7 @@ class _XMinerViewState extends ConsumerState<XMinerView> {
                                 });
                               }
                             },
-                            focusNode: _focusNode
-                              ..addListener(() {
-                                // Only show error when focus is lost
-                                if (!_focusNode.hasFocus) {
-                                  final value = _controller.text.trim();
-                                  final error =
-                                      AddressValidator.validateMiningAddress(
-                                          value);
-                                  setState(() {
-                                    _addressError = error;
-                                  });
-                                  // Save trimmed address regardless of validation
-                                  ref
-                                      .read(ccxAddressProvider.notifier)
-                                      .setAddress(value);
-                                  // Update controller with trimmed value
-                                  _controller.text = value;
-                                }
-                              }),
+                            focusNode: _focusNode,
                             controller: _controller,
                           ),
                         ),
@@ -478,20 +481,7 @@ class _XMinerViewState extends ConsumerState<XMinerView> {
                                 });
                               }
                             },
-                            focusNode: _proxyFocusNode
-                              ..addListener(() {
-                                if (!_proxyFocusNode.hasFocus) {
-                                  final value = _proxyController.text.trim();
-                                  final error = ProxyValidator.validate(value);
-                                  setState(() {
-                                    _proxyError = error;
-                                  });
-                                  ref
-                                      .read(xMinerProxyProvider.notifier)
-                                      .setProxy(value);
-                                  _proxyController.text = value;
-                                }
-                              }),
+                            focusNode: _proxyFocusNode,
                           ),
                         ),
                         const SizedBox(width: 16),

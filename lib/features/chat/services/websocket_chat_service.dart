@@ -72,7 +72,7 @@ class WebSocketChatService implements ChatService {
         _currentUser = ChatUser.fromJson(jsonDecode(userJson));
       }
     } catch (e) {
-      debugPrint('[WebSocketChatService] Failed to load user cache: $e');
+      // Failed to load user cache
     } finally {
       _initCompleter.complete();
     }
@@ -128,7 +128,9 @@ class WebSocketChatService implements ChatService {
     if (_currentUser == null) {
       throw Exception('Cannot connect without an initialized user.');
     }
-    if (_isConnected || _isConnecting) return;
+    if (_isConnected || _isConnecting) {
+      return;
+    }
 
     _isConnecting = true;
     _intentionalDisconnect = false;
@@ -165,7 +167,6 @@ class WebSocketChatService implements ChatService {
         cancelOnError: false,
       );
     } catch (e) {
-      debugPrint('[WebSocketChatService] Connection failed: $e');
       _scheduleReconnect();
       rethrow;
     } finally {
@@ -213,7 +214,7 @@ class WebSocketChatService implements ChatService {
         _messageController.add(ChatMessage.fromJson(decoded));
       }
     } catch (e) {
-      debugPrint('[WebSocketChatService] Failed to parse message payload: $e');
+      // Failed to parse message payload
     }
   }
 
@@ -237,12 +238,10 @@ class WebSocketChatService implements ChatService {
   // ===========================================================================
 
   void _onError(Object error, StackTrace stackTrace) {
-    debugPrint('[WebSocketChatService] Stream error encountered: $error');
     _handleUnexpectedDisconnection();
   }
 
   void _onDone() {
-    debugPrint('[WebSocketChatService] Stream closed by remote peer.');
     _handleUnexpectedDisconnection();
   }
 
@@ -258,7 +257,6 @@ class WebSocketChatService implements ChatService {
 
     _cancelReconnectTimer();
     _reconnectTimer = Timer(const Duration(seconds: 3), () {
-      debugPrint('[WebSocketChatService] Attempting to reconnect to $_currentChannelId...');
       if (_currentChannelId != null) {
         connect(channelId: _currentChannelId!).catchError((_) {
           // Errors here are caught by the catch block in connect and will trigger 

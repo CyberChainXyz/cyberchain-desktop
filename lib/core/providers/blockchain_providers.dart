@@ -47,6 +47,12 @@ class BlockchainMetricsNotifier extends AsyncNotifier<BlockchainMetrics?> {
   }
 
   Future<BlockchainMetrics?> _getMetricsWithRetry() async {
+    final processService = ref.read(processServiceProvider.notifier);
+    if (!processService.isProcessRunning('go-cyberchain')) {
+      _retryTimer?.cancel();
+      return null;
+    }
+
     try {
       final metrics = await _blockchainService.getMetrics();
       return metrics;
@@ -60,6 +66,12 @@ class BlockchainMetricsNotifier extends AsyncNotifier<BlockchainMetrics?> {
   }
 
   Future<void> _updateMetrics() async {
+    final processService = ref.read(processServiceProvider.notifier);
+    if (!processService.isProcessRunning('go-cyberchain')) {
+      _retryTimer?.cancel();
+      return;
+    }
+
     try {
       final metrics = await _blockchainService.getMetrics();
       state = AsyncData(metrics);

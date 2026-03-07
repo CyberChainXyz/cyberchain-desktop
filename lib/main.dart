@@ -86,21 +86,17 @@ class _CCXDesktopAppState extends ConsumerState<CCXDesktopApp> {
           ],
         ),
       );
-      // debugPrint('shouldExit: $shouldExit');
       if (shouldExit != true) {
         return AppExitResponse.cancel;
       }
 
       // Stop mining processes before exit
       if (isGoCyberchainRunning) {
-        // debugPrint('Stopping go-cyberchain');
         await processService.stopProgram('go-cyberchain');
       }
       if (isXMinerRunning) {
-        // debugPrint('Stopping xMiner');
         await processService.stopProgram('xMiner');
       }
-      // debugPrint('Exiting application');
     }
 
     return AppExitResponse.exit;

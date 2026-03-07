@@ -20,6 +20,7 @@ class LogViewer extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final scrollController = useScrollController();
+    final isMouseInside = useState(false);
 
     // Auto scroll to bottom when new content is added
     useEffect(() {
@@ -27,15 +28,21 @@ class LogViewer extends HookConsumerWidget {
 
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (scrollController.hasClients && output.lineCount > 0) {
-          scrollController.animateTo(
-            scrollController.position.maxScrollExtent,
-            duration: const Duration(milliseconds: 200),
-            curve: Curves.easeOut,
-          );
+          // If the mouse is NOT inside the log viewer, force scroll to bottom
+          if (!isMouseInside.value) {
+            final position = scrollController.position;
+            if (position.pixels < position.maxScrollExtent) {
+              scrollController.animateTo(
+                position.maxScrollExtent,
+                duration: const Duration(milliseconds: 100),
+                curve: Curves.easeOut,
+              );
+            }
+          }
         }
       });
       return null;
-    }, [output.lineCount]);
+    }, [output.lastUpdate]);
 
     if (output.lineCount == 0) {
       return Center(
@@ -49,53 +56,59 @@ class LogViewer extends HookConsumerWidget {
       );
     }
 
-    return RawScrollbar(
-      controller: scrollController,
-      thumbVisibility: true,
-      trackVisibility: true,
-      thickness: 12,
-      thumbColor: Colors.grey[600],
-      radius: const Radius.circular(4),
-      child: ListView.builder(
-        controller: scrollController,
-        itemCount: output.lineCount,
-        itemBuilder: (context, index) {
-          final line = output.getLine(index);
-          if (line == null) return const SizedBox.shrink();
+    return MouseRegion(
+      onEnter: (_) => isMouseInside.value = true,
+      onExit: (_) => isMouseInside.value = false,
+      child: SelectionArea(
+        child: RawScrollbar(
+          controller: scrollController,
+          thumbVisibility: true,
+          trackVisibility: true,
+          thickness: 12,
+          thumbColor: Colors.grey[600],
+          radius: const Radius.circular(4),
+          child: ListView.builder(
+            controller: scrollController,
+            itemCount: output.lineCount,
+            itemBuilder: (context, index) {
+              final line = output.getLine(index);
+              if (line == null) return const SizedBox.shrink();
 
-          return Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(
-                width: 24,
-                child: Text(
-                  '>>',
-                  style: TextStyle(
-                    color: Colors.grey[500],
-                    fontFamily: 'monospace',
-                    fontSize: 12,
+              return Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(
+                    width: 24,
+                    child: Text(
+                      '>>',
+                      style: TextStyle(
+                        color: Colors.grey[500],
+                        fontFamily: 'monospace',
+                        fontSize: 12,
+                      ),
+                      textAlign: TextAlign.right,
+                    ),
                   ),
-                  textAlign: TextAlign.right,
-                ),
-              ),
-              Container(
-                width: 1,
-                height: 16,
-                color: Colors.grey[800],
-                margin: const EdgeInsets.symmetric(horizontal: 8),
-              ),
-              Expanded(
-                child: SelectableText(
-                  line,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontFamily: 'monospace',
+                  Container(
+                    width: 1,
+                    height: 16,
+                    color: Colors.grey[800],
+                    margin: const EdgeInsets.symmetric(horizontal: 8),
                   ),
-                ),
-              ),
-            ],
-          );
-        },
+                  Expanded(
+                    child: Text(
+                      line,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontFamily: 'monospace',
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
+        ),
       ),
     );
   }

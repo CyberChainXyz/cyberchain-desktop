@@ -23,7 +23,6 @@ class ProcessService extends StateNotifier<Map<String, Process>> {
   }
 
   void _appendOutput(String name, String output) {
-
     // Use the appropriate output provider based on the program name
     if (name == 'go-cyberchain') {
       _ref.read(goCyberchainOutputProvider.notifier).appendOutput(output);

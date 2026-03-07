@@ -101,6 +101,8 @@ class CyberchainInfoScreen extends StatelessWidget {
                     _buildLink(
                         context, 'Twitter', 'https://x.com/cyberchainxyz'),
                     _buildLink(
+                        context, 'Telegram', 'https://t.me/cyberchainxyz'),
+                    _buildLink(
                         context, 'GitHub', 'https://github.com/CyberChainXyz'),
                     _buildLink(context, 'Discussions',
                         'https://github.com/orgs/CyberChainXyz/discussions'),

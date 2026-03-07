@@ -15,7 +15,6 @@ class GoCyberchainView extends ConsumerStatefulWidget {
 }
 
 class _GoCyberchainViewState extends ConsumerState<GoCyberchainView> {
-  final ScrollController _scrollController = ScrollController();
   final _numberFormat = NumberFormat('#,###');
 
   String _formatBigInt(BigInt? value) {
@@ -30,22 +29,6 @@ class _GoCyberchainViewState extends ConsumerState<GoCyberchainView> {
       buffer.write(str[i]);
     }
     return buffer.toString();
-  }
-
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    super.dispose();
-  }
-
-  void _scrollToBottom() {
-    if (_scrollController.hasClients) {
-      _scrollController.animateTo(
-        _scrollController.position.maxScrollExtent,
-        duration: const Duration(milliseconds: 200),
-        curve: Curves.easeOut,
-      );
-    }
   }
 
   Widget _buildMetricsCard() {
@@ -117,8 +100,6 @@ class _GoCyberchainViewState extends ConsumerState<GoCyberchainView> {
     final metrics = ref.watch(blockchainMetricsNotifierProvider);
 
     final isOperating = isStopping || isStarting;
-
-    WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
 
     return Padding(
       padding: const EdgeInsets.all(16.0),

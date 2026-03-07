@@ -13,6 +13,8 @@ import '../../../core/services/app_notification_service.dart';
 
 class HexagonPainter extends CustomPainter {
   final Color color;
+  Path? _cachedPath;
+  Size? _lastSize;
 
   HexagonPainter({
     this.color = const Color(0xFF000000),
@@ -20,44 +22,51 @@ class HexagonPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+    // Only re-calculate path if size changes
+    if (_cachedPath == null || _lastSize != size) {
+      _lastSize = size;
+      _cachedPath = Path();
+
+      const double hexSize = 30;
+      final double rows = (size.height / (hexSize * 0.866)).ceil().toDouble();
+      final double cols = (size.width / hexSize).ceil().toDouble();
+
+      for (var row = 0; row < rows; row++) {
+        for (var col = 0; col < cols; col++) {
+          final xOffset = col * hexSize * 0.75;
+          final yOffset = row * hexSize * 0.866;
+          final isOffset = row.isOdd;
+
+          final centerX = xOffset + (isOffset ? hexSize * 0.375 : 0);
+          final centerY = yOffset;
+
+          for (var i = 0; i < 6; i++) {
+            final angle = (i * 60 - 30) * math.pi / 180;
+            final x = centerX + hexSize * 0.4 * math.cos(angle);
+            final y = centerY + hexSize * 0.4 * math.sin(angle);
+
+            if (i == 0) {
+              _cachedPath!.moveTo(x, y);
+            } else {
+              _cachedPath!.lineTo(x, y);
+            }
+          }
+          _cachedPath!.close();
+        }
+      }
+    }
+
     final paint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 0.5
       ..color = color.withOpacity(0.08);
 
-    const double hexSize = 30;
-    final double rows = (size.height / (hexSize * 0.866)).ceil().toDouble();
-    final double cols = (size.width / hexSize).ceil().toDouble();
-
-    final path = Path();
-    for (var row = 0; row < rows; row++) {
-      for (var col = 0; col < cols; col++) {
-        final xOffset = col * hexSize * 0.75;
-        final yOffset = row * hexSize * 0.866;
-        final isOffset = row.isOdd;
-
-        final centerX = xOffset + (isOffset ? hexSize * 0.375 : 0);
-        final centerY = yOffset;
-
-        for (var i = 0; i < 6; i++) {
-          final angle = (i * 60 - 30) * math.pi / 180;
-          final x = centerX + hexSize * 0.4 * math.cos(angle);
-          final y = centerY + hexSize * 0.4 * math.sin(angle);
-
-          if (i == 0) {
-            path.moveTo(x, y);
-          } else {
-            path.lineTo(x, y);
-          }
-        }
-        path.close();
-      }
-    }
-    canvas.drawPath(path, paint);
+    canvas.drawPath(_cachedPath!, paint);
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  bool shouldRepaint(covariant HexagonPainter oldDelegate) =>
+      color != oldDelegate.color;
 }
 
 class ChatScreen extends ConsumerStatefulWidget {
