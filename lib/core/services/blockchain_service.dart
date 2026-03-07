@@ -11,6 +11,7 @@ class BlockchainService {
   static const _wsRetryDelay = Duration(seconds: 2);
   static const _throttleDuration = Duration(milliseconds: 300);
   WebSocketChannel? _channel;
+  StreamSubscription? _wsSubscription;
   Timer? _reconnectTimer;
   Timer? _throttleTimer;
   bool _shouldReconnect = false;
@@ -24,8 +25,7 @@ class BlockchainService {
   }
 
   void _connectWebSocket() {
-    _channel?.sink.close();
-    _reconnectTimer?.cancel();
+    _cleanupConnection();
 
     if (!_shouldReconnect) {
       return;
@@ -42,7 +42,7 @@ class BlockchainService {
         'params': ['newHeads']
       }));
 
-      _channel?.stream.listen(
+      _wsSubscription = _channel?.stream.listen(
         (message) {
           final data = jsonDecode(message);
           if (data['method'] == 'eth_subscription' && !_isThrottled) {
@@ -81,12 +81,18 @@ class BlockchainService {
     });
   }
 
-  void unsubscribe() {
-    _shouldReconnect = false;
+  void _cleanupConnection() {
     _reconnectTimer?.cancel();
-    _throttleTimer?.cancel();
+    _wsSubscription?.cancel();
+    _wsSubscription = null;
     _channel?.sink.close();
     _channel = null;
+  }
+
+  void unsubscribe() {
+    _shouldReconnect = false;
+    _cleanupConnection();
+    _throttleTimer?.cancel();
     _onNewBlock = null;
   }
 

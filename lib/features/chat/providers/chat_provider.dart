@@ -25,15 +25,15 @@ class ChatState with _$ChatState {
   }) = _ChatState;
 }
 
-// Single instance of WebSocketChatService
-final _chatService = WebSocketChatService();
-
 final chatServiceProvider = Provider<WebSocketChatService>((ref) {
-  return _chatService;
+  final service = WebSocketChatService();
+  ref.onDispose(() => service.dispose());
+  return service;
 });
 
 final chatProvider = StateNotifierProvider<ChatNotifier, ChatState>((ref) {
-  return ChatNotifier(_chatService, ref);
+  final chatService = ref.watch(chatServiceProvider);
+  return ChatNotifier(chatService, ref);
 });
 
 class ChatNotifier extends StateNotifier<ChatState> {
@@ -291,7 +291,6 @@ class ChatNotifier extends StateNotifier<ChatState> {
   void dispose() {
     _messageSubscription?.cancel();
     _initialMessagesSubscription?.cancel();
-    (_chatService as WebSocketChatService).dispose();
     super.dispose();
   }
 

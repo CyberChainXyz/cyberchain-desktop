@@ -72,10 +72,11 @@ class NotificationNotifier extends StateNotifier<NotificationState> {
     }
 
     _isFetching = true;
+    final client = getClient();
     try {
       state = state.copyWith(isLoading: true, error: null);
 
-      final response = await getClient().get(
+      final response = await client.get(
         Uri.parse(_notificationsUrl),
         headers: {
           'X-User-ID': currentUser.id,
@@ -124,6 +125,7 @@ class NotificationNotifier extends StateNotifier<NotificationState> {
         error: e.toString(),
       );
     } finally {
+      client.close();
       _isFetching = false;
     }
   }
