@@ -4,12 +4,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/providers/service_providers.dart';
 import 'core/services/app_notification_service.dart';
+import 'core/services/migration_service.dart';
 import 'ui/screens/home_screen.dart';
 import 'ui/screens/download_screen.dart';
 import 'core/utils/user_agent_utils.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Migrate data from old application ID if necessary
+  await MigrationService.migrate();
 
   // Initialize User-Agent before any HTTP requests
   await UserAgentUtils.initialize();
