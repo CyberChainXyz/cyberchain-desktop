@@ -18,7 +18,7 @@ class GithubService {
           'Accept': 'application/vnd.github.v3+json',
           'User-Agent': 'CCX-Desktop-App',
         },
-      );
+      ).timeout(const Duration(seconds: 10));
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
@@ -26,7 +26,7 @@ class GithubService {
         return version;
       }
     } catch (e) {
-      // No need to print error here, as it's handled in the catch block
+      // Error handled by returning null
     }
 
     try {
@@ -37,7 +37,7 @@ class GithubService {
           'Accept': 'application/vnd.github.v3+json',
           'User-Agent': 'CCX-Desktop-App',
         },
-      );
+      ).timeout(const Duration(seconds: 10));
 
       if (response.statusCode == 200) {
         final List<dynamic> releases = jsonDecode(response.body);
@@ -47,7 +47,7 @@ class GithubService {
         }
       }
     } catch (e) {
-      // No need to print error here, as it's handled in the catch block
+      // Error handled by returning null
     }
     return null;
   }

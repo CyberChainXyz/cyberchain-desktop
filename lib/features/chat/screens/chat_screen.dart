@@ -13,8 +13,8 @@ import '../../../core/services/app_notification_service.dart';
 
 class HexagonPainter extends CustomPainter {
   final Color color;
-  Path? _cachedPath;
-  Size? _lastSize;
+  static Path? _staticCachedPath;
+  static Size? _staticLastSize;
 
   HexagonPainter({
     this.color = const Color(0xFF000000),
@@ -22,14 +22,23 @@ class HexagonPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    // Only re-calculate path if size changes
-    if (_cachedPath == null || _lastSize != size) {
-      _lastSize = size;
-      _cachedPath = Path();
+    // Critical safety check: prevent infinite loop if size is not finite
+    if (size.isEmpty || !size.isFinite) {
+      return;
+    }
+
+    // Use rounded size to stabilize cache against sub-pixel jitter
+    final roundedSize = Size(size.width.roundToDouble(), size.height.roundToDouble());
+
+    // Only re-calculate path if size changes or static cache is empty
+    if (_staticCachedPath == null || _staticLastSize != roundedSize) {
+      _staticLastSize = roundedSize;
+      final path = Path();
 
       const double hexSize = 30;
-      final double rows = (size.height / (hexSize * 0.866)).ceil().toDouble();
-      final double cols = (size.width / hexSize).ceil().toDouble();
+      // Calculate rows and cols to ensure full coverage including staggered offsets
+      final double rows = (roundedSize.height / (hexSize * 0.866)).ceil().toDouble() + 1;
+      final double cols = (roundedSize.width / (hexSize * 0.75)).ceil().toDouble() + 1;
 
       for (var row = 0; row < rows; row++) {
         for (var col = 0; col < cols; col++) {
@@ -46,14 +55,15 @@ class HexagonPainter extends CustomPainter {
             final y = centerY + hexSize * 0.4 * math.sin(angle);
 
             if (i == 0) {
-              _cachedPath!.moveTo(x, y);
+              path.moveTo(x, y);
             } else {
-              _cachedPath!.lineTo(x, y);
+              path.lineTo(x, y);
             }
           }
-          _cachedPath!.close();
+          path.close();
         }
       }
+      _staticCachedPath = path;
     }
 
     final paint = Paint()
@@ -61,7 +71,7 @@ class HexagonPainter extends CustomPainter {
       ..strokeWidth = 0.5
       ..color = color.withOpacity(0.08);
 
-    canvas.drawPath(_cachedPath!, paint);
+    canvas.drawPath(_staticCachedPath!, paint);
   }
 
   @override

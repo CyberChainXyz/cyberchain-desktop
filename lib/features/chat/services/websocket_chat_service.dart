@@ -65,14 +65,16 @@ class WebSocketChatService implements ChatService {
 
   /// Restore user data from local cache
   Future<void> _initializeUser() async {
+    debugPrint('ChatService: Initializing user...');
     try {
       final prefs = await SharedPreferences.getInstance();
       final userJson = prefs.getString(_prefsKey);
       if (userJson != null) {
         _currentUser = ChatUser.fromJson(jsonDecode(userJson));
+        debugPrint('ChatService: Restored user: ${_currentUser?.username}');
       }
     } catch (e) {
-      // Failed to load user cache
+      debugPrint('ChatService: Error restoring user cache: $e');
     } finally {
       _initCompleter.complete();
     }
@@ -89,6 +91,7 @@ class WebSocketChatService implements ChatService {
 
   @override
   Future<ChatUser> createUser(String name, String avatarId) async {
+    debugPrint('ChatService: Creating user: $name');
     final client = getClient();
     try {
       final response = await client.post(
@@ -101,6 +104,7 @@ class WebSocketChatService implements ChatService {
       );
 
       if (response.statusCode != 200) {
+        debugPrint('ChatService: API Error [${response.statusCode}]: ${response.body}');
         throw Exception(
             'API Error [${response.statusCode}]: ${response.body}');
       }
@@ -113,7 +117,11 @@ class WebSocketChatService implements ChatService {
       await prefs.setString(_prefsKey, jsonEncode(user.toJson()));
 
       _currentUser = user;
+      debugPrint('ChatService: User created successfully: ${user.username}');
       return user;
+    } catch (e) {
+      debugPrint('ChatService: Exception during createUser: $e');
+      rethrow;
     } finally {
       client.close();
     }
@@ -125,10 +133,13 @@ class WebSocketChatService implements ChatService {
 
   @override
   Future<void> connect({required String channelId}) async {
+    debugPrint('ChatService: Connecting to channel: $channelId');
     if (_currentUser == null) {
+      debugPrint('ChatService: Connection aborted - user not initialized');
       throw Exception('Cannot connect without an initialized user.');
     }
     if (_isConnected || _isConnecting) {
+      debugPrint('ChatService: Connection skipped - already connected or connecting');
       return;
     }
 
@@ -149,7 +160,8 @@ class WebSocketChatService implements ChatService {
         headers: {
           'User-Agent': UserAgentUtils.getUserAgent(),
         },
-        pingInterval: const Duration(seconds: 15),
+        pingInterval: const Duration(seconds: 30),
+        // pingInterval: null,
         connectTimeout: const Duration(seconds: 15),
       );
 
@@ -157,6 +169,7 @@ class WebSocketChatService implements ChatService {
       await _channel!.ready;
 
       _isConnected = true;
+      debugPrint('ChatService: Connected successfully to $channelId');
       _cancelReconnectTimer();
 
       // Start listening to the channel data stream
@@ -167,6 +180,7 @@ class WebSocketChatService implements ChatService {
         cancelOnError: false,
       );
     } catch (e) {
+      debugPrint('ChatService: Connection failed: $e');
       _scheduleReconnect();
       rethrow;
     } finally {
@@ -176,6 +190,7 @@ class WebSocketChatService implements ChatService {
 
   @override
   Future<void> disconnect() async {
+    debugPrint('ChatService: Intentional disconnect from $_currentChannelId');
     _intentionalDisconnect = true;
     _currentChannelId = null;
     
@@ -184,13 +199,21 @@ class WebSocketChatService implements ChatService {
   }
 
   Future<void> _cleanupConnection() async {
+    debugPrint('ChatService: Cleaning up connection resources...');
     _isConnected = false;
     
-    await _subscription?.cancel();
+    final sub = _subscription;
     _subscription = null;
-
-    await _channel?.sink.close();
+    
+    final channel = _channel;
     _channel = null;
+
+    if (sub != null) {
+      await sub.cancel();
+    }
+    if (channel != null) {
+      await channel.sink.close();
+    }
   }
 
   // ===========================================================================
@@ -203,6 +226,7 @@ class WebSocketChatService implements ChatService {
       if (decoded is! Map<String, dynamic>) return;
 
       if (decoded['type'] == 'initial_messages') {
+        debugPrint('ChatService: Received initial messages batch');
         final messagesList = decoded['messages'] as List?;
         if (messagesList != null) {
           final messages = messagesList
@@ -214,15 +238,17 @@ class WebSocketChatService implements ChatService {
         _messageController.add(ChatMessage.fromJson(decoded));
       }
     } catch (e) {
-      // Failed to parse message payload
+      debugPrint('ChatService: Error parsing received message: $e');
     }
   }
 
   @override
   Future<void> sendMessage(String content) async {
     if (!_isConnected || _channel == null) {
+      debugPrint('ChatService: Send failed - not connected');
       throw Exception('Cannot send message: WebSocket is disconnected.');
     }
+    debugPrint('ChatService: Sending message: ${content.length > 20 ? content.substring(0, 20) + '...' : content}');
     _channel!.sink.add(content);
   }
 
@@ -238,27 +264,33 @@ class WebSocketChatService implements ChatService {
   // ===========================================================================
 
   void _onError(Object error, StackTrace stackTrace) {
+    debugPrint('ChatService: WebSocket error occurred: $error');
     _handleUnexpectedDisconnection();
   }
 
   void _onDone() {
+    debugPrint('ChatService: WebSocket connection closed (onDone)');
     _handleUnexpectedDisconnection();
   }
 
-  void _handleUnexpectedDisconnection() {
+  Future<void> _handleUnexpectedDisconnection() async {
     if (_intentionalDisconnect) return;
 
-    _cleanupConnection();
+    debugPrint('ChatService: Handling unexpected disconnection...');
+    await _cleanupConnection();
     _scheduleReconnect();
   }
 
   void _scheduleReconnect() {
     if (_intentionalDisconnect || _currentChannelId == null) return;
 
+    debugPrint('ChatService: Scheduling reconnect to $_currentChannelId in 3s...');
     _cancelReconnectTimer();
     _reconnectTimer = Timer(const Duration(seconds: 3), () {
       if (_currentChannelId != null) {
-        connect(channelId: _currentChannelId!).catchError((_) {
+        debugPrint('ChatService: Attempting scheduled reconnect...');
+        connect(channelId: _currentChannelId!).catchError((e) {
+          debugPrint('ChatService: Reconnect attempt failed: $e');
           // Errors here are caught by the catch block in connect and will trigger 
           // _scheduleReconnect again. This catch prevents unhandled exception crashes.
         });
@@ -267,8 +299,11 @@ class WebSocketChatService implements ChatService {
   }
 
   void _cancelReconnectTimer() {
-    _reconnectTimer?.cancel();
-    _reconnectTimer = null;
+    if (_reconnectTimer != null) {
+      debugPrint('ChatService: Cancelling reconnect timer');
+      _reconnectTimer?.cancel();
+      _reconnectTimer = null;
+    }
   }
 
   // ===========================================================================
@@ -276,6 +311,7 @@ class WebSocketChatService implements ChatService {
   // ===========================================================================
 
   void dispose() {
+    debugPrint('ChatService: Disposing service');
     disconnect();
     _messageController.close();
     _initialMessagesController.close();

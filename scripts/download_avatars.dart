@@ -56,7 +56,7 @@ Future<void> main() async {
 
       try {
         print('Downloading $url');
-        final response = await http.get(Uri.parse(url));
+        final response = await http.get(Uri.parse(url)).timeout(const Duration(seconds: 30));
         if (response.statusCode == 200) {
           await File(filePath).writeAsBytes(response.bodyBytes);
           print('Successfully downloaded $fileName');

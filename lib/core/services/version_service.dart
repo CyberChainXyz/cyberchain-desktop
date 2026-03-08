@@ -2,7 +2,6 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:async';
 import 'package:package_info_plus/package_info_plus.dart';
-import '../constants/app_constants.dart';
 
 class VersionService {
   static const String githubUrl =
@@ -44,13 +43,14 @@ class VersionService {
 
   Future<String?> getLatestVersion() async {
     try {
-      final response = await http.get(Uri.parse(apiUrl));
+      final response = await http.get(Uri.parse(apiUrl)).timeout(const Duration(seconds: 10));
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         final tagName = data['tag_name'] as String;
         _latestReleaseUrl = data['html_url'] as String;
-        return tagName.startsWith('v') ? tagName.substring(1) : tagName;
+        final version = tagName.startsWith('v') ? tagName.substring(1) : tagName;
+        return version;
       } else {
         return null;
       }
