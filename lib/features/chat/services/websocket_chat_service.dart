@@ -45,6 +45,7 @@ class WebSocketChatService implements ChatService {
   String? _currentChannelId;
   Timer? _reconnectTimer;
   Timer? _pingTimer;
+  DateTime? _lastSeen;
 
   final Completer<void> _initCompleter = Completer<void>();
   final StreamController<ChatMessage> _messageController =
@@ -81,7 +82,6 @@ class WebSocketChatService implements ChatService {
     }
   }
 
-  @override
   Future<void> get initialized => _initCompleter.future;
 
   @override
@@ -169,6 +169,7 @@ class WebSocketChatService implements ChatService {
       await _channel!.ready;
 
       _isConnected = true;
+      _lastSeen = DateTime.now();
       debugPrint('ChatService: Connected successfully to $channelId');
       _cancelReconnectTimer();
       _startPingTimer();
@@ -202,6 +203,7 @@ class WebSocketChatService implements ChatService {
   Future<void> _cleanupConnection() async {
     debugPrint('ChatService: Cleaning up connection resources...');
     _isConnected = false;
+    _lastSeen = null;
     _stopPingTimer();
     
     final sub = _subscription;
@@ -221,9 +223,20 @@ class WebSocketChatService implements ChatService {
   void _startPingTimer() {
     _stopPingTimer();
     _pingTimer = Timer.periodic(const Duration(seconds: 30), (_) {
-      if (_isConnected) {
-        sendMessage(jsonEncode({'type': 'ping'}));
+      if (!_isConnected) return;
+
+      // Check for heartbeat timeout
+      if (_lastSeen != null) {
+        final now = DateTime.now();
+        final silenceDuration = now.difference(_lastSeen!);
+        if (silenceDuration > const Duration(seconds: 45)) {
+          debugPrint('ChatService: Ping timeout (no response for ${silenceDuration.inSeconds}s). Triggering reconnect.');
+          _handleUnexpectedDisconnection();
+          return;
+        }
       }
+
+      sendMessage(jsonEncode({'type': 'ping'}));
     });
   }
 
@@ -237,6 +250,7 @@ class WebSocketChatService implements ChatService {
   // ===========================================================================
 
   void _onMessageReceived(dynamic payload) {
+    _lastSeen = DateTime.now();
     try {
       final decoded = jsonDecode(payload);
       if (decoded is! Map<String, dynamic>) return;
