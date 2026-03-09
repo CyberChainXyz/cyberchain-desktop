@@ -24,7 +24,7 @@ class BlockchainService {
     _connectWebSocket();
   }
 
-  void _connectWebSocket() {
+  Future<void> _connectWebSocket() async {
     _cleanupConnection();
 
     if (!_shouldReconnect) {
@@ -33,6 +33,9 @@ class BlockchainService {
 
     try {
       _channel = WebSocketChannel.connect(Uri.parse(_wsUrl));
+
+      // Await the connection to be established to catch immediate connection errors
+      await _channel?.ready;
 
       // Subscribe to new block headers
       _channel?.sink.add(jsonEncode({
