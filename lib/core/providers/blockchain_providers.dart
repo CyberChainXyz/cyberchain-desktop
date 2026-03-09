@@ -58,6 +58,7 @@ class BlockchainMetricsNotifier extends AsyncNotifier<BlockchainMetrics?> {
       return metrics;
     } catch (e) {
       // Schedule a retry after 2 seconds
+      _retryTimer?.cancel();
       _retryTimer = Timer(const Duration(seconds: 2), () {
         _updateMetrics();
       });
@@ -77,6 +78,7 @@ class BlockchainMetricsNotifier extends AsyncNotifier<BlockchainMetrics?> {
       state = AsyncData(metrics);
     } catch (e) {
       // Schedule a retry after 2 seconds
+      _retryTimer?.cancel();
       _retryTimer = Timer(const Duration(seconds: 2), () {
         _updateMetrics();
       });
