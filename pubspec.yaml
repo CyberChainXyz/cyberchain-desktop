@@ -50,11 +50,8 @@ dependencies:
   freezed_annotation: ^2.4.4
   json_annotation: ^4.9.0
   web_socket_channel: ^3.0.3
-  emoji_picker_flutter: ^4.2.0
-  flutter_svg: ^2.0.9
   flutter_hooks: ^0.20.5
   hooks_riverpod: ^2.6.1
-  local_notifier: ^0.1.6
 
 dev_dependencies:
   flutter_test:
@@ -117,17 +114,6 @@ flutter:
     - assets/images/
     - assets/programs/go-cyberchain/
     - assets/programs/xMiner/
-    - assets/avatars/adventurer/
-    - assets/avatars/avataaars/
-    - assets/avatars/big-ears/
-    - assets/avatars/bottts/
-    - assets/avatars/fun-emoji/
-    - assets/avatars/lorelei/
-    - assets/avatars/notionists/
-    - assets/avatars/open-peeps/
-    - assets/avatars/personas/
-    - assets/avatars/pixel-art/
-    - assets/avatars/thumbs/
 
   fonts:
     - family: Noto Color Emoji

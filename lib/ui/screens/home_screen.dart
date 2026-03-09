@@ -7,7 +7,6 @@ import 'package:url_launcher/url_launcher.dart';
 import 'cyberchain_info_screen.dart';
 import '../views/go_cyberchain_view.dart';
 import '../views/xminer_view.dart';
-import '../../features/chat/views/chat_view.dart';
 import 'download_screen.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
@@ -33,12 +32,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       label: 'xMiner',
       tooltip: 'Start One-Click Mining',
       view: XMinerView(),
-    ),
-    (
-      icon: Icons.chat_bubble_outline,
-      label: 'Chat',
-      tooltip: 'Community Chat',
-      view: ChatView(),
     ),
     (
       icon: Icons.info_outline,

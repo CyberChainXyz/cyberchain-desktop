@@ -7,7 +7,7 @@ part of 'blockchain_providers.dart';
 // **************************************************************************
 
 String _$blockchainMetricsNotifierHash() =>
-    r'224856d3a70c0481166ee6e9d0bbe971481f83ff';
+    r'e20c60ca9c8d6b6b2c99f3273191990527c3ad8f';
 
 /// See also [BlockchainMetricsNotifier].
 @ProviderFor(BlockchainMetricsNotifier)
