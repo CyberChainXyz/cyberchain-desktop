@@ -44,6 +44,7 @@ class WebSocketChatService implements ChatService {
   StreamSubscription? _subscription;
   String? _currentChannelId;
   Timer? _reconnectTimer;
+  Timer? _pingTimer;
 
   final Completer<void> _initCompleter = Completer<void>();
   final StreamController<ChatMessage> _messageController =
@@ -160,8 +161,7 @@ class WebSocketChatService implements ChatService {
         headers: {
           'User-Agent': UserAgentUtils.getUserAgent(),
         },
-        pingInterval: const Duration(seconds: 30),
-        // pingInterval: null,
+        pingInterval: null,
         connectTimeout: const Duration(seconds: 15),
       );
 
@@ -171,6 +171,7 @@ class WebSocketChatService implements ChatService {
       _isConnected = true;
       debugPrint('ChatService: Connected successfully to $channelId');
       _cancelReconnectTimer();
+      _startPingTimer();
 
       // Start listening to the channel data stream
       _subscription = _channel!.stream.listen(
@@ -201,6 +202,7 @@ class WebSocketChatService implements ChatService {
   Future<void> _cleanupConnection() async {
     debugPrint('ChatService: Cleaning up connection resources...');
     _isConnected = false;
+    _stopPingTimer();
     
     final sub = _subscription;
     _subscription = null;
@@ -216,6 +218,20 @@ class WebSocketChatService implements ChatService {
     }
   }
 
+  void _startPingTimer() {
+    _stopPingTimer();
+    _pingTimer = Timer.periodic(const Duration(seconds: 30), (_) {
+      if (_isConnected) {
+        sendMessage(jsonEncode({'type': 'ping'}));
+      }
+    });
+  }
+
+  void _stopPingTimer() {
+    _pingTimer?.cancel();
+    _pingTimer = null;
+  }
+
   // ===========================================================================
   // Message Handling & Dispatch
   // ===========================================================================
@@ -225,8 +241,17 @@ class WebSocketChatService implements ChatService {
       final decoded = jsonDecode(payload);
       if (decoded is! Map<String, dynamic>) return;
 
+      if (decoded['type'] == 'ping') {
+        sendMessage(jsonEncode({'type': 'pong'}));
+        return;
+      }
+      
+      if (decoded['type'] == 'pong') {
+        return;
+      }
+
       if (decoded['type'] == 'initial_messages') {
-        debugPrint('ChatService: Received initial messages batch');
+        // debugPrint('ChatService: Received initial messages batch');
         final messagesList = decoded['messages'] as List?;
         if (messagesList != null) {
           final messages = messagesList
@@ -248,7 +273,7 @@ class WebSocketChatService implements ChatService {
       debugPrint('ChatService: Send failed - not connected');
       throw Exception('Cannot send message: WebSocket is disconnected.');
     }
-    debugPrint('ChatService: Sending message: ${content.length > 20 ? content.substring(0, 20) + '...' : content}');
+    // debugPrint('ChatService: Sending message: ${content.length > 20 ? content.substring(0, 20) + '...' : content}');
     _channel!.sink.add(content);
   }
 
